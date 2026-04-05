@@ -879,7 +879,7 @@ function FullViewStage({
   );
 }
 
-function StageInfoCard({ description, title }: { description: string; title: string }) {
+function _StageInfoCard({ description, title }: { description: string; title: string }) {
   return (
     <div className="rounded-[26px] border border-[rgba(15,76,92,0.12)] bg-white/82 p-5 shadow-[0_18px_40px_rgba(15,76,92,0.06)]">
       <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-primary)]">
@@ -899,7 +899,7 @@ function StageField({ children, label }: { children: React.ReactNode; label: str
   );
 }
 
-function EnrichmentMetric({ description, title }: { description: string; title: string }) {
+function _EnrichmentMetric({ description, title }: { description: string; title: string }) {
   return (
     <div className="rounded-[22px] border border-[var(--color-border)] bg-[rgba(15,76,92,0.03)] p-4">
       <p className="text-sm font-semibold">{title}</p>

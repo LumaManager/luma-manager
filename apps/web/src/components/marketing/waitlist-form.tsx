@@ -54,7 +54,7 @@ export function WaitlistForm({
   utmSource = "",
   utmTerm = ""
 }: WaitlistFormProps) {
-  const [summary] = useState(initialSummary);
+  const [_summary] = useState(initialSummary);
   const [email, setEmail] = useState("");
   const [professionalRole, setProfessionalRole] =
     useState<WaitlistProfessionalRole>("therapist");
