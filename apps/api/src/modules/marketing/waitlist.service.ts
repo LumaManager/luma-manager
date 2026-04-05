@@ -10,6 +10,7 @@ import type {
 } from "@terapia/contracts";
 import { waitlistJoinRequestSchema } from "@terapia/contracts";
 
+import { EmailService } from "@/modules/platform/email/email.service";
 import { SupabaseService } from "@/modules/platform/supabase/supabase.service";
 
 const PAIN_LABELS: Record<WaitlistBiggestPain, string> = {
@@ -58,7 +59,10 @@ type DbRow = {
 export class WaitlistService {
   private readonly logger = new Logger(WaitlistService.name);
 
-  constructor(@Inject(SupabaseService) private readonly supabase: SupabaseService) {}
+  constructor(
+    @Inject(SupabaseService) private readonly supabase: SupabaseService,
+    @Inject(EmailService) private readonly email: EmailService
+  ) {}
 
   async getSummary(): Promise<WaitlistSummary> {
     if (!this.supabase.adminClient) {
@@ -165,6 +169,8 @@ export class WaitlistService {
       this.logger.error("Failed to insert waitlist entry", error);
       throw new Error("Erro ao registrar entrada na waitlist.");
     }
+
+    void this.email.sendWaitlistConfirmation(normalizedEmail, payload.fullName ?? undefined);
 
     return {
       success: true,

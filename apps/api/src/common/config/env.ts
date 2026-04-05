@@ -29,7 +29,8 @@ const envSchema = z.object({
   AUDIO_TRANSCRIPTION_ENABLED: z
     .union([z.literal("true"), z.literal("false")])
     .default("false")
-    .transform((value) => value === "true")
+    .transform((value) => value === "true"),
+  RESEND_API_KEY: z.string().optional()
 });
 
 export type Environment = z.infer<typeof envSchema>;

@@ -27,6 +27,7 @@ import { LinkedinLeadsController } from "@/modules/linkedin-leads/linkedin-leads
 import { LinkedinLeadsService } from "@/modules/linkedin-leads/linkedin-leads.service";
 import { WaitlistController } from "@/modules/marketing/waitlist.controller";
 import { WaitlistService } from "@/modules/marketing/waitlist.service";
+import { EmailService } from "@/modules/platform/email/email.service";
 import { PatientsController } from "@/modules/patients/patients.controller";
 import { PatientsService } from "@/modules/patients/patients.service";
 import { SupabaseService } from "@/modules/platform/supabase/supabase.service";
@@ -70,7 +71,8 @@ import { SettingsController } from "@/modules/settings/settings.controller";
     LinkedinLeadsService,
     PatientsService,
     PortalService,
-    WaitlistService
+    WaitlistService,
+    EmailService
   ]
 })
 export class AppModule {}
