@@ -1,0 +1,10 @@
+{
+  "extends": "../../packages/config/typescript/nest-app.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+  "include": ["src/**/*.ts"]
+}

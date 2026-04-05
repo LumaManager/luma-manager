@@ -1,0 +1,782 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Luma Manager Preview</title>
+    <style>
+      :root {
+        --bg: #f4ede2;
+        --bg-strong: #103a45;
+        --bg-strong-2: #0f4c5c;
+        --card: rgba(255, 253, 248, 0.94);
+        --card-dark: rgba(255, 255, 255, 0.08);
+        --border: rgba(15, 76, 92, 0.14);
+        --border-dark: rgba(255, 255, 255, 0.14);
+        --text: #163139;
+        --text-muted: #556b72;
+        --white: #fff;
+        --accent: #c67a45;
+        --success: #4d8b72;
+        --shadow: 0 30px 80px rgba(15, 76, 92, 0.14);
+        --radius-xl: 40px;
+        --radius-lg: 28px;
+        --radius-md: 22px;
+        --radius-sm: 18px;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family:
+          ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        color: var(--text);
+        background:
+          radial-gradient(circle at top left, rgba(198, 122, 69, 0.16), transparent 26%),
+          radial-gradient(circle at top right, rgba(15, 76, 92, 0.16), transparent 30%),
+          linear-gradient(180deg, #f8f3e8 0%, var(--bg) 100%);
+      }
+
+      .page {
+        max-width: 1900px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+
+      .hero-grid {
+        gap: 16px;
+        position: relative;
+        overflow: hidden;
+        border-radius: var(--radius-xl);
+        border: 1px solid var(--border);
+        background: linear-gradient(145deg, var(--bg-strong) 0%, var(--bg-strong-2) 42%, #164d59 100%);
+        box-shadow: 0 30px 80px rgba(15, 76, 92, 0.24);
+        padding: 40px;
+        color: var(--white);
+      }
+
+      .hero-top {
+        display: grid;
+        grid-template-columns: minmax(0, 1.08fr) minmax(320px, 360px);
+        gap: 16px;
+        align-items: start;
+      }
+
+      .hero {
+        position: relative;
+        overflow: visible;
+        border-radius: 0;
+        border: 0;
+        background: transparent;
+        color: var(--white);
+        box-shadow: none;
+        padding: 0;
+      }
+
+      .hero::before {
+        content: "";
+        position: absolute;
+        inset: 0 0 auto 0;
+        height: 160px;
+        background: radial-gradient(ellipse at top, rgba(255,255,255,0.20) 0%, rgba(255,255,255,0.10) 28%, rgba(255,255,255,0.04) 46%, rgba(255,255,255,0) 74%);
+      }
+
+      .hero-inner {
+        position: relative;
+      }
+
+      .badges,
+      .actions,
+      .trust-grid,
+      .cards-4,
+      .cards-3,
+      .faq-grid,
+      .fit-grid,
+      .waitlist-signals {
+        display: grid;
+        gap: 12px;
+      }
+
+      .badges {
+        display: flex;
+        flex-wrap: wrap;
+      }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        border-radius: 999px;
+        padding: 10px 14px;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        border: 1px solid rgba(255,255,255,0.14);
+        background: rgba(255,255,255,0.08);
+        color: rgba(255,255,255,0.84);
+      }
+
+      .badge.light {
+        background: rgba(255,255,255,0.16);
+        color: #fff;
+      }
+
+      h1, h2, h3, p {
+        margin: 0;
+      }
+
+      h1 {
+        margin-top: 26px;
+        max-width: 860px;
+        font-size: clamp(2.8rem, 4.2vw, 4.4rem);
+        line-height: 0.96;
+        letter-spacing: -0.055em;
+      }
+
+      .lead {
+        margin-top: 20px;
+        max-width: 760px;
+        font-size: 17px;
+        line-height: 1.9;
+        color: rgba(255,255,255,0.82);
+      }
+
+      .bullets {
+        margin-top: 20px;
+        display: grid;
+        gap: 10px;
+      }
+
+      .bullet {
+        display: flex;
+        gap: 12px;
+        align-items: flex-start;
+        color: rgba(255,255,255,0.82);
+        font-size: 15px;
+        line-height: 1.8;
+      }
+
+      .dot {
+        width: 20px;
+        height: 20px;
+        border-radius: 999px;
+        margin-top: 4px;
+        flex: 0 0 auto;
+        background: rgba(255,255,255,0.14);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+      }
+
+      .actions {
+        margin-top: 24px;
+        display: flex;
+        flex-wrap: wrap;
+      }
+
+      .button {
+        text-decoration: none;
+        border-radius: var(--radius-md);
+        padding: 16px 22px;
+        font-weight: 700;
+        font-size: 15px;
+        border: 1px solid transparent;
+      }
+
+      .button.primary {
+        background: #fff;
+        color: var(--bg-strong-2);
+      }
+
+      .button.secondary {
+        color: #fff;
+        border-color: rgba(255,255,255,0.18);
+        background: rgba(255,255,255,0.08);
+      }
+
+      .hero-panels {
+        margin-top: 28px;
+        display: block;
+      }
+
+      .panel,
+      .dark-card,
+      .card,
+      .waitlist-card,
+      .cta,
+      .fit-card {
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--border);
+      }
+
+      .panel {
+        border-color: var(--border-dark);
+        background: rgba(255,255,255,0.08);
+        padding: 20px;
+      }
+
+      .panel-title {
+        display: flex;
+        justify-content: space-between;
+        align-items: start;
+        gap: 12px;
+      }
+
+      .eyebrow {
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+      }
+
+      .eyebrow.dark {
+        color: rgba(255,255,255,0.56);
+      }
+
+      .eyebrow.light {
+        color: var(--bg-strong-2);
+      }
+
+      .metrics {
+        margin-top: 16px;
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .metric,
+      .mini-card,
+      .hero-value,
+      .queue-card,
+      .timeline-card {
+        border-radius: 24px;
+        border: 1px solid rgba(255,255,255,0.12);
+        background: rgba(7,24,29,0.18);
+        padding: 16px;
+      }
+
+      .metric-value {
+        margin-top: 8px;
+        font-size: 28px;
+        font-weight: 700;
+        letter-spacing: -0.05em;
+      }
+
+      .metric-copy,
+      .mini-card p,
+      .hero-value p,
+      .queue-card p,
+      .timeline-item p,
+      .card p,
+      .waitlist-card p,
+      .cta p,
+      .fit-card p {
+        line-height: 1.75;
+      }
+
+      .hero-bottom {
+        margin-top: 16px;
+        display: grid;
+        grid-template-columns: 1.2fr 0.9fr 0.9fr;
+        gap: 12px;
+      }
+
+      .timeline-card {
+        background: rgba(7,24,29,0.2);
+      }
+
+      .timeline-list,
+      .queue-list,
+      .hero-values {
+        display: grid;
+        gap: 10px;
+      }
+
+      .timeline-list {
+        margin-top: 16px;
+      }
+
+      .timeline-item {
+        display: grid;
+        grid-template-columns: 72px minmax(0, 1fr);
+        gap: 12px;
+        border-radius: 20px;
+        border: 1px solid rgba(255,255,255,0.10);
+        background: rgba(255,255,255,0.06);
+        padding: 14px;
+      }
+
+      .time {
+        display: inline-flex;
+        border-radius: 999px;
+        padding: 6px 10px;
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .time.ok {
+        background: rgba(88,171,136,0.22);
+        color: rgba(199,246,219,0.95);
+      }
+
+      .time.warn {
+        background: rgba(198,122,69,0.2);
+        color: rgba(255,223,198,0.95);
+      }
+
+      .time.info {
+        background: rgba(128,186,212,0.18);
+        color: rgba(218,241,250,0.95);
+      }
+
+      .queue-card {
+        background: rgba(255,255,255,0.08);
+      }
+
+      .queue-list {
+        margin-top: 12px;
+      }
+
+      .queue-item {
+        border-radius: 18px;
+        border: 1px solid rgba(255,255,255,0.1);
+        background: rgba(7,24,29,0.16);
+        padding: 12px;
+        font-size: 14px;
+        color: rgba(255,255,255,0.82);
+      }
+
+      .hero-values {
+        margin-top: 12px;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+
+      .signals {
+        display: grid;
+        gap: 12px;
+        align-content: start;
+      }
+
+      .waitlist-card {
+        background: linear-gradient(180deg, rgba(250,245,236,0.98) 0%, rgba(246,239,229,0.98) 100%);
+        box-shadow: 0 32px 90px rgba(15,76,92,0.16);
+        overflow: hidden;
+      }
+
+      .waitlist-head {
+        border-bottom: 1px solid var(--border);
+        background: linear-gradient(180deg, rgba(255,250,242,0.68) 0%, rgba(251,244,234,0.24) 100%);
+        padding: 16px;
+      }
+
+      .waitlist-body {
+        padding: 16px;
+      }
+
+      .waitlist-signals {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        margin-bottom: 16px;
+      }
+
+      .signal-box,
+      .field-box {
+        border-radius: var(--radius-sm);
+        border: 1px solid rgba(15,76,92,0.12);
+        background: rgba(250,245,236,0.92);
+        padding: 10px;
+      }
+
+      .form-shell {
+        border-radius: 24px;
+        border: 1px solid rgba(15,76,92,0.14);
+        background: linear-gradient(180deg, rgba(248,241,231,0.96) 0%, rgba(244,236,224,0.92) 100%);
+        padding: 12px;
+      }
+
+      .field-grid {
+        display: grid;
+        gap: 12px;
+        margin-top: 12px;
+      }
+
+      .field-box label {
+        display: block;
+        font-size: 13px;
+        font-weight: 600;
+        margin-bottom: 8px;
+      }
+
+      .field-box input,
+      .field-box select {
+        width: 100%;
+        height: 50px;
+        border-radius: 20px;
+        border: 1px solid rgba(15,76,92,0.18);
+        background: rgba(255,251,244,0.96);
+        padding: 0 14px;
+        font-size: 14px;
+      }
+
+      .section {
+        margin-top: 64px;
+      }
+
+      .section-header {
+        max-width: 860px;
+      }
+
+      .section-header h2 {
+        margin-top: 14px;
+        font-size: 48px;
+        line-height: 1.04;
+        letter-spacing: -0.04em;
+      }
+
+      .section-header p {
+        margin-top: 16px;
+        font-size: 18px;
+        color: var(--text-muted);
+      }
+
+      .trust-grid,
+      .cards-4 {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+
+      .cards-3,
+      .fit-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .faq-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .card,
+      .fit-card {
+        background: var(--card);
+        padding: 22px;
+        box-shadow: 0 18px 40px rgba(15,76,92,0.06);
+      }
+
+      .card h3,
+      .fit-card h3 {
+        font-size: 24px;
+        line-height: 1.12;
+        letter-spacing: -0.03em;
+      }
+
+      .cta {
+        margin-top: 64px;
+        background: linear-gradient(145deg, var(--bg-strong) 0%, var(--bg-strong-2) 50%, #164d59 100%);
+        color: #fff;
+        padding: 32px;
+        box-shadow: 0 30px 80px rgba(15,76,92,0.24);
+      }
+
+      .cta-inner {
+        display: flex;
+        justify-content: space-between;
+        gap: 20px;
+        align-items: end;
+      }
+
+      .muted-dark {
+        color: rgba(255,255,255,0.8);
+      }
+
+      @media (max-width: 1100px) {
+        .hero-top,
+        .hero-panels,
+        .hero-bottom,
+        .cards-4,
+        .cards-3,
+        .trust-grid,
+        .faq-grid,
+        .fit-grid,
+        .metrics,
+        .waitlist-signals {
+          grid-template-columns: 1fr;
+        }
+
+        .hero,
+        .cta {
+          padding: 24px;
+        }
+
+        .hero-values {
+          grid-template-columns: 1fr;
+        }
+
+        .cta-inner {
+          flex-direction: column;
+          align-items: start;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <section class="hero-grid">
+        <div class="hero-top">
+          <div class="hero">
+            <div class="hero-inner">
+              <div class="badges">
+                <span class="badge">Luma</span>
+                <span class="badge light">Beta do Luma Manager</span>
+              </div>
+
+              <h1>A rotina clinica para de se espalhar quando tudo roda na Luma.</h1>
+              <p class="lead">
+                O Luma Manager e o produto da Luma para psicologo(a) autonomo(a) no Brasil.
+                Ele junta o que hoje fica em Google Agenda, WhatsApp, planilha, documento
+                solto e cobranca espalhada, sem abrir mao de revisao humana obrigatoria.
+              </p>
+
+              <div class="bullets">
+                <div class="bullet"><span class="dot">✓</span><span>Veja cedo o que pode travar atendimento, consentimento, continuidade ou pagamento.</span></div>
+                <div class="bullet"><span class="dot">✓</span><span>Feche o pos-sessao com contexto, rascunho assistido e decisao humana.</span></div>
+                <div class="bullet"><span class="dot">✓</span><span>Saia do remendo entre Google Agenda, WhatsApp, planilha, documento e cobranca.</span></div>
+              </div>
+
+              <div class="actions">
+                <a class="button primary" href="#waitlist">Entrar na waitlist</a>
+                <a class="button secondary" href="#como-funciona">Ver como funciona</a>
+              </div>
+            </div>
+          </div>
+
+          <aside class="waitlist-card" id="waitlist">
+            <div class="waitlist-head">
+              <div class="badges">
+                <span class="badge" style="color:#8b562e;border-color:rgba(198,122,69,0.18);background:rgba(198,122,69,0.10);">Acesso antecipado</span>
+              </div>
+              <h2 style="margin-top:12px;font-size:28px;line-height:1.02;letter-spacing:-0.035em;">Entrar cedo no Luma Manager</h2>
+              <p style="margin-top:8px;font-size:12px;line-height:1.6;color:var(--text-muted);">
+                Deixe seu e-mail e entre na lista de quem quer trocar Google Agenda, WhatsApp,
+                planilha, documento solto e cobranca espalhada por um fluxo mais claro dentro do
+                Luma Manager.
+              </p>
+            </div>
+
+            <div class="waitlist-body">
+              <div class="waitlist-signals">
+                <div class="signal-box">
+                  <div class="eyebrow light">Entrada</div>
+                  <strong>1 e-mail</strong>
+                </div>
+                <div class="signal-box">
+                  <div class="eyebrow light">Filtro inicial</div>
+                  <strong>Seu perfil</strong>
+                </div>
+                <div class="signal-box">
+                  <div class="eyebrow light">Tempo</div>
+                  <strong>Menos de 1 min</strong>
+                </div>
+              </div>
+
+              <div class="form-shell">
+                <div class="eyebrow light">Passo 1 de 2</div>
+
+                <div class="field-grid">
+                  <div class="field-box">
+                    <label>E-mail profissional</label>
+                    <input type="email" placeholder="voce@consultorio.com.br" />
+                  </div>
+                  <div class="field-box">
+                    <label>Seu perfil</label>
+                    <select>
+                      <option>Psicologo(a) clinico(a)</option>
+                      <option>Psiquiatra</option>
+                      <option>Clinica ou consultorio</option>
+                      <option>Operacao ou secretaria</option>
+                      <option>Outro perfil</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="signal-box" style="margin-top:12px;">
+                  Voce entra na fila agora. Se fizer sentido, completa volume e principal gargalo depois.
+                </div>
+              </div>
+
+              <a class="button primary" href="#" style="display:block;text-align:center;margin-top:12px;padding:14px 18px;font-size:14px;">Entrar na waitlist</a>
+            </div>
+          </aside>
+        </div>
+
+        <div class="hero-panels">
+          <div class="badges">
+              <div class="panel">
+                <div class="panel-title">
+                  <div>
+                    <div class="eyebrow dark">Hoje na Luma</div>
+                    <h3 style="margin-top: 10px; font-size: 30px; letter-spacing: -0.03em;">O consultorio em ordem antes, durante e depois da sessao.</h3>
+                  </div>
+                </div>
+
+                <div class="metrics">
+                  <div class="metric">
+                    <div class="eyebrow dark">Sessoes hoje</div>
+                    <div class="metric-value">6</div>
+                    <div class="metric-copy">2 com pendencia operacional</div>
+                  </div>
+                  <div class="metric">
+                    <div class="eyebrow dark">Pos-sessao</div>
+                    <div class="metric-value">2</div>
+                    <div class="metric-copy">1 rascunho e 1 revisao final</div>
+                  </div>
+                  <div class="metric">
+                    <div class="eyebrow dark">Recebimentos</div>
+                    <div class="metric-value">R$ 480</div>
+                    <div class="metric-copy">1 cobranca fora do prazo</div>
+                  </div>
+                  <div class="mini-card" style="height:auto;">
+                    <div class="eyebrow dark">Governanca</div>
+                    <h3 style="margin-top:10px;font-size:22px;letter-spacing:-0.02em;">Revisao humana obrigatoria</h3>
+                    <p style="margin-top:8px;color:rgba(255,255,255,0.76);">A IA assiste o fechamento. O registro clinico final continua sob decisao do terapeuta.</p>
+                  </div>
+                  <div class="mini-card" style="height:auto;">
+                    <div class="eyebrow dark">Pensado para o Brasil</div>
+                    <h3 style="margin-top:10px;font-size:22px;letter-spacing:-0.02em;">Feito para a rotina do consultorio daqui</h3>
+                    <p style="margin-top:8px;color:rgba(255,255,255,0.76);">Cobranca, documentos, consentimentos e o jeito de atender no Brasil entram no produto desde o comeco.</p>
+                  </div>
+                </div>
+
+              </div>
+
+              <div class="panel" style="margin-top:12px;">
+                <div class="panel-title">
+                  <div>
+                    <div class="eyebrow dark">Preview do Luma Manager</div>
+                    <h3 style="margin-top:10px;font-size:22px;letter-spacing:-0.02em;">Um recorte do dia para visualizar o que pede acao agora.</h3>
+                  </div>
+                </div>
+
+                <div class="hero-bottom">
+                  <div class="timeline-card">
+                    <div style="display:flex;justify-content:space-between;gap:12px;align-items:start;">
+                      <div>
+                        <div class="eyebrow dark">Resumo da ultima sessao</div>
+                        <h3 style="margin-top: 10px; font-size: 22px; letter-spacing: -0.02em;">Ana Ribeiro, 09:00</h3>
+                      </div>
+                      <span class="badge">Proxima sessao</span>
+                    </div>
+                    <p style="margin-top:14px;color:rgba(255,255,255,0.76);line-height:1.7;">
+                      Entre na proxima sessao com a mente fresca sobre o que ficou mais vivo na conversa anterior.
+                    </p>
+                    <div class="timeline-list">
+                      <div class="queue-item">ansiedade mais alta ao falar da pressao no trabalho</div>
+                      <div class="queue-item">culpa recorrente quando tenta colocar limite na familia</div>
+                      <div class="queue-item">combinado de observar rotina de sono ate a proxima sessao</div>
+                    </div>
+                    <div class="queue-card" style="margin-top:12px;background:rgba(7,24,29,0.16);">
+                      <div class="eyebrow dark">Ponto para retomar</div>
+                      <p style="margin-top:8px;color:rgba(255,255,255,0.82);">Retomar como foi a semana no trabalho e se conseguiu sustentar algum limite sem se punir.</p>
+                    </div>
+                  </div>
+
+                  <div class="queue-card" style="height:auto;">
+                    <div class="eyebrow dark">Fila de fechamento</div>
+                    <h3 style="margin-top:10px;font-size:22px;letter-spacing:-0.02em;">Pos-sessao com contexto pronto</h3>
+                    <p style="margin-top:8px;color:rgba(255,255,255,0.76);">A Luma separa o que esta pronto para revisar do que ainda depende de acao.</p>
+                    <div class="queue-list">
+                      <div class="queue-item">Sessao 11:00 com cobranca pendente</div>
+                      <div class="queue-item">Sessao 15:30 com documento para liberar</div>
+                    </div>
+                  </div>
+
+                  <div class="queue-card" style="height:auto;">
+                    <div class="eyebrow dark">Leitura longitudinal</div>
+                    <h3 style="margin-top:10px;font-size:22px;letter-spacing:-0.02em;">Continuidade visivel antes da proxima conversa</h3>
+                    <p style="margin-top:8px;color:rgba(255,255,255,0.76);">O caso volta com o que ja foi aprovado, sem recomecar da memoria.</p>
+                    <div class="queue-list">
+                      <div class="queue-item">Ultimo resumo aprovado em 26 de marco</div>
+                      <div class="queue-item">Proximo passo sugerido para retomada</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="hero-values">
+                  <div class="hero-value">
+                    <div class="eyebrow dark">Agenda</div>
+                    <h3 style="margin-top:10px;font-size:22px;letter-spacing:-0.02em;">Bloqueios, disponibilidade e sessoes no mesmo quadro</h3>
+                    <p style="margin-top:8px;color:rgba(255,255,255,0.76);">A agenda deixa de ser um calendario solto e vira a mesa de acao do dia.</p>
+                  </div>
+                  <div class="hero-value">
+                    <div class="eyebrow dark">Sessao</div>
+                    <h3 style="margin-top:10px;font-size:22px;letter-spacing:-0.02em;">O detalhe mostra o que pode travar continuidade</h3>
+                    <p style="margin-top:8px;color:rgba(255,255,255,0.76);">Paciente, consentimentos, cobranca e proximos passos aparecem no mesmo lugar.</p>
+                  </div>
+                  <div class="hero-value">
+                    <div class="eyebrow dark">Revisao</div>
+                    <h3 style="margin-top:10px;font-size:22px;letter-spacing:-0.02em;">O pos-sessao deixa de depender de memoria improvisada</h3>
+                    <p style="margin-top:8px;color:rgba(255,255,255,0.76);">O sistema organiza rascunho, contexto e pendencias antes da aprovacao final.</p>
+                  </div>
+                  <div class="hero-value">
+                    <div class="eyebrow dark">Financeiro</div>
+                    <h3 style="margin-top:10px;font-size:22px;letter-spacing:-0.02em;">Cobranca e documentos entram no fluxo clinico</h3>
+                    <p style="margin-top:8px;color:rgba(255,255,255,0.76);">O que costuma escapar ao longo da semana aparece antes de virar urgencia.</p>
+                  </div>
+                </div>
+              </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="trust-grid">
+          <div class="card"><h3>Util sem audio</h3><p style="margin-top:10px;color:var(--text-muted);">A promessa principal nao depende de gravar tudo. O produto continua util no modo texto ou ditado.</p></div>
+          <div class="card"><h3>Revisao humana obrigatoria</h3><p style="margin-top:10px;color:var(--text-muted);">A IA propoe e organiza. O terapeuta continua decidindo o que vira registro final.</p></div>
+          <div class="card"><h3>Sem fazer o bruto virar identidade</h3><p style="margin-top:10px;color:var(--text-muted);">Audio e transcript sao capability condicional, nao a base da tese do produto.</p></div>
+          <div class="card"><h3>Pensado para o consultorio no Brasil</h3><p style="margin-top:10px;color:var(--text-muted);">Cobranca, consentimentos, documentos e a rotina real do consultorio entram no produto desde cedo.</p></div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-header">
+          <div class="badge" style="color:#8b562e;border-color:rgba(198,122,69,0.18);background:rgba(198,122,69,0.10);">O problema hoje</div>
+          <h2>O consultorio se espalha quando cada parte da rotina vive em um canto.</h2>
+          <p>Google Agenda em um lado, WhatsApp em outro, planilha para cobranca, documento solto no Drive e o pos-sessao sempre empurrado para o fim do dia.</p>
+        </div>
+        <div class="cards-4" style="margin-top:24px;">
+          <div class="card"><h3>Agenda solta</h3><p style="margin-top:10px;color:var(--text-muted);">A sessao existe no Google Agenda, mas o contexto real do atendimento nao acompanha o horario.</p></div>
+          <div class="card"><h3>Pos-sessao pesado</h3><p style="margin-top:10px;color:var(--text-muted);">O fechamento clinico fica para depois e passa a depender de memoria, cansaco e texto improvisado.</p></div>
+          <div class="card"><h3>Documento fora do timing</h3><p style="margin-top:10px;color:var(--text-muted);">Consentimento, termo e pendencia aparecem tarde, quando ja viraram atrito no WhatsApp com paciente.</p></div>
+          <div class="card"><h3>Cobranca sem contexto</h3><p style="margin-top:10px;color:var(--text-muted);">Pagamento vai para planilha, comprovante chega no WhatsApp e o financeiro vira mais uma pilha separada.</p></div>
+        </div>
+      </section>
+
+      <section class="section" id="como-funciona">
+        <div class="section-header">
+          <div class="badge" style="color:#0f4c5c;border-color:rgba(15,76,92,0.12);background:rgba(15,76,92,0.05);">Plataforma unica</div>
+          <h2>Em vez de remendar ferramentas, a rotina inteira passa a caber no mesmo workspace.</h2>
+          <p>No Luma Manager, antes, durante e depois da sessao passam a conversar no mesmo fluxo operacional, com menos troca de contexto e menos decisao importante perdida no fim do dia.</p>
+        </div>
+        <div class="cards-3" style="margin-top:24px;">
+          <div class="card"><h3>Agenda do terapeuta</h3><p style="margin-top:10px;color:var(--text-muted);">Disponibilidade, bloqueios, quick view e criacao de sessao sem sair da grade.</p></div>
+          <div class="card"><h3>Detalhe da sessao</h3><p style="margin-top:10px;color:var(--text-muted);">Paciente, consentimentos, pagamento, prontidao e acesso a sala no mesmo contexto.</p></div>
+          <div class="card"><h3>Revisao clinica</h3><p style="margin-top:10px;color:var(--text-muted);">Fila, transcript quando houver, rascunho assistido e aprovacao humana antes do registro final.</p></div>
+          <div class="card"><h3>Prontuario longitudinal</h3><p style="margin-top:10px;color:var(--text-muted);">Continuidade visivel a partir do que ja foi aprovado, sem depender de memoria improvisada.</p></div>
+          <div class="card"><h3>Documentos e consentimentos</h3><p style="margin-top:10px;color:var(--text-muted);">Versao, status, assinatura, revogacao e impacto operacional claros no fluxo da pratica.</p></div>
+          <div class="card"><h3>Financeiro e portal</h3><p style="margin-top:10px;color:var(--text-muted);">Cobranca ligada a sessao, leitura operacional do recebimento e fluxo web do paciente.</p></div>
+        </div>
+      </section>
+
+      <section class="cta">
+        <div class="cta-inner">
+          <div style="max-width:860px;">
+            <div class="badge light">Waitlist</div>
+            <h2 style="margin-top:14px;font-size:48px;line-height:1.04;letter-spacing:-0.04em;">Se essa rotina ja pesa hoje, entra cedo na fila.</h2>
+            <p class="muted-dark" style="margin-top:16px;font-size:18px;">O Luma Manager nao e para quem quer mais uma ferramenta solta. Ele e para quem quer parar de remendar agenda, sessao, documento, revisao e cobranca em cinco lugares diferentes.</p>
+          </div>
+          <a class="button primary" href="#waitlist">Entrar na waitlist</a>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

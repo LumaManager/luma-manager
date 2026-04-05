@@ -1,0 +1,463 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Terapia | Landing Preview</title>
+    <style>
+      :root {
+        --primary: #0f4c5c;
+        --primary-strong: #103a45;
+        --accent: #c67a45;
+        --success: #3f6b61;
+        --surface: #f6f1e8;
+        --surface-strong: #fffdf8;
+        --surface-soft: #eee6d7;
+        --text: #1f2933;
+        --text-muted: #5a6672;
+        --border: rgba(15, 76, 92, 0.12);
+        --border-strong: rgba(15, 76, 92, 0.24);
+        --shadow: 0 24px 60px rgba(15, 76, 92, 0.12);
+      }
+      * { box-sizing: border-box; }
+      html { scroll-behavior: smooth; }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: Aptos, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+        color: var(--text);
+        background:
+          radial-gradient(circle at top left, rgba(198, 122, 69, 0.16), transparent 26%),
+          radial-gradient(circle at top right, rgba(15, 76, 92, 0.14), transparent 30%),
+          linear-gradient(180deg, #f8f3e8 0%, #f4ede2 100%);
+      }
+      a { color: inherit; text-decoration: none; }
+      .page { width: min(1900px, calc(100% - 6px)); margin: 0 auto; padding: 12px 0 24px; }
+      .hidden { display: none !important; }
+      .badge {
+        display: inline-flex; align-items: center; gap: 8px; min-height: 30px; padding: 0 14px;
+        border-radius: 999px; font-size: 12px; font-weight: 700; white-space: nowrap;
+      }
+      .warning { background: rgba(198, 122, 69, 0.14); color: var(--accent); }
+      .info { background: rgba(15, 76, 92, 0.12); color: var(--primary); }
+      .success { background: rgba(63, 107, 97, 0.12); color: var(--success); }
+      .neutral { background: var(--surface-soft); color: var(--text-muted); }
+      .card, .trust-card, .flow-card, .faq-card {
+        border: 1px solid var(--border);
+        background: rgba(255, 253, 248, 0.92);
+        box-shadow: var(--shadow);
+      }
+      .button {
+        display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 56px;
+        padding: 0 24px; border-radius: 22px; border: 1px solid transparent; font-size: 16px; font-weight: 700;
+      }
+      .button.primary { background: #fff; color: var(--primary); }
+      .button.secondary { background: rgba(255, 255, 255, 0.08); color: #fff; border-color: rgba(255, 255, 255, 0.18); }
+      .button.dark { background: var(--primary); color: white; }
+      .button.ghost { background: transparent; color: var(--primary); border-color: var(--border-strong); }
+      .hero-grid {
+        display: grid; grid-template-columns: minmax(0, 1.26fr) minmax(380px, 450px);
+        gap: 16px; align-items: start;
+      }
+      .hero-panel {
+        position: relative; overflow: hidden; border-radius: 40px;
+        background: linear-gradient(145deg, #103a45 0%, #0f4c5c 42%, #164d59 100%);
+        color: #fff; padding: 36px 36px 48px; box-shadow: 0 30px 80px rgba(15, 76, 92, 0.24);
+      }
+      .hero-panel::before {
+        content: ""; position: absolute; inset: 0 0 auto 0; height: 160px;
+        background: radial-gradient(ellipse at top, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.1) 28%, rgba(255,255,255,0.04) 46%, rgba(255,255,255,0) 74%);
+        opacity: 0.9;
+      }
+      .row, .cta-row { display: flex; flex-wrap: wrap; gap: 12px; }
+      .mark {
+        border: 1px solid rgba(255,255,255,0.14); background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.74);
+        border-radius: 16px; padding: 11px 16px; font-size: 12px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase;
+      }
+      .hero-panel h1 {
+        margin: 26px 0 0; max-width: 760px; font-size: clamp(42px, 4.2vw, 70px);
+        line-height: 0.94; letter-spacing: -0.06em;
+      }
+      .lead {
+        max-width: 700px; margin: 18px 0 0; font-size: 17px; line-height: 1.7; color: rgba(255,255,255,0.82);
+      }
+      .bullet-stack { display: grid; gap: 8px; margin-top: 22px; max-width: 720px; }
+      .hero-bullet {
+        display: flex; align-items: flex-start; gap: 10px; padding: 4px 0; font-size: 15px;
+        line-height: 1.7; color: rgba(255,255,255,0.8);
+      }
+      .hero-bullet-mark {
+        display: flex; align-items: center; justify-content: center; width: 20px; height: 20px;
+        margin-top: 2px; border-radius: 999px; background: rgba(255,255,255,0.12); font-size: 11px; font-weight: 800; flex: 0 0 20px;
+      }
+      .hero-values { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 24px; }
+      .hero-value {
+        border: 1px solid rgba(255,255,255,0.14); background: rgba(255,255,255,0.08);
+        border-radius: 24px; padding: 16px; backdrop-filter: blur(8px);
+      }
+      .eyebrow { font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(255,255,255,0.64); font-weight: 700; }
+      .hero-value strong { display: block; margin-top: 8px; font-size: 19px; line-height: 1.2; letter-spacing: -0.03em; }
+      .hero-value p { margin: 8px 0 0; font-size: 14px; line-height: 1.6; color: rgba(255,255,255,0.78); }
+      .card { border-radius: 32px; overflow: hidden; }
+      .card-header {
+        padding: 20px; border-bottom: 1px solid var(--border);
+        background: linear-gradient(180deg, rgba(15,76,92,0.12), rgba(15,76,92,0.045));
+      }
+      .card-header h2 { margin: 12px 0 0; font-size: 31px; line-height: 1.02; letter-spacing: -0.04em; }
+      .card-header p { margin: 8px 0 0; font-size: 13px; line-height: 1.65; color: var(--text-muted); }
+      .card-body { display: grid; gap: 16px; padding: 20px; }
+      .capture-box {
+        display: grid; gap: 14px; border: 1px solid rgba(15,76,92,0.18);
+        background: linear-gradient(180deg, rgba(15,76,92,0.06), rgba(15,76,92,0.025));
+        border-radius: 24px; padding: 14px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.65);
+      }
+      .capture-top {
+        display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+      }
+      .capture-top strong { font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--primary); }
+      .capture-top span { font-size: 12px; color: var(--text-muted); }
+      .form-grid { display: grid; gap: 14px; }
+      label span { display: block; margin-bottom: 8px; font-size: 14px; font-weight: 700; }
+      input, select {
+        width: 100%; min-height: 50px; border-radius: 20px; border: 1px solid var(--border-strong);
+        background: #fff; padding: 0 16px; font: inherit;
+      }
+      .note, .trust-card, .flow-card, .faq-card, .fit-point, .no-hype, .stage-info {
+        border: 1px solid var(--border); border-radius: 24px; padding: 16px;
+      }
+      .note { background: rgba(255,255,255,0.74); font-size: 14px; line-height: 1.65; color: var(--text-muted); }
+      .trust-grid, .flow-grid, .faq-grid, .fit-grid { display: grid; gap: 16px; }
+      .trust-grid { margin-top: 22px; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+      .section { margin-top: 64px; }
+      .section h2, .final-cta h2 { margin: 14px 0 0; font-size: 48px; letter-spacing: -0.05em; }
+      .section-lead, .final-cta p { max-width: 760px; margin: 12px 0 0; font-size: 20px; line-height: 1.75; color: var(--text-muted); }
+      .flow-grid { margin-top: 24px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .flow-card, .faq-card, .trust-card { border-radius: 28px; padding: 24px; }
+      .flow-card h3, .trust-card h3 { margin: 14px 0 0; font-size: 28px; letter-spacing: -0.04em; }
+      .faq-card h3 { margin: 8px 0 0; font-size: 26px; line-height: 1.08; letter-spacing: -0.04em; }
+      .flow-card p, .faq-card p, .trust-card p, .fit-point p, .no-hype p { margin: 8px 0 0; font-size: 14px; line-height: 1.7; color: var(--text-muted); }
+      .step { font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--primary); font-weight: 700; }
+      .two-up { display: grid; grid-template-columns: 1fr 0.92fr; gap: 18px; }
+      .fit-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: 18px; }
+      .fit-point { background: rgba(15,76,92,0.03); }
+      .no-hype { background: rgba(255,255,255,0.8); }
+      .final-cta {
+        margin-top: 64px; border-radius: 40px; padding: 34px; background: linear-gradient(145deg, #103a45 0%, #0f4c5c 50%, #164d59 100%);
+        color: #fff; box-shadow: 0 30px 80px rgba(15,76,92,0.24);
+      }
+      .final-cta p { color: rgba(255,255,255,0.82); }
+
+      .stage-shell {
+        width: min(1600px, calc(100% - 12px)); margin: 0 auto; padding: 16px 0 32px;
+      }
+      .stage-panel {
+        border: 1px solid rgba(15,76,92,0.14); background: rgba(255,253,248,0.96); border-radius: 40px;
+        box-shadow: 0 30px 80px rgba(15,76,92,0.14); padding: 36px;
+      }
+      .stage-panel h1 {
+        margin: 18px 0 0; font-size: clamp(42px, 4vw, 64px); line-height: 0.96; letter-spacing: -0.05em;
+      }
+      .stage-lead { max-width: 760px; margin: 18px 0 0; font-size: 18px; line-height: 1.8; color: var(--text-muted); }
+      .stage-grid { display: grid; gap: 16px; grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: 28px; }
+      .stage-info strong {
+        display: block; font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--primary);
+      }
+      .stage-info p { margin: 12px 0 0; font-size: 16px; line-height: 1.8; color: var(--text); }
+      .stage-form { display: grid; gap: 16px; margin-top: 28px; }
+      .stage-cta-row { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 24px; }
+      .success-strip {
+        display: flex; align-items: flex-start; gap: 16px; border: 1px solid rgba(63,107,97,0.18);
+        background: linear-gradient(180deg, rgba(63,107,97,0.12) 0%, rgba(63,107,97,0.05) 100%);
+        border-radius: 30px; padding: 24px; box-shadow: 0 18px 40px rgba(63,107,97,0.08);
+      }
+      .success-icon {
+        width: 56px; height: 56px; border-radius: 999px; display: flex; align-items: center; justify-content: center;
+        background: rgba(63,107,97,0.22); color: var(--success); font-size: 28px; font-weight: 800; flex: 0 0 56px;
+        box-shadow: inset 0 1px 0 rgba(255,255,255,0.4);
+      }
+
+      @media (max-width: 1080px) {
+        .hero-grid, .trust-grid, .flow-grid, .hero-values, .fit-grid, .faq-grid, .two-up, .stage-grid {
+          grid-template-columns: 1fr;
+        }
+        .section h2, .final-cta h2 { font-size: 38px; }
+      }
+      @media (max-width: 720px) {
+        .page, .stage-shell { width: min(100% - 12px, 1900px); }
+        .hero-panel, .card-header, .card-body, .flow-card, .trust-card, .faq-card, .final-cta, .stage-panel { padding: 22px; }
+        .hero-panel h1 { font-size: 44px; }
+        .section h2, .final-cta h2, .stage-panel h1 { font-size: 32px; }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page" id="preview-capture-stage">
+      <section class="hero-grid">
+        <div class="hero-panel">
+          <div class="row">
+            <div class="mark">Terapia</div>
+            <div class="badge warning">Beta por convite</div>
+            <div class="badge neutral" style="background: rgba(255,255,255,0.12); color: white">
+              Agenda, pós-sessão, documentos e cobrança no mesmo lugar
+            </div>
+          </div>
+          <h1>Menos correria no fim do dia. Mais clareza no cuidado e na rotina.</h1>
+          <p class="lead">
+            O terapeuta enxerga o que precisa fazer antes, durante e depois da sessão, sem depender de memória, texto solto e troca de ferramenta o dia inteiro.
+          </p>
+          <div class="bullet-stack">
+            <div class="hero-bullet"><div class="hero-bullet-mark">•</div><div>Veja antes o que pode travar atendimento, continuidade ou pagamento.</div></div>
+            <div class="hero-bullet"><div class="hero-bullet-mark">•</div><div>Feche o pós-sessão com mais clareza e menos retrabalho.</div></div>
+            <div class="hero-bullet"><div class="hero-bullet-mark">•</div><div>Pare de pular entre Google Agenda, documento, planilha e revisão.</div></div>
+          </div>
+          <div class="cta-row" style="margin-top: 24px">
+            <a class="button primary" href="#waitlist">Entrar na waitlist</a>
+            <a class="button secondary" href="#como-funciona">Ver como funciona</a>
+          </div>
+          <div class="hero-values">
+            <div class="hero-value">
+              <div class="eyebrow">Agenda</div>
+              <strong>A agenda deixa de ser só calendário</strong>
+              <p>Disponibilidade, bloqueios e sessões ficam no mesmo fluxo de trabalho.</p>
+            </div>
+            <div class="hero-value">
+              <div class="eyebrow">Pós-sessão</div>
+              <strong>O pós-sessão pesa menos no fim do dia</strong>
+              <p>O fechamento do atendimento fica mais claro e menos espalhado.</p>
+            </div>
+            <div class="hero-value">
+              <div class="eyebrow">Documentos</div>
+              <strong>Documentos aparecem antes de virar urgência</strong>
+              <p>Você enxerga pendências e risco operacional antes da sessão começar.</p>
+            </div>
+            <div class="hero-value">
+              <div class="eyebrow">Financeiro</div>
+              <strong>Cobrança entra na rotina, não no esquecimento</strong>
+              <p>O que impacta continuidade e pagamento fica visível no momento certo.</p>
+            </div>
+          </div>
+        </div>
+
+        <section class="card" id="waitlist" style="border: 1px solid rgba(15,76,92,0.2); background: rgba(255,253,248,0.98); box-shadow: 0 32px 90px rgba(15,76,92,0.16)">
+          <div class="card-header">
+            <div class="row">
+              <div class="badge warning" style="padding-inline: 10px">Beta por waitlist</div>
+              <div class="badge neutral" style="padding-inline: 10px">Fit primeiro, volume depois</div>
+            </div>
+            <h2>Entre cedo na fila de validação</h2>
+            <p>Deixe seu e-mail e entre na lista de quem quer testar um workspace clínico realmente operacional.</p>
+            <p style="margin-top: 10px; font-size: 13px; font-weight: 700; color: var(--primary)">Leva menos de 20 segundos para entrar.</p>
+          </div>
+          <div class="card-body">
+            <form id="preview-form">
+              <div class="capture-box">
+                <div class="capture-top">
+                  <strong style="font-size:11px">PASSO 1 DE 2</strong>
+                </div>
+                <div class="form-grid">
+                  <label><span style="font-size:13px">E-mail profissional</span><input placeholder="voce@consultorio.com.br" type="email" value="voce@consultorio.com.br" /></label>
+                  <label><span style="font-size:13px">Seu perfil</span><select><option>Psicólogo(a) clínico(a)</option><option>Psiquiatra</option><option>Clínica ou consultório</option><option>Operação ou secretária</option><option>Outro perfil</option></select></label>
+                </div>
+                <div class="note" style="border-radius:18px; padding:10px 14px; font-size:13px">Deixe seu e-mail agora. Se fizer sentido, você completa o restante depois.</div>
+              </div>
+              <div class="stage-cta-row" style="margin-top: 6px">
+                <button class="button dark" style="width: 100%; min-height:52px; border-radius:20px; justify-content: space-between; font-size:15px" type="submit">Entrar na waitlist</button>
+              </div>
+              <div style="font-size: 13px; line-height: 1.65; color: var(--text-muted)">Você entra na fila agora e pode completar mais contexto depois, se quiser.</div>
+              <div style="font-size: 11px; line-height: 1.5; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.14em">Sem inscrições ainda. Convites por prioridade de aderência.</div>
+            </form>
+          </div>
+        </section>
+      </section>
+
+      <section class="trust-grid">
+        <div class="trust-card"><h3>Menos coisa escapando antes da sessão</h3><p>Você enxerga pendências, documentos e sinais de risco antes de isso virar correria.</p></div>
+        <div class="trust-card"><h3>Pós-sessão menos pesado</h3><p>O fechamento do atendimento deixa de ficar perdido em texto solto, memória e retrabalho.</p></div>
+        <div class="trust-card"><h3>Documentos e cobrança no radar</h3><p>O que pode travar continuidade, consentimento ou pagamento aparece no fluxo certo.</p></div>
+        <div class="trust-card"><h3>Menos troca entre telas e ferramentas</h3><p>A rotina fica mais concentrada, com menos idas e vindas para agenda, cobrança e revisão.</p></div>
+      </section>
+
+      <section class="section" id="como-funciona">
+        <div class="badge info">Como funciona</div>
+        <h2>O produto foi desenhado para a rotina real do terapeuta solo.</h2>
+        <p class="section-lead">Em vez de improvisar entre agenda, texto solto, documentos e cobrança, a rotina fica mais concentrada do começo ao fim do atendimento.</p>
+        <div class="flow-grid">
+          <div class="flow-card"><div class="step">Etapa 01</div><h3>A agenda concentra disponibilidade, bloqueios e sessões</h3><p>Você organiza horários, bloqueios e remarcações sem perder o contexto do dia.</p></div>
+          <div class="flow-card"><div class="step">Etapa 02</div><h3>O detalhe da sessão mostra o que pode travar o atendimento</h3><p>Paciente, documentos, pendências e próximos passos aparecem no mesmo lugar.</p></div>
+          <div class="flow-card"><div class="step">Etapa 03</div><h3>Depois da sessão, a revisão clínica fecha o trabalho</h3><p>O fechamento clínico deixa de depender só de memória, texto espalhado e retrabalho.</p></div>
+          <div class="flow-card"><div class="step">Etapa 04</div><h3>Documentos, consentimentos e cobrança deixam de viver separados</h3><p>O que costuma escapar ao longo da semana entra no radar antes de virar problema.</p></div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="card">
+          <div class="card-header">
+            <div class="badge warning">Para quem o beta faz sentido</div>
+            <h2>Para quem isso costuma fazer sentido mais rápido.</h2>
+            <p style="margin-top:12px; max-width:760px; font-size:14px; line-height:1.7; color: var(--text-muted)">
+              Se sua rotina hoje depende de remendo entre agenda, texto solto, cobrança e documento fora do timing, esse beta provavelmente conversa com o seu dia a dia.
+            </p>
+          </div>
+          <div class="card-body">
+            <div class="fit-grid" style="grid-template-columns: repeat(3, minmax(0, 1fr)); margin-top: 0">
+              <div class="fit-point"><strong>Quem já cansou do remendo</strong><p>Hoje opera com WhatsApp, Google Agenda, planilha no Excel, cobrança separada e revisão clínica fragmentada.</p></div>
+              <div class="fit-point"><strong>Psicólogo(a) solo</strong><p>Atende com volume recorrente e já sente desgaste para fechar pós-sessão, documentos e cobrança.</p></div>
+              <div class="fit-point"><strong>Consultório enxuto</strong><p>Precisa de clareza operacional sem cair em software pesado de clínica multiusuário.</p></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="badge neutral">Antes de entrar</div>
+        <h2>O que vale saber antes de entrar na fila.</h2>
+        <div class="faq-grid" style="margin-top: 24px; grid-template-columns: repeat(2, minmax(0, 1fr));">
+          <div class="faq-card"><h3>Serve para quem atende sozinho?</h3><p>Sim. O foco inicial é justamente quem sente a rotina espalhada entre agenda, documentos, pós-sessão e cobrança.</p></div>
+          <div class="faq-card"><h3>Em que momento isso mais ajuda?</h3><p>Principalmente antes da sessão, no fechamento do atendimento e na hora de acompanhar o que pode travar continuidade ou pagamento.</p></div>
+          <div class="faq-card"><h3>Preciso usar áudio?</h3><p>Não. O uso principal continua funcionando com texto ou ditado. A ideia é organizar a rotina, não te obrigar a gravar tudo.</p></div>
+          <div class="faq-card"><h3>O que acontece depois?</h3><p>Você entra na fila e, se o seu caso combinar com os primeiros testes, abrimos o beta com um grupo pequeno e bem aderente a essa dor.</p></div>
+        </div>
+      </section>
+
+      <section class="final-cta">
+        <div class="badge warning" style="background: rgba(255,255,255,0.16); color: white">Próximo passo</div>
+        <h2>Se essa dor é sua, entra cedo na fila.</h2>
+        <p>Se hoje sua rotina ainda depende de Google Agenda, texto solto, planilha, documentos fora do timing e cobrança perdida, vale entrar cedo e acompanhar o beta.</p>
+        <div class="cta-row"><a class="button primary" href="#waitlist">Entrar na waitlist</a></div>
+      </section>
+    </main>
+
+    <main class="stage-shell hidden" id="preview-confirmed-stage">
+      <section class="stage-panel">
+        <div class="badge success">Entrada confirmada</div>
+        <h1>Você entrou na waitlist</h1>
+        <p class="stage-lead">Quando abrirmos os primeiros convites, vamos chamar os perfis com rotina mais próxima dessa dor. Se fizer sentido, você pode completar mais contexto agora.</p>
+
+        <div class="stage-grid">
+          <div class="stage-info">
+            <strong>O que já ficou registrado</strong>
+            <p>voce@consultorio.com.br entrou na fila como Psicólogo(a) clínico(a).</p>
+          </div>
+          <div class="stage-info">
+            <strong>O que acontece agora</strong>
+            <p>Os primeiros convites vão para quem sente mais claramente esse problema na rotina.</p>
+          </div>
+        </div>
+
+        <div class="note" style="margin-top: 24px; background: rgba(15,76,92,0.04)">
+          <strong style="display:block; margin-bottom:8px; color: var(--text); font-size: 20px">Quer aumentar sua prioridade no beta?</strong>
+          Conte volume, principal gargalo e um contato opcional. Isso leva cerca de 1 minuto e ajuda a priorizar melhor os primeiros convites.
+        </div>
+
+        <div class="stage-cta-row">
+          <button class="button dark" id="open-questionnaire" type="button">Completar meu perfil</button>
+          <button class="button ghost" id="skip-questionnaire" type="button">Agora não</button>
+        </div>
+      </section>
+    </main>
+
+    <main class="stage-shell hidden" id="preview-questionnaire-stage">
+      <section class="stage-panel">
+        <div class="badge info">Contexto opcional</div>
+        <h1>Conte mais sobre sua rotina</h1>
+        <p class="stage-lead">Isso ajuda a entender se o beta combina com o seu momento. Não precisa preencher tudo para continuar na fila.</p>
+
+        <form class="stage-form" id="preview-questionnaire-form">
+          <div class="stage-grid">
+            <label><span>Nome completo</span><input placeholder="Seu nome" /></label>
+            <label><span>WhatsApp opcional</span><input placeholder="(11) 99999-9999" /></label>
+          </div>
+          <div class="stage-grid">
+            <label><span>Volume mensal de sessões</span><select><option>Até 20 sessões por mês</option><option selected>Entre 21 e 60 sessões por mês</option><option>Entre 61 e 120 sessões por mês</option><option>Mais de 120 sessões por mês</option></select></label>
+            <label><span>Maior gargalo hoje</span><select><option selected>Rotina espalhada entre várias ferramentas</option><option>Pós-sessão pesado no fim do dia</option><option>Documentos e consentimentos fora do timing</option><option>Cobrança e acompanhamento financeiro</option><option>Troca constante entre telas e contextos</option></select></label>
+          </div>
+          <div class="note">Seu e-mail principal continua sendo <strong>voce@consultorio.com.br</strong>. Essa etapa só adiciona contexto para priorização.</div>
+          <div class="stage-cta-row">
+            <button class="button dark" type="submit">Salvar meu contexto</button>
+            <button class="button ghost" id="back-to-confirmed" type="button">Voltar</button>
+          </div>
+        </form>
+      </section>
+    </main>
+
+    <main class="stage-shell hidden" id="preview-done-stage">
+      <section class="stage-panel">
+        <div class="badge success" style="border: 1px solid rgba(63,107,97,0.18); background: rgba(63,107,97,0.14); color: rgba(52,101,88,0.95)">Tudo certo</div>
+        <h1>Seu lugar na fila está garantido</h1>
+        <p class="stage-lead">Quando começarmos a chamar os primeiros perfis, vamos usar esse contexto para entender quem mais se beneficia cedo do beta.</p>
+
+        <div class="success-strip" style="margin-top: 28px">
+          <div class="success-icon">✓</div>
+          <div>
+            <div style="font-size:12px; letter-spacing:0.16em; text-transform:uppercase; font-weight:800; color: rgba(52,101,88,0.95)">Inscrição concluída</div>
+            <div style="margin-top:10px; font-size:30px; line-height:1.08; letter-spacing:-0.04em; font-weight:800; color: var(--text)">Seu envio foi recebido com sucesso</div>
+            <div style="margin-top:10px; font-size:16px; line-height:1.8; color: var(--text-muted)">Agora é só aguardar. Se o seu caso combinar com os primeiros testes, vamos entrar em contato.</div>
+          </div>
+        </div>
+
+        <div class="stage-grid" style="grid-template-columns: repeat(3, minmax(0, 1fr));">
+          <div class="stage-info"><strong>E-mail registrado</strong><p>voce@consultorio.com.br</p></div>
+          <div class="stage-info"><strong>Perfil</strong><p>Psicólogo(a) clínico(a)</p></div>
+          <div class="stage-info"><strong>Status</strong><p>Sem inscrições ainda</p></div>
+        </div>
+
+        <div class="note" style="margin-top: 24px">
+          <strong style="display:block; margin-bottom:8px; color: var(--text); font-size: 20px">O que esperar agora</strong>
+          Se o seu caso combinar com os primeiros testes, vamos entrar em contato para abrir o beta com um grupo pequeno e bem aderente a essa dor.
+        </div>
+
+        <div class="stage-cta-row">
+          <button class="button ghost" id="back-to-landing" type="button">Voltar para a landing</button>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      const captureStage = document.getElementById("preview-capture-stage");
+      const confirmedStage = document.getElementById("preview-confirmed-stage");
+      const questionnaireStage = document.getElementById("preview-questionnaire-stage");
+      const doneStage = document.getElementById("preview-done-stage");
+      const previewForm = document.getElementById("preview-form");
+      const questionnaireForm = document.getElementById("preview-questionnaire-form");
+      const openQuestionnaire = document.getElementById("open-questionnaire");
+      const skipQuestionnaire = document.getElementById("skip-questionnaire");
+      const backToConfirmed = document.getElementById("back-to-confirmed");
+      const backToLanding = document.getElementById("back-to-landing");
+
+      function showStage(stage) {
+        captureStage.classList.add("hidden");
+        confirmedStage.classList.add("hidden");
+        questionnaireStage.classList.add("hidden");
+        doneStage.classList.add("hidden");
+        stage.classList.remove("hidden");
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+
+      previewForm.addEventListener("submit", function (event) {
+        event.preventDefault();
+        showStage(confirmedStage);
+      });
+
+      openQuestionnaire.addEventListener("click", function () {
+        showStage(questionnaireStage);
+      });
+
+      skipQuestionnaire.addEventListener("click", function () {
+        showStage(doneStage);
+      });
+
+      questionnaireForm.addEventListener("submit", function (event) {
+        event.preventDefault();
+        showStage(doneStage);
+      });
+
+      backToConfirmed.addEventListener("click", function () {
+        showStage(confirmedStage);
+      });
+
+      backToLanding.addEventListener("click", function () {
+        showStage(captureStage);
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,8 @@
+{
+  "extends": "../config/typescript/next-app.json",
+  "compilerOptions": {
+    "incremental": false,
+    "rootDir": "./src"
+  },
+  "include": ["src/**/*.ts", "src/**/*.tsx"]
+}

@@ -1,0 +1,37 @@
+{
+  "name": "terapia-core-web",
+  "version": "0.1.0",
+  "private": true,
+  "engines": {
+    "node": ">=20 <23"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces --if-present",
+    "dev": "concurrently \"npm run dev --workspace @terapia/api\" \"npm run dev --workspace @terapia/web\"",
+    "dev:api": "npm run dev --workspace @terapia/api",
+    "dev:web": "npm run dev --workspace @terapia/web",
+    "format": "prettier --check .",
+    "format:write": "prettier --write .",
+    "lint": "npm run lint --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present"
+  },
+  "devDependencies": {
+    "@next/eslint-plugin-next": "^15.5.14",
+    "@eslint/js": "^9.24.0",
+    "@types/node": "^24.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "concurrently": "^9.1.2",
+    "drizzle-kit": "^0.31.0",
+    "eslint": "^9.24.0",
+    "prettier": "^3.5.3",
+    "tsup": "^8.4.0",
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.3",
+    "typescript-eslint": "^8.29.0"
+  }
+}
