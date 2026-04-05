@@ -74,7 +74,8 @@ async function bootstrap() {
     credentials: true
   });
 
-  await app.listen(env.API_PORT, "0.0.0.0");
+  const port = Number(process.env.PORT) || env.API_PORT;
+  await app.listen(port, "0.0.0.0");
 }
 
 bootstrap().catch((error) => {
