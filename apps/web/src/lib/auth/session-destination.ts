@@ -1,7 +1,7 @@
 import type { AuthSession } from "@terapia/contracts";
 
 export function isInternalOperatorSession(session: Pick<AuthSession, "therapist">) {
-  return session.therapist.email.endsWith("@terapia.internal");
+  return session.therapist.crp === "INTERNAL" || session.therapist.email.endsWith("@terapia.internal");
 }
 
 export function getAuthenticatedHomePath(
