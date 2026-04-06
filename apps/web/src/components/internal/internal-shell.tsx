@@ -27,7 +27,7 @@ export function InternalShell({
                 {bootstrap.internalUserProfile.environmentLabel}
               </Badge>
             </div>
-            <h1 className="mt-3 text-2xl font-semibold tracking-[-0.02em]">Terapia Platform Ops</h1>
+            <h1 className="mt-3 text-2xl font-semibold tracking-[-0.02em]">Luma Manager · Ops</h1>
             <p className="mt-2 text-sm text-[rgba(255,255,255,0.72)]">
               {bootstrap.internalSecurityStatus}
             </p>

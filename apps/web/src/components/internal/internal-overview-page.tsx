@@ -12,7 +12,7 @@ export function InternalOverviewPage({ bootstrap }: { bootstrap: InternalBootstr
   ] as const;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 text-white">
       <section className="rounded-[32px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.04)] p-7">
         <div className="flex flex-wrap items-center gap-3">
           <Badge tone="warning">Visão geral</Badge>

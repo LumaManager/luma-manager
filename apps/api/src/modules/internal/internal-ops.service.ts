@@ -346,7 +346,7 @@ export class InternalOpsService {
         email: operator.email,
         primaryRole: operator.primaryRole,
         roleLabel: roleLabelMap[operator.primaryRole],
-        environmentLabel: "Local sandbox",
+        environmentLabel: "Produção",
         sessionSecurityLabel: "MFA obrigatorio · sessao curta"
       },
       internalRoleSet: operator.roles,
