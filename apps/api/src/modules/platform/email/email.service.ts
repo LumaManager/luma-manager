@@ -1,4 +1,4 @@
-import { Injectable, Logger } from "@nestjs/common";
+import { Inject, Injectable, Logger } from "@nestjs/common";
 import { Resend } from "resend";
 
 import { EnvService } from "@/common/config/env.service";
@@ -8,7 +8,7 @@ export class EmailService {
   private readonly logger = new Logger(EmailService.name);
   private readonly resend: Resend | null;
 
-  constructor(private readonly env: EnvService) {
+  constructor(@Inject(EnvService) private readonly env: EnvService) {
     const key = this.env.get("RESEND_API_KEY");
     this.resend = key ? new Resend(key) : null;
   }
