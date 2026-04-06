@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 import type { InternalBootstrap } from "@terapia/contracts";
-import { Badge, Button, Card } from "@terapia/ui";
+import { Badge, Button } from "@terapia/ui";
 import { Building2, LifeBuoy, SearchCheck, Shield, Siren, UserRoundPlus, Wallet } from "lucide-react";
 
 export function InternalShell({
@@ -83,19 +83,17 @@ export function InternalShell({
         </aside>
 
         <main className="min-w-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.04)_0%,rgba(255,255,255,0.02)_100%)] px-8 py-8">
-          <Card className="mb-6 overflow-hidden border-[rgba(255,255,255,0.08)] bg-[linear-gradient(135deg,rgba(255,255,255,0.08),rgba(255,255,255,0.03))] text-white shadow-[0_26px_60px_rgba(0,0,0,0.18)]">
-            <div className="flex items-center justify-between gap-4 p-6">
-              <div>
-                <p className="text-sm font-semibold">{bootstrap.banner.title}</p>
-                <p className="mt-2 text-sm text-[rgba(255,255,255,0.68)]">
-                  {bootstrap.banner.description}
-                </p>
-              </div>
-              <Button asChild variant="secondary" className="border-[rgba(255,255,255,0.14)] bg-[rgba(255,255,255,0.08)] text-white hover:bg-[rgba(255,255,255,0.14)]">
-                <Link href={bootstrap.banner.href}>{bootstrap.banner.ctaLabel}</Link>
-              </Button>
+          <div className="mb-6 flex items-center justify-between gap-4 overflow-hidden rounded-[28px] border border-[rgba(255,255,255,0.08)] bg-[linear-gradient(135deg,rgba(255,255,255,0.08),rgba(255,255,255,0.03))] p-6 shadow-[0_26px_60px_rgba(0,0,0,0.18)]">
+            <div>
+              <p className="text-sm font-semibold text-white">{bootstrap.banner.title}</p>
+              <p className="mt-2 text-sm text-[rgba(255,255,255,0.68)]">
+                {bootstrap.banner.description}
+              </p>
             </div>
-          </Card>
+            <Button asChild variant="secondary" className="border-[rgba(255,255,255,0.14)] bg-[rgba(255,255,255,0.08)] text-white hover:bg-[rgba(255,255,255,0.14)]">
+              <Link href={bootstrap.banner.href}>{bootstrap.banner.ctaLabel}</Link>
+            </Button>
+          </div>
           {children}
         </main>
       </div>
