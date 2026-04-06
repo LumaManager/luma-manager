@@ -5,3 +5,5 @@ buildCommand = "npm install && npm run build --workspace @terapia/api"
 [deploy]
 startCommand = "node apps/api/dist/main.js"
 restartPolicyType = "on_failure"
+healthcheckPath = "/v1/health"
+healthcheckTimeout = 30
