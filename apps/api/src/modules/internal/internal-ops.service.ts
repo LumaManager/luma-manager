@@ -30,6 +30,13 @@ const operators: InternalOperatorRecord[] = [
     email: "ops@terapia.internal",
     roles: ["platform_admin", "support_ops", "billing_ops", "compliance_ops", "security_admin"],
     primaryRole: "platform_admin"
+  },
+  {
+    id: "internal_dev_luma",
+    fullName: "Dev Luma",
+    email: "dev@lumamanager.com.br",
+    roles: ["platform_admin", "support_ops", "billing_ops", "compliance_ops", "security_admin"],
+    primaryRole: "platform_admin"
   }
 ];
 
