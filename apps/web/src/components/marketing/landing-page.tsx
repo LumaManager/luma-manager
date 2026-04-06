@@ -374,7 +374,7 @@ export function LandingPage({
                   </div>
 
                   <h1 className="mt-8 max-w-3xl text-[clamp(2.8rem,4.1vw,4.4rem)] font-semibold leading-[0.96] tracking-[-0.055em]">
-                    A rotina clínica para de se espalhar quando tudo roda na {brandName}.
+                    Chega de rotina clínica espalhada. Tudo roda na {brandName}.
                   </h1>
 
                   <p className="mt-5 max-w-2xl text-[17px] leading-8 text-[rgba(255,255,255,0.8)]">
