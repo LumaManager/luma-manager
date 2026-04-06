@@ -34,7 +34,7 @@ export class EmailService {
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
           <meta name="color-scheme" content="light">
         </head>
-        <body style="margin:0;padding:0;background:#f0f4f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;">
+        <body style="margin:0;padding:0;background:#f0f4f5;font-family:Arial,Helvetica,sans-serif;">
           <table width="100%" cellpadding="0" cellspacing="0" style="background:#f0f4f5;padding:48px 16px;">
             <tr><td align="center">
               <table width="560" cellpadding="0" cellspacing="0" style="max-width:560px;width:100%;">
@@ -45,10 +45,10 @@ export class EmailService {
                     <table width="100%" cellpadding="0" cellspacing="0">
                       <tr>
                         <td>
-                          <p style="margin:0;color:#ffffff;font-size:13px;font-weight:600;letter-spacing:0.12em;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;text-transform:uppercase;">Luma Manager</p>
+                          <p style="margin:0;color:#ffffff;font-size:13px;font-weight:600;letter-spacing:0.12em;font-family:Arial,Helvetica,sans-serif;text-transform:uppercase;">Luma Manager</p>
                         </td>
                         <td align="right">
-                          <p style="margin:0;color:rgba(255,255,255,0.4);font-size:12px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;letter-spacing:0.02em;">lumamanager.com.br</p>
+                          <p style="margin:0;color:rgba(255,255,255,0.4);font-size:12px;font-family:Arial,Helvetica,sans-serif;letter-spacing:0.02em;">lumamanager.com.br</p>
                         </td>
                       </tr>
                     </table>
@@ -65,7 +65,7 @@ export class EmailService {
                   <td style="background:#ffffff;padding:44px 40px 36px;">
 
                     <!-- Headline -->
-                    <p style="margin:0 0 28px;color:#0f4c5c;font-size:26px;font-weight:700;line-height:1.2;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;letter-spacing:-0.5px;">${greeting},<br>sua vaga está garantida.</p>
+                    <p style="margin:0 0 28px;color:#0f4c5c;font-size:26px;font-weight:700;line-height:1.2;font-family:Arial,Helvetica,sans-serif;letter-spacing:-0.5px;">${greeting},<br>sua vaga está garantida.</p>
 
                     <!-- Divider -->
                     <table width="40" cellpadding="0" cellspacing="0" style="margin:0 0 28px;">
