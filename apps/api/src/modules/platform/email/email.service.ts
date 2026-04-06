@@ -29,38 +29,74 @@ export class EmailService {
       html: `
         <!DOCTYPE html>
         <html lang="pt-BR">
-        <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
-        <body style="margin:0;padding:0;background:#f5f7f9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
-          <table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f7f9;padding:40px 0;">
+        <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <meta name="color-scheme" content="light">
+        </head>
+        <body style="margin:0;padding:0;background:#ede9e3;font-family:Georgia,'Times New Roman',Times,serif;">
+          <table width="100%" cellpadding="0" cellspacing="0" style="background:#ede9e3;padding:48px 16px;">
             <tr><td align="center">
-              <table width="560" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+              <table width="560" cellpadding="0" cellspacing="0" style="max-width:560px;width:100%;">
+
+                <!-- Header -->
                 <tr>
-                  <td style="background:#0f4c5c;padding:32px 40px;">
-                    <p style="margin:0;color:#ffffff;font-size:20px;font-weight:600;letter-spacing:-0.3px;">Luma Manager</p>
+                  <td style="background:#0f4c5c;padding:28px 40px;border-radius:10px 10px 0 0;">
+                    <table width="100%" cellpadding="0" cellspacing="0">
+                      <tr>
+                        <td>
+                          <p style="margin:0;color:#ffffff;font-size:15px;font-weight:400;letter-spacing:0.08em;font-family:Georgia,'Times New Roman',Times,serif;text-transform:uppercase;">Luma Manager</p>
+                        </td>
+                        <td align="right">
+                          <p style="margin:0;color:rgba(255,255,255,0.35);font-size:12px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;letter-spacing:0.04em;">lumamanager.com.br</p>
+                        </td>
+                      </tr>
+                    </table>
                   </td>
                 </tr>
+
+                <!-- Accent bar -->
                 <tr>
-                  <td style="padding:40px;">
-                    <p style="margin:0 0 16px;color:#0f4c5c;font-size:24px;font-weight:600;line-height:1.3;">${greeting}, sua vaga está reservada.</p>
-                    <p style="margin:0 0 24px;color:#4a5568;font-size:16px;line-height:1.6;">
-                      Você entrou na waitlist do Luma Manager — a plataforma feita para psicólogos que querem organizar a prática sem abrir dez abas.
+                  <td style="background:#c9a96e;height:3px;font-size:0;line-height:0;">&nbsp;</td>
+                </tr>
+
+                <!-- Body -->
+                <tr>
+                  <td style="background:#ffffff;padding:44px 40px 36px;">
+
+                    <!-- Headline -->
+                    <p style="margin:0 0 28px;color:#0f4c5c;font-size:26px;font-weight:400;line-height:1.25;font-family:Georgia,'Times New Roman',Times,serif;letter-spacing:-0.3px;">${greeting},<br>sua vaga está garantida.</p>
+
+                    <!-- Divider -->
+                    <table width="40" cellpadding="0" cellspacing="0" style="margin:0 0 28px;">
+                      <tr><td style="background:#c9a96e;height:2px;font-size:0;line-height:0;">&nbsp;</td></tr>
+                    </table>
+
+                    <!-- Body copy -->
+                    <p style="margin:0 0 20px;color:#3d4a52;font-size:15px;line-height:1.75;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+                      Você entrou na waitlist do Luma Manager — construído para psicólogos que querem fechar o dia sem carregar o peso do pós-sessão.
                     </p>
-                    <p style="margin:0 0 24px;color:#4a5568;font-size:16px;line-height:1.6;">
-                      Quando abrirmos os primeiros convites, você será um dos primeiros a saber.
+                    <p style="margin:0 0 32px;color:#3d4a52;font-size:15px;line-height:1.75;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+                      Quando os primeiros acessos abrirem, vamos chamar quem chegou antes. Você já está dentro.
                     </p>
-                    <p style="margin:0;color:#718096;font-size:14px;line-height:1.6;">
+
+                    <!-- Sign-off -->
+                    <p style="margin:0;color:#7a8c94;font-size:14px;line-height:1.6;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
                       Até lá,<br>
-                      <strong style="color:#0f4c5c;">Equipe Luma Manager</strong>
+                      <span style="color:#0f4c5c;font-weight:600;">Equipe Luma Manager</span>
                     </p>
                   </td>
                 </tr>
+
+                <!-- Footer -->
                 <tr>
-                  <td style="padding:24px 40px;border-top:1px solid #e8ecef;">
-                    <p style="margin:0;color:#a0aec0;font-size:12px;">
-                      Você recebeu este e-mail porque se cadastrou em lumamanager.com.br. Se não foi você, pode ignorar esta mensagem.
+                  <td style="background:#f7f4ef;padding:20px 40px;border-top:1px solid #e8e2d8;border-radius:0 0 10px 10px;">
+                    <p style="margin:0;color:#a89f93;font-size:11px;line-height:1.6;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+                      Você recebeu este e-mail porque se cadastrou em <a href="https://lumamanager.com.br" style="color:#0f4c5c;text-decoration:none;">lumamanager.com.br</a>. Se não foi você, pode ignorar esta mensagem.
                     </p>
                   </td>
                 </tr>
+
               </table>
             </td></tr>
           </table>
