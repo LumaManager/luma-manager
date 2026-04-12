@@ -2,48 +2,12 @@
 
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
-import { ArrowLeft, Building2, KeyRound, Shield, UserRound } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 
 import type { AuthLoginResponse, AuthSession } from "@terapia/contracts";
-import { Badge, Button } from "@terapia/ui";
+import { Button } from "@terapia/ui";
 
 import { getAuthenticatedHomePath } from "@/lib/auth/session-destination";
-
-const defaultCredentials = {
-  email: "ana@institutovivace.com.br",
-  password: "12345678",
-  mfaCode: "123456"
-};
-
-const rolePresets = [
-  {
-    id: "therapist-default",
-    label: "Conta inicial",
-    caption: "Onboarding pendente",
-    email: "ana@institutovivace.com.br",
-    password: "12345678",
-    mfaCode: "123456",
-    icon: UserRound
-  },
-  {
-    id: "therapist-ready",
-    label: "Conta pronta",
-    caption: "Vai direto ao dashboard",
-    email: "ana.ready@institutovivace.com.br",
-    password: "12345678",
-    mfaCode: "123456",
-    icon: Building2
-  },
-  {
-    id: "internal",
-    label: "Operação interna",
-    caption: "Abre /internal",
-    email: "ops@terapia.internal",
-    password: "12345678",
-    mfaCode: "123456",
-    icon: Shield
-  }
-] as const;
 
 type Phase = "credentials" | "mfa";
 
@@ -55,18 +19,11 @@ export function LoginForm({ nextPath }: LoginFormProps) {
   const router = useRouter();
   const [phase, setPhase] = useState<Phase>("credentials");
   const [challenge, setChallenge] = useState<AuthLoginResponse | null>(null);
-  const [email, setEmail] = useState(defaultCredentials.email);
-  const [password, setPassword] = useState(defaultCredentials.password);
-  const [code, setCode] = useState(defaultCredentials.mfaCode);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [code, setCode] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
-
-  function applyPreset(preset: (typeof rolePresets)[number]) {
-    setEmail(preset.email);
-    setPassword(preset.password);
-    setCode(preset.mfaCode);
-    setError(null);
-  }
 
   function getApiBaseUrl() {
     return process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
@@ -121,7 +78,7 @@ export function LoginForm({ nextPath }: LoginFormProps) {
 
         if (!response.ok) {
           const payload = (await response.json().catch(() => null)) as { message?: string } | null;
-          throw new Error(payload?.message ?? "Não foi possível validar o MFA.");
+          throw new Error(payload?.message ?? "Código incorreto. Tente novamente.");
         }
 
         const session = (await response.json()) as AuthSession;
@@ -135,14 +92,14 @@ export function LoginForm({ nextPath }: LoginFormProps) {
         });
 
         if (!sessionResponse.ok) {
-          throw new Error("Não foi possível abrir a sessão autenticada no web.");
+          throw new Error("Não foi possível abrir a sessão. Tente novamente.");
         }
 
         router.push(getAuthenticatedHomePath(session, nextPath));
         router.refresh();
       } catch (requestError) {
         setError(
-          requestError instanceof Error ? requestError.message : "Erro inesperado ao validar MFA."
+          requestError instanceof Error ? requestError.message : "Erro inesperado. Tente novamente."
         );
       }
     });
@@ -150,98 +107,36 @@ export function LoginForm({ nextPath }: LoginFormProps) {
 
   return (
     <div className="space-y-8">
-      <div className="space-y-4">
-        <div className="rounded-[28px] border border-[var(--color-border)] bg-[linear-gradient(180deg,rgba(15,76,92,0.05)_0%,rgba(15,76,92,0.02)_100%)] p-3">
-          <div className="grid gap-3 md:grid-cols-2">
-            <StatusBubble
-              label="Etapa atual"
-              tone="info"
-              value={phase === "credentials" ? "Passo 1 de 2" : "Passo 2 de 2"}
-            />
-            <StatusBubble
-              label="Ambiente"
-              tone="neutral"
-              value="Dummy preparado para auth real"
-            />
-          </div>
-
-          <div className="mt-3 grid grid-cols-2 gap-2 rounded-[22px] border border-[var(--color-border)] bg-[rgba(255,255,255,0.8)] p-2">
-            <div
-              className={`rounded-[18px] px-4 py-3.5 text-sm font-semibold transition ${
-                phase === "credentials"
-                  ? "bg-white text-[var(--color-text)] shadow-[0_10px_20px_rgba(15,76,92,0.08)]"
-                  : "text-[var(--color-text-muted)]"
-              }`}
-            >
-              Identidade
-            </div>
-            <div
-              className={`rounded-[18px] px-4 py-3.5 text-sm font-semibold transition ${
-                phase === "mfa"
-                  ? "bg-white text-[var(--color-text)] shadow-[0_10px_20px_rgba(15,76,92,0.08)]"
-                  : "text-[var(--color-text-muted)]"
-              }`}
-            >
-              MFA TOTP
-            </div>
-          </div>
+      <div className="grid grid-cols-2 gap-2 rounded-[22px] border border-[var(--color-border)] bg-[rgba(15,76,92,0.04)] p-1.5">
+        <div
+          className={`rounded-[18px] px-4 py-3 text-sm font-semibold transition ${
+            phase === "credentials"
+              ? "bg-white text-[var(--color-text)] shadow-[0_10px_20px_rgba(15,76,92,0.08)]"
+              : "text-[var(--color-text-muted)]"
+          }`}
+        >
+          Acesso
         </div>
-
-        <p className="text-sm leading-7 text-[var(--color-text-muted)]">
-          {phase === "credentials"
-            ? "Use sua conta profissional para iniciar a sessão. A conta só abre depois do segundo fator."
-            : "Valide o autenticador para concluir a abertura da sessão protegida no workspace clínico."}
-        </p>
+        <div
+          className={`rounded-[18px] px-4 py-3 text-sm font-semibold transition ${
+            phase === "mfa"
+              ? "bg-white text-[var(--color-text)] shadow-[0_10px_20px_rgba(15,76,92,0.08)]"
+              : "text-[var(--color-text-muted)]"
+          }`}
+        >
+          Confirmação
+        </div>
       </div>
 
       {phase === "credentials" ? (
         <form className="space-y-6" onSubmit={handleCredentialsSubmit}>
-          <div className="space-y-3">
-            <div className="flex items-center justify-between gap-3">
-              <p className="text-sm font-semibold uppercase tracking-[0.14em] text-[var(--color-text-muted)]">
-                Entradas rápidas
-              </p>
-              <p className="text-xs text-[var(--color-text-muted)]">Preenche o formulário automaticamente</p>
-            </div>
-            <div className="grid gap-3">
-              {rolePresets.map((preset) => {
-                const Icon = preset.icon;
-                const selected = email === preset.email;
-                return (
-                  <button
-                    key={preset.id}
-                    className={`flex items-center justify-between rounded-[22px] border px-4 py-4 text-left transition ${
-                      selected
-                        ? "border-[var(--color-primary)] bg-[rgba(15,76,92,0.08)]"
-                        : "border-[var(--color-border)] bg-white hover:border-[var(--color-border-strong)] hover:bg-[rgba(15,76,92,0.03)]"
-                    }`}
-                    onClick={() => applyPreset(preset)}
-                    type="button"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[rgba(15,76,92,0.1)] text-[var(--color-primary)]">
-                        <Icon className="h-5 w-5" />
-                      </div>
-                      <div>
-                        <p className="font-semibold">{preset.label}</p>
-                        <p className="mt-1 text-sm text-[var(--color-text-muted)]">{preset.caption}</p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-sm font-medium text-[var(--color-text)]">{preset.email}</p>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
           <label className="block space-y-2">
-            <span className="text-sm font-medium">E-mail profissional</span>
+            <span className="text-sm font-medium">E-mail</span>
             <input
+              autoComplete="email"
               className="h-[52px] w-full rounded-[22px] border border-[var(--color-border-strong)] bg-white px-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.6)] outline-none transition focus:border-[var(--color-primary)] focus:shadow-[0_0_0_4px_rgba(15,76,92,0.08)]"
               onChange={(event) => setEmail(event.target.value)}
-              placeholder="voce@consultorio.com.br"
+              placeholder="você@consultório.com.br"
               type="email"
               value={email}
             />
@@ -250,27 +145,13 @@ export function LoginForm({ nextPath }: LoginFormProps) {
           <label className="block space-y-2">
             <span className="text-sm font-medium">Senha</span>
             <input
+              autoComplete="current-password"
               className="h-[52px] w-full rounded-[22px] border border-[var(--color-border-strong)] bg-white px-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.6)] outline-none transition focus:border-[var(--color-primary)] focus:shadow-[0_0_0_4px_rgba(15,76,92,0.08)]"
               onChange={(event) => setPassword(event.target.value)}
               type="password"
               value={password}
             />
           </label>
-
-          <div className="rounded-[28px] border border-dashed border-[var(--color-border-strong)] bg-[rgba(15,76,92,0.04)] p-5 text-sm leading-6 text-[var(--color-text-muted)]">
-            <div className="flex items-start gap-3">
-              <div className="mt-0.5 flex h-10 w-10 items-center justify-center rounded-2xl bg-[rgba(15,76,92,0.1)] text-[var(--color-primary)]">
-                <KeyRound className="h-4 w-4" />
-              </div>
-              <div>
-                <p className="font-semibold text-[var(--color-text)]">Credenciais de avaliação visual</p>
-                <p className="mt-2">Senha padrão: {defaultCredentials.password}</p>
-                <p>MFA dummy: {defaultCredentials.mfaCode}</p>
-                <p className="mt-2">Terapeuta: ana.ready@institutovivace.com.br</p>
-                <p>Interno: ops@terapia.internal</p>
-              </div>
-            </div>
-          </div>
 
           {error ? (
             <p className="rounded-2xl bg-[rgba(178,74,58,0.12)] px-4 py-3 text-sm text-[var(--color-danger)]">
@@ -280,30 +161,29 @@ export function LoginForm({ nextPath }: LoginFormProps) {
 
           <div className="flex items-center justify-between gap-4">
             <a className="text-sm font-medium text-[var(--color-primary)]" href="#">
-              Preciso recuperar meu acesso
+              Esqueci minha senha
             </a>
-            <Button className="min-w-[180px]" disabled={isPending} type="submit">
-              {isPending ? "Validando..." : "Continuar para MFA"}
+            <Button className="min-w-[160px]" disabled={isPending} type="submit">
+              {isPending ? "Verificando..." : "Continuar"}
             </Button>
           </div>
         </form>
       ) : (
         <form className="space-y-6" onSubmit={handleMfaSubmit}>
-          <div className="rounded-[28px] border border-[var(--color-border)] bg-[rgba(15,76,92,0.04)] p-5 text-sm leading-7 text-[var(--color-text-muted)]">
-            <p className="font-semibold text-[var(--color-text)]">Código do autenticador</p>
-            <p className="mt-2">
-              Use o app TOTP da conta selecionada. Nesta avaliação, o código de acesso é {defaultCredentials.mfaCode}.
-            </p>
-          </div>
+          <p className="text-sm leading-7 text-[var(--color-text-muted)]">
+            Abra seu aplicativo de autenticação e informe o código de 6 dígitos.
+            O código muda a cada 30 segundos.
+          </p>
 
           <label className="block space-y-2">
-            <span className="text-sm font-medium">Codigo de 6 digitos</span>
+            <span className="text-sm font-medium">Código de 6 dígitos</span>
             <input
+              autoComplete="one-time-code"
               className="h-14 w-full rounded-[22px] border border-[var(--color-border-strong)] bg-white px-4 text-lg tracking-[0.35em] shadow-[inset_0_1px_0_rgba(255,255,255,0.6)] outline-none transition focus:border-[var(--color-primary)] focus:shadow-[0_0_0_4px_rgba(15,76,92,0.08)]"
               inputMode="numeric"
               maxLength={6}
               onChange={(event) => setCode(event.target.value)}
-              placeholder="123456"
+              placeholder="000000"
               value={code}
             />
           </label>
@@ -326,35 +206,12 @@ export function LoginForm({ nextPath }: LoginFormProps) {
               <ArrowLeft className="h-4 w-4" />
               Voltar
             </button>
-            <Button className="min-w-[180px]" disabled={isPending} type="submit">
-              {isPending ? "Abrindo sessão..." : "Entrar no workspace"}
+            <Button className="min-w-[160px]" disabled={isPending} type="submit">
+              {isPending ? "Entrando..." : "Entrar"}
             </Button>
           </div>
         </form>
       )}
-    </div>
-  );
-}
-
-function StatusBubble({
-  label,
-  tone,
-  value
-}: {
-  label: string;
-  tone: "info" | "neutral";
-  value: string;
-}) {
-  return (
-    <div className="rounded-[20px] border border-[rgba(15,76,92,0.08)] bg-[rgba(255,255,255,0.78)] px-4 py-3">
-      <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--color-text-muted)]">
-        {label}
-      </p>
-      <div className="mt-2">
-        <Badge tone={tone} className="px-3">
-          {value}
-        </Badge>
-      </div>
     </div>
   );
 }
