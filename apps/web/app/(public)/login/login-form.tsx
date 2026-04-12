@@ -149,35 +149,41 @@ export function LoginForm({ nextPath }: LoginFormProps) {
   }
 
   return (
-    <div className="space-y-7">
+    <div className="space-y-8">
       <div className="space-y-4">
-        <div className="flex flex-wrap items-center gap-2">
-          <Badge tone="info" className="px-3">
-            {phase === "credentials" ? "Passo 1 de 2" : "Passo 2 de 2"}
-          </Badge>
-          <Badge tone="neutral" className="px-3">
-            Modo dummy preparado para auth real
-          </Badge>
-        </div>
-
-        <div className="grid grid-cols-2 gap-2 rounded-[24px] border border-[var(--color-border)] bg-[rgba(15,76,92,0.03)] p-2">
-          <div
-            className={`rounded-[18px] px-4 py-3 text-sm font-semibold transition ${
-              phase === "credentials"
-                ? "bg-white text-[var(--color-text)] shadow-[0_10px_20px_rgba(15,76,92,0.08)]"
-                : "text-[var(--color-text-muted)]"
-            }`}
-          >
-            Identidade
+        <div className="rounded-[28px] border border-[var(--color-border)] bg-[linear-gradient(180deg,rgba(15,76,92,0.05)_0%,rgba(15,76,92,0.02)_100%)] p-3">
+          <div className="grid gap-3 md:grid-cols-2">
+            <StatusBubble
+              label="Etapa atual"
+              tone="info"
+              value={phase === "credentials" ? "Passo 1 de 2" : "Passo 2 de 2"}
+            />
+            <StatusBubble
+              label="Ambiente"
+              tone="neutral"
+              value="Dummy preparado para auth real"
+            />
           </div>
-          <div
-            className={`rounded-[18px] px-4 py-3 text-sm font-semibold transition ${
-              phase === "mfa"
-                ? "bg-white text-[var(--color-text)] shadow-[0_10px_20px_rgba(15,76,92,0.08)]"
-                : "text-[var(--color-text-muted)]"
-            }`}
-          >
-            MFA TOTP
+
+          <div className="mt-3 grid grid-cols-2 gap-2 rounded-[22px] border border-[var(--color-border)] bg-[rgba(255,255,255,0.8)] p-2">
+            <div
+              className={`rounded-[18px] px-4 py-3.5 text-sm font-semibold transition ${
+                phase === "credentials"
+                  ? "bg-white text-[var(--color-text)] shadow-[0_10px_20px_rgba(15,76,92,0.08)]"
+                  : "text-[var(--color-text-muted)]"
+              }`}
+            >
+              Identidade
+            </div>
+            <div
+              className={`rounded-[18px] px-4 py-3.5 text-sm font-semibold transition ${
+                phase === "mfa"
+                  ? "bg-white text-[var(--color-text)] shadow-[0_10px_20px_rgba(15,76,92,0.08)]"
+                  : "text-[var(--color-text-muted)]"
+              }`}
+            >
+              MFA TOTP
+            </div>
           </div>
         </div>
 
@@ -193,7 +199,7 @@ export function LoginForm({ nextPath }: LoginFormProps) {
           <div className="space-y-3">
             <div className="flex items-center justify-between gap-3">
               <p className="text-sm font-semibold uppercase tracking-[0.14em] text-[var(--color-text-muted)]">
-                Entrar para avaliar
+                Entradas rápidas
               </p>
               <p className="text-xs text-[var(--color-text-muted)]">Preenche o formulário automaticamente</p>
             </div>
@@ -326,6 +332,29 @@ export function LoginForm({ nextPath }: LoginFormProps) {
           </div>
         </form>
       )}
+    </div>
+  );
+}
+
+function StatusBubble({
+  label,
+  tone,
+  value
+}: {
+  label: string;
+  tone: "info" | "neutral";
+  value: string;
+}) {
+  return (
+    <div className="rounded-[20px] border border-[rgba(15,76,92,0.08)] bg-[rgba(255,255,255,0.78)] px-4 py-3">
+      <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--color-text-muted)]">
+        {label}
+      </p>
+      <div className="mt-2">
+        <Badge tone={tone} className="px-3">
+          {value}
+        </Badge>
+      </div>
     </div>
   );
 }

@@ -31,8 +31,8 @@ export default async function LoginPage({
   }
 
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_top_left,rgba(198,122,69,0.16),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(15,76,92,0.2),transparent_32%),linear-gradient(180deg,#f8f3e8_0%,#f4ede2_100%)] px-6 py-8 lg:px-8 lg:py-10">
-      <div className="mx-auto flex w-full max-w-7xl items-center justify-between">
+    <main className="min-h-screen bg-[radial-gradient(circle_at_top_left,rgba(198,122,69,0.16),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(15,76,92,0.18),transparent_34%),linear-gradient(180deg,#f8f3e8_0%,#f4ede2_100%)] px-6 py-8 lg:px-8 lg:py-10">
+      <div className="mx-auto flex w-full max-w-[1460px] items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="rounded-2xl border border-[rgba(15,76,92,0.14)] bg-white/72 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-[var(--color-text-muted)] shadow-[0_12px_30px_rgba(15,76,92,0.08)]">
             Terapia
@@ -53,11 +53,11 @@ export default async function LoginPage({
         </div>
       </div>
 
-      <div className="mx-auto mt-6 grid w-full max-w-7xl gap-8 lg:grid-cols-[1.08fr_minmax(430px,510px)]">
-        <section className="relative overflow-hidden rounded-[40px] border border-[rgba(15,76,92,0.14)] bg-[linear-gradient(145deg,#103a45_0%,#0f4c5c_42%,#164d59_100%)] p-8 text-white shadow-[0_30px_80px_rgba(15,76,92,0.24)] lg:p-12">
-          <div className="absolute inset-x-0 top-0 h-32 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.2),transparent_55%)]" />
-          <div className="absolute -right-24 top-20 h-72 w-72 rounded-full bg-[rgba(255,255,255,0.08)] blur-3xl" />
-          <div className="absolute -left-16 bottom-0 h-56 w-56 rounded-full bg-[rgba(198,122,69,0.16)] blur-3xl" />
+      <div className="mx-auto mt-6 grid w-full max-w-[1460px] gap-8 xl:grid-cols-[minmax(0,1.04fr)_minmax(540px,620px)]">
+        <section className="relative overflow-hidden rounded-[42px] border border-[rgba(15,76,92,0.14)] bg-[linear-gradient(145deg,#103a45_0%,#0f4c5c_42%,#164d59_100%)] p-8 text-white shadow-[0_30px_80px_rgba(15,76,92,0.24)] lg:p-12">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_68%_18%,rgba(255,255,255,0.12),transparent_28%),radial-gradient(circle_at_22%_-4%,rgba(255,255,255,0.07),transparent_24%)]" />
+          <div className="absolute -right-16 top-10 h-72 w-72 rounded-full bg-[rgba(255,255,255,0.05)] blur-[110px]" />
+          <div className="absolute -left-12 bottom-0 h-56 w-56 rounded-full bg-[rgba(198,122,69,0.14)] blur-[90px]" />
 
           <div className="relative">
             <div className="flex flex-wrap items-center gap-3">
@@ -69,7 +69,7 @@ export default async function LoginPage({
               </Badge>
             </div>
 
-            <h1 className="mt-8 max-w-3xl text-[clamp(3rem,5vw,5.2rem)] font-semibold leading-[0.96] tracking-[-0.05em]">
+            <h1 className="mt-8 max-w-[11ch] text-[clamp(3rem,4.8vw,5rem)] font-semibold leading-[0.94] tracking-[-0.05em]">
               Acesse a operação do dia sem ruído, dúvida ou tela genérica.
             </h1>
             <p className="mt-6 max-w-2xl text-lg leading-8 text-[rgba(255,255,255,0.78)]">
@@ -118,8 +118,8 @@ export default async function LoginPage({
           </div>
         </section>
 
-        <Card className="overflow-hidden border-[rgba(15,76,92,0.16)] bg-[rgba(255,253,248,0.96)] shadow-[0_28px_70px_rgba(15,76,92,0.14)]">
-          <CardHeader className="border-b border-[var(--color-border)] bg-[linear-gradient(180deg,rgba(15,76,92,0.08)_0%,rgba(15,76,92,0.03)_100%)] pb-6">
+        <Card className="self-start overflow-hidden rounded-[34px] border-[rgba(15,76,92,0.16)] bg-[rgba(255,253,248,0.98)] shadow-[0_28px_70px_rgba(15,76,92,0.14)] xl:sticky xl:top-8">
+          <CardHeader className="border-b border-[var(--color-border)] bg-[linear-gradient(180deg,rgba(15,76,92,0.08)_0%,rgba(15,76,92,0.03)_100%)] pb-6 lg:px-8 lg:pt-8">
             <div className="flex items-start gap-4">
               <div className="flex h-14 w-14 items-center justify-center rounded-[20px] bg-[rgba(15,76,92,0.12)] text-[var(--color-primary)]">
                 <ShieldCheck className="h-7 w-7" />
@@ -138,13 +138,13 @@ export default async function LoginPage({
               </div>
             </div>
           </CardHeader>
-          <CardContent className="p-8">
+          <CardContent className="p-8 lg:p-9">
             <LoginForm nextPath={params.next ?? "/app/dashboard"} />
           </CardContent>
         </Card>
       </div>
 
-      <div className="mx-auto mt-8 grid w-full max-w-7xl gap-4 lg:grid-cols-3">
+      <div className="mx-auto mt-8 grid w-full max-w-[1460px] gap-4 lg:grid-cols-3">
         <TrustPanel
           eyebrow="Autorização"
           title="Backend como fonte de verdade"
