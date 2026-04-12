@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import Image from "next/image";
 import { CalendarDays, FileText, Wallet } from "lucide-react";
 
 import type { AuthSession } from "@terapia/contracts";
@@ -32,7 +33,14 @@ export default async function LoginPage({
 
   return (
     <main className="min-h-screen bg-[radial-gradient(circle_at_top_left,rgba(198,122,69,0.16),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(15,76,92,0.18),transparent_34%),linear-gradient(180deg,#f8f3e8_0%,#f4ede2_100%)] px-6 py-8 lg:px-8 lg:py-10">
-      <div className="mx-auto flex w-full max-w-[1460px] items-center">
+      <div className="mx-auto flex w-full max-w-[1460px] items-center gap-2.5">
+        <Image
+          src="/icon.svg"
+          alt="Luma"
+          width={28}
+          height={28}
+          className="rounded-lg"
+        />
         <span className="text-lg font-semibold tracking-[-0.03em] text-[var(--color-text)]">
           Luma
         </span>
@@ -98,14 +106,20 @@ export default async function LoginPage({
           </CardHeader>
           <CardContent className="p-8 lg:p-9">
             <LoginForm nextPath={params.next ?? "/app/dashboard"} />
+            <p className="mt-6 text-center text-sm text-[var(--color-text-muted)]">
+              Ainda não tem conta?{" "}
+              <a href="/" className="font-medium text-[var(--color-primary)] hover:underline">
+                Entre na lista de espera
+              </a>
+            </p>
           </CardContent>
         </Card>
       </div>
 
       <div className="mx-auto mt-8 grid w-full max-w-[1460px] gap-4 lg:grid-cols-3">
         <TrustPanel
-          title="Seus dados são seus"
-          description="Acesso protegido com dois fatores. Ninguém mais entra na sua conta."
+          title="Acesso com dois fatores"
+          description="E-mail, senha e confirmação pelo aplicativo. Três camadas para manter sua conta segura."
         />
         <TrustPanel
           title="Funciona onde você estiver"
