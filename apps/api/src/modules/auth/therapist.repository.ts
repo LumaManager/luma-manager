@@ -43,26 +43,28 @@ export class TherapistRepository {
     const tenantId = randomUUID();
     const therapistId = randomUUID();
 
-    await this.db.insert(tenants).values({
-      id: tenantId,
-      name: input.practiceName,
-      shortName: input.practiceName.slice(0, 30),
-      status: "active"
+    return this.db.transaction(async (tx) => {
+      await tx.insert(tenants).values({
+        id: tenantId,
+        name: input.practiceName,
+        shortName: input.practiceName.slice(0, 30),
+        status: "active"
+      });
+
+      const [therapist] = await tx
+        .insert(therapists)
+        .values({
+          id: therapistId,
+          tenantId,
+          email: input.email.toLowerCase(),
+          passwordHash: input.passwordHash,
+          fullName: input.fullName,
+          role: "owner",
+          status: "pending_onboarding"
+        })
+        .returning();
+
+      return therapist;
     });
-
-    const [therapist] = await this.db
-      .insert(therapists)
-      .values({
-        id: therapistId,
-        tenantId,
-        email: input.email.toLowerCase(),
-        passwordHash: input.passwordHash,
-        fullName: input.fullName,
-        role: "owner",
-        status: "pending_onboarding"
-      })
-      .returning();
-
-    return therapist;
   }
 }
