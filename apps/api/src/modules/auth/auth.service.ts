@@ -2,6 +2,7 @@
 import { randomUUID } from "node:crypto";
 
 import { ConflictException, Inject, Injectable, UnauthorizedException } from "@nestjs/common";
+import type { OnModuleInit } from "@nestjs/common";
 import { authLoginRequestSchema, authMfaVerifyRequestSchema, type AuthLoginRequest, type AuthLoginResponse, type AuthSession } from "@terapia/contracts";
 
 import { MfaService } from "./mfa.service";
@@ -23,8 +24,18 @@ type RegisterInput = {
 };
 
 @Injectable()
-export class AuthService {
+export class AuthService implements OnModuleInit {
   private readonly pendingChallenges = new Map<string, PendingChallenge>();
+  private sweepInterval?: ReturnType<typeof setInterval>;
+
+  onModuleInit() {
+    this.sweepInterval = setInterval(() => {
+      const now = Date.now();
+      for (const [id, ch] of this.pendingChallenges) {
+        if (ch.expiresAt < now) this.pendingChallenges.delete(id);
+      }
+    }, 60_000);
+  }
 
   constructor(
     @Inject(AppSessionService) private readonly appSessionService: AppSessionService,

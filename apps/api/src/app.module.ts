@@ -3,6 +3,7 @@ import { Module } from "@nestjs/common";
 import { EnvService } from "@/common/config/env.service";
 import { DATABASE_CLIENT } from "@/common/tokens";
 import { createDatabaseClient } from "@/db/client";
+import type { DrizzleClient } from "@/db/client";
 import { MfaRepository } from "@/modules/auth/mfa.repository";
 import { MfaService } from "@/modules/auth/mfa.service";
 import { PasswordService } from "@/modules/auth/password.service";
@@ -79,12 +80,12 @@ import { SettingsController } from "@/modules/settings/settings.controller";
     },
     TherapistRepository,
     PasswordService,
-    MfaService,
     {
       provide: MfaRepository,
       inject: [DATABASE_CLIENT, "MFA_ENCRYPTION_KEY_BUFFER"],
-      useFactory: (db: any, key: Buffer) => new MfaRepository(db, key)
+      useFactory: (db: DrizzleClient, key: Buffer) => new MfaRepository(db, key)
     },
+    MfaService,
     AppointmentsService,
     DashboardService,
     ClinicalReviewService,
