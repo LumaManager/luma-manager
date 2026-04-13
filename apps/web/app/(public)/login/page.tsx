@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { CalendarDays, FileText, Wallet } from "lucide-react";
+import { CalendarDays, Check, FileText, Wallet } from "lucide-react";
 
 import type { AuthSession } from "@terapia/contracts";
 import { Card, CardContent, CardHeader } from "@terapia/ui";
@@ -53,16 +53,25 @@ export default async function LoginPage({
             <div className="mt-8 grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(420px,480px)]">
 
               {/* Left — copy */}
-              <div>
-                <h1 className="max-w-[13ch] text-[clamp(2.8rem,4.1vw,4.4rem)] font-semibold leading-[0.96] tracking-[-0.055em]">
-                  Tudo pronto para o seu dia.
-                </h1>
-                <p className="mt-5 max-w-xl text-[17px] leading-8 text-[rgba(255,255,255,0.78)]">
-                  Agenda, prontuários e cobranças no mesmo lugar.
-                  Sem precisar abrir mais nada.
-                </p>
+              <div className="flex flex-col justify-between gap-10 lg:min-h-[480px]">
+                <div>
+                  <h1 className="max-w-[13ch] text-[clamp(2.8rem,4.1vw,4.8rem)] font-semibold leading-[0.94] tracking-[-0.055em]">
+                    Tudo pronto para o seu dia.
+                  </h1>
+                  <p className="mt-5 max-w-lg text-[17px] leading-8 text-[rgba(255,255,255,0.78)]">
+                    Agenda, prontuários e cobranças no mesmo lugar.
+                    Sem precisar abrir mais nada.
+                  </p>
 
-                <div className="mt-8 grid gap-3 sm:grid-cols-3">
+                  <ul className="mt-7 grid gap-3">
+                    <Bullet text="Veja quem você atende hoje e o histórico de cada paciente antes de entrar na sessão." />
+                    <Bullet text="Registre a nota clínica logo depois — sem acumular para o fim do dia." />
+                    <Bullet text="Acompanhe o que foi pago, o que está pendente e o que precisa de atenção." />
+                    <Bullet text="Tudo em um fluxo só. Sem Google Agenda, WhatsApp e planilha separados." />
+                  </ul>
+                </div>
+
+                <div className="grid gap-3 sm:grid-cols-3">
                   <FeaturePanel
                     icon={CalendarDays}
                     title="Sua agenda"
@@ -108,6 +117,17 @@ export default async function LoginPage({
 
       </div>
     </main>
+  );
+}
+
+function Bullet({ text }: { text: string }) {
+  return (
+    <li className="flex items-start gap-3">
+      <div className="mt-1 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[rgba(255,255,255,0.14)]">
+        <Check className="h-3 w-3 text-white" />
+      </div>
+      <span className="text-[15px] leading-7 text-[rgba(255,255,255,0.78)]">{text}</span>
+    </li>
   );
 }
 
