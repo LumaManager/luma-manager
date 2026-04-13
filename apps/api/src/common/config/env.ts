@@ -4,6 +4,7 @@ const envSchema = z.object({
   API_PORT: z.coerce.number().default(4000),
   WEB_ORIGIN: z.string().url().default("http://localhost:3000"),
   APP_SESSION_SECRET: z.string().min(12),
+  MFA_ENCRYPTION_KEY: z.string().regex(/^[0-9a-fA-F]{64}$/, "MFA_ENCRYPTION_KEY must be 64 hex characters"),
   AUTH_PROVIDER: z.enum(["mock", "supabase"]).default("mock"),
   MOCK_THERAPIST_EMAIL: z.string().email().default("ana@institutovivace.com.br"),
   MOCK_THERAPIST_PASSWORD: z.string().min(8).default("12345678"),
