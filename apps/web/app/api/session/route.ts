@@ -13,7 +13,7 @@ export async function POST(request: Request) {
     value: session.accessToken,
     httpOnly: true,
     sameSite: "lax",
-    secure: false,
+    secure: process.env.NODE_ENV === "production",
     path: "/",
     expires: new Date(session.expiresAt)
   });
