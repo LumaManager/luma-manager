@@ -1,5 +1,5 @@
 // apps/api/src/modules/auth/mfa.repository.ts
-import { createCipheriv, createDecipheriv, randomBytes, randomUUID } from "node:crypto";
+import { createCipheriv, createDecipheriv, randomBytes, randomUUID, timingSafeEqual } from "node:crypto";
 
 import { Inject, Injectable } from "@nestjs/common";
 import { eq } from "drizzle-orm";
@@ -31,8 +31,8 @@ export class MfaRepository {
     const parts = stored.split(":");
     const ivHex = parts[0];
     const tagHex = parts[1];
-    const ciphertextHex = parts[2];
-    if (!ivHex || !tagHex || !ciphertextHex) {
+    const ciphertextHex = parts.slice(2).join(":");
+    if (!ivHex || !tagHex || !ciphertextHex || ciphertextHex.length === 0) {
       throw new Error("Invalid encrypted secret format");
     }
     const iv = Buffer.from(ivHex, "hex");
@@ -86,10 +86,17 @@ export class MfaRepository {
     if (!row) return false;
 
     const codes: string[] = JSON.parse(row.recoveryCodes);
-    const index = codes.indexOf(code);
-    if (index === -1) return false;
+    const normalizedCode = code.toUpperCase();
+    const maxLen = Math.max(...codes.map((c) => c.length), normalizedCode.length);
+    const target = Buffer.from(normalizedCode.padEnd(maxLen, "\0"));
+    let foundIndex = -1;
+    for (let i = 0; i < codes.length; i++) {
+      const candidate = Buffer.from((codes[i] ?? "").padEnd(maxLen, "\0"));
+      if (timingSafeEqual(candidate, target)) foundIndex = i;
+    }
+    if (foundIndex === -1) return false;
 
-    codes.splice(index, 1);
+    codes.splice(foundIndex, 1);
     await this.db
       .update(mfaSecrets)
       .set({ recoveryCodes: JSON.stringify(codes) })

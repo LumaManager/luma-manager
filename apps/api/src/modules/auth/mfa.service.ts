@@ -75,9 +75,9 @@ function totpVerify(token: string, secret: string): boolean {
   const counter = BigInt(Math.floor(Date.now() / 1000 / TOTP_PERIOD));
   for (let i = -TOTP_WINDOW; i <= TOTP_WINDOW; i++) {
     const expected = generateTotpCode(secret, counter + BigInt(i));
-    const a = Buffer.from(expected.padEnd(8, "0"));
-    const b = Buffer.from(token.padEnd(8, "0"));
-    if (timingSafeEqual(a, b) && expected === token) return true;
+    const a = Buffer.from(expected);
+    const b = Buffer.from(token.slice(0, TOTP_DIGITS).padStart(TOTP_DIGITS, "0"));
+    if (a.length === b.length && timingSafeEqual(a, b)) return true;
   }
   return false;
 }
@@ -119,6 +119,10 @@ export class MfaService {
   }
 
   async setupForTherapist(therapistId: string): Promise<{ secret: string; recoveryCodes: string[] }> {
+    const existing = await this.mfaRepository.findByTherapistId(therapistId);
+    if (existing) {
+      throw new Error("MFA already configured for this therapist");
+    }
     const secret = this.generateSecret();
     const recoveryCodes = this.generateRecoveryCodes();
     await this.mfaRepository.create(therapistId, secret, recoveryCodes);
