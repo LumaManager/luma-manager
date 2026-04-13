@@ -72,11 +72,12 @@ function generateTotpCode(secret: string, counter: bigint): string {
 }
 
 function totpVerify(token: string, secret: string): boolean {
+  if (token.length !== TOTP_DIGITS) return false;
   const counter = BigInt(Math.floor(Date.now() / 1000 / TOTP_PERIOD));
   for (let i = -TOTP_WINDOW; i <= TOTP_WINDOW; i++) {
     const expected = generateTotpCode(secret, counter + BigInt(i));
     const a = Buffer.from(expected);
-    const b = Buffer.from(token.slice(0, TOTP_DIGITS).padStart(TOTP_DIGITS, "0"));
+    const b = Buffer.from(token);
     if (a.length === b.length && timingSafeEqual(a, b)) return true;
   }
   return false;

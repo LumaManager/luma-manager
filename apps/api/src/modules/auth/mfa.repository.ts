@@ -82,26 +82,33 @@ export class MfaRepository {
   }
 
   async consumeRecoveryCode(therapistId: string, code: string): Promise<boolean> {
-    const row = await this.findByTherapistId(therapistId);
-    if (!row) return false;
+    return this.db.transaction(async (tx) => {
+      const rows = await tx
+        .select()
+        .from(mfaSecrets)
+        .where(eq(mfaSecrets.therapistId, therapistId))
+        .limit(1);
 
-    const codes: string[] = JSON.parse(row.recoveryCodes);
-    const normalizedCode = code.toUpperCase();
-    const maxLen = Math.max(...codes.map((c) => c.length), normalizedCode.length);
-    const target = Buffer.from(normalizedCode.padEnd(maxLen, "\0"));
-    let foundIndex = -1;
-    for (let i = 0; i < codes.length; i++) {
-      const candidate = Buffer.from((codes[i] ?? "").padEnd(maxLen, "\0"));
-      if (timingSafeEqual(candidate, target)) foundIndex = i;
-    }
-    if (foundIndex === -1) return false;
+      if (!rows[0]) return false;
 
-    codes.splice(foundIndex, 1);
-    await this.db
-      .update(mfaSecrets)
-      .set({ recoveryCodes: JSON.stringify(codes) })
-      .where(eq(mfaSecrets.therapistId, therapistId));
+      const codes: string[] = JSON.parse(rows[0].recoveryCodes);
+      const normalizedCode = code.toUpperCase();
+      const maxLen = Math.max(...codes.map((c) => c.length), normalizedCode.length);
+      const target = Buffer.from(normalizedCode.padEnd(maxLen, "\0"));
+      let foundIndex = -1;
+      for (let i = 0; i < codes.length; i++) {
+        const candidate = Buffer.from((codes[i] ?? "").padEnd(maxLen, "\0"));
+        if (timingSafeEqual(candidate, target)) foundIndex = i;
+      }
+      if (foundIndex === -1) return false;
 
-    return true;
+      codes.splice(foundIndex, 1);
+      await tx
+        .update(mfaSecrets)
+        .set({ recoveryCodes: JSON.stringify(codes) })
+        .where(eq(mfaSecrets.therapistId, therapistId));
+
+      return true;
+    });
   }
 }
