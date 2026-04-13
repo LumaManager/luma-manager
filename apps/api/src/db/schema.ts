@@ -25,8 +25,8 @@ export const therapists = pgTable("therapists", {
 
 export const mfaSecrets = pgTable("mfa_secrets", {
   id: text("id").primaryKey(),
-  therapistId: text("therapist_id").notNull().references(() => therapists.id),
-  secret: text("secret").notNull(), // base32 TOTP secret
+  therapistId: text("therapist_id").notNull().references(() => therapists.id).unique(),
+  encryptedSecret: text("encrypted_secret").notNull(), // AES-GCM encrypted TOTP secret
   verified: boolean("verified").notNull().default(false),
   recoveryCodes: text("recovery_codes").notNull().default("[]"), // JSON array
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow()

@@ -6,9 +6,9 @@ import type { EnvService } from "@/common/config/env.service";
 
 export type DrizzleClient = ReturnType<typeof drizzle>;
 
-export function createDatabaseClient(env: EnvService): DrizzleClient | null {
+export function createDatabaseClient(env: EnvService): DrizzleClient {
   if (!env.values.DATABASE_URL) {
-    return null;
+    throw new Error("DATABASE_URL is required but not set");
   }
 
   const sql = postgres(env.values.DATABASE_URL, {
