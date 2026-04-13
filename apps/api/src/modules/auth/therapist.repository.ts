@@ -39,6 +39,25 @@ export class TherapistRepository {
     return rows[0] ?? null;
   }
 
+  async findByIdWithTenant(id: string) {
+    const rows = await this.db
+      .select({
+        id: therapists.id,
+        email: therapists.email,
+        fullName: therapists.fullName,
+        role: therapists.role,
+        status: therapists.status,
+        tenantId: therapists.tenantId,
+        practiceName: tenants.name
+      })
+      .from(therapists)
+      .innerJoin(tenants, eq(tenants.id, therapists.tenantId))
+      .where(eq(therapists.id, id))
+      .limit(1);
+
+    return rows[0] ?? null;
+  }
+
   async create(input: CreateTherapistInput) {
     const tenantId = randomUUID();
     const therapistId = randomUUID();

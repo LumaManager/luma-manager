@@ -1,6 +1,12 @@
 import { Module } from "@nestjs/common";
 
 import { EnvService } from "@/common/config/env.service";
+import { DATABASE_CLIENT } from "@/common/tokens";
+import { createDatabaseClient } from "@/db/client";
+import { MfaRepository } from "@/modules/auth/mfa.repository";
+import { MfaService } from "@/modules/auth/mfa.service";
+import { PasswordService } from "@/modules/auth/password.service";
+import { TherapistRepository } from "@/modules/auth/therapist.repository";
 import { AccountController } from "@/modules/account/account.controller";
 import { AppointmentsController } from "@/modules/appointments/appointments.controller";
 import { AppointmentsService } from "@/modules/appointments/appointments.service";
@@ -61,6 +67,24 @@ import { SettingsController } from "@/modules/settings/settings.controller";
     SupabaseService,
     AppSessionService,
     AuthService,
+    {
+      provide: DATABASE_CLIENT,
+      inject: [EnvService],
+      useFactory: (env: EnvService) => createDatabaseClient(env)
+    },
+    {
+      provide: "MFA_ENCRYPTION_KEY_BUFFER",
+      inject: [EnvService],
+      useFactory: (env: EnvService) => Buffer.from(env.values.MFA_ENCRYPTION_KEY, "hex")
+    },
+    TherapistRepository,
+    PasswordService,
+    MfaService,
+    {
+      provide: MfaRepository,
+      inject: [DATABASE_CLIENT, "MFA_ENCRYPTION_KEY_BUFFER"],
+      useFactory: (db: any, key: Buffer) => new MfaRepository(db, key)
+    },
     AppointmentsService,
     DashboardService,
     ClinicalReviewService,

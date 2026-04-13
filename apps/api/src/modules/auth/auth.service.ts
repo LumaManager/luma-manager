@@ -1,29 +1,25 @@
+// apps/api/src/modules/auth/auth.service.ts
 import { randomUUID } from "node:crypto";
 
-import {
-  Inject,
-  Injectable,
-  NotImplementedException,
-  UnauthorizedException
-} from "@nestjs/common";
-import {
-  authLoginRequestSchema,
-  authMfaVerifyRequestSchema,
-  type AuthLoginRequest,
-  type AuthLoginResponse,
-  type AuthSession
-} from "@terapia/contracts";
+import { ConflictException, Inject, Injectable, UnauthorizedException } from "@nestjs/common";
+import { authLoginRequestSchema, authMfaVerifyRequestSchema, type AuthLoginRequest, type AuthLoginResponse, type AuthSession } from "@terapia/contracts";
 
-import { EnvService } from "@/common/config/env.service";
-import { InternalOpsService } from "@/modules/internal/internal-ops.service";
-import { SupabaseService } from "@/modules/platform/supabase/supabase.service";
-import { WorkspaceStateService } from "@/modules/account/workspace-state.service";
-
+import { MfaService } from "./mfa.service";
+import { PasswordService } from "./password.service";
+import { TherapistRepository } from "./therapist.repository";
 import { AppSessionService } from "./app-session.service";
 
 type PendingChallenge = {
+  therapistId: string;
   email: string;
   expiresAt: number;
+};
+
+type RegisterInput = {
+  email: string;
+  password: string;
+  fullName: string;
+  practiceName: string;
 };
 
 @Injectable()
@@ -31,26 +27,57 @@ export class AuthService {
   private readonly pendingChallenges = new Map<string, PendingChallenge>();
 
   constructor(
-    @Inject(EnvService) private readonly envService: EnvService,
     @Inject(AppSessionService) private readonly appSessionService: AppSessionService,
-    @Inject(SupabaseService) private readonly supabaseService: SupabaseService,
-    @Inject(WorkspaceStateService) private readonly workspaceStateService: WorkspaceStateService,
-    @Inject(InternalOpsService) private readonly internalOpsService: InternalOpsService
+    @Inject(TherapistRepository) private readonly therapistRepository: TherapistRepository,
+    @Inject(PasswordService) private readonly passwordService: PasswordService,
+    @Inject(MfaService) private readonly mfaService: MfaService
   ) {}
+
+  async register(input: RegisterInput): Promise<{
+    therapistId: string;
+    mfaSecret: string;
+    otpAuthUrl: string;
+    recoveryCodes: string[];
+  }> {
+    const existing = await this.therapistRepository.findByEmail(input.email);
+    if (existing) {
+      throw new ConflictException("Este e-mail já está cadastrado.");
+    }
+
+    const passwordHash = await this.passwordService.hash(input.password);
+    const therapist = await this.therapistRepository.create({
+      email: input.email,
+      passwordHash,
+      fullName: input.fullName,
+      practiceName: input.practiceName
+    });
+
+    if (!therapist) {
+      throw new Error("Failed to create therapist account.");
+    }
+
+    const { secret, recoveryCodes } = await this.mfaService.setupForTherapist(therapist.id);
+    const otpAuthUrl = this.mfaService.getOtpAuthUrl(input.email, secret);
+
+    return { therapistId: therapist.id, mfaSecret: secret, otpAuthUrl, recoveryCodes };
+  }
 
   async login(input: AuthLoginRequest): Promise<AuthLoginResponse> {
     const payload = authLoginRequestSchema.parse(input);
+    const therapist = await this.therapistRepository.findByEmail(payload.email);
 
-    if (this.envService.values.AUTH_PROVIDER === "supabase") {
-      await this.assertSupabaseLogin(payload);
-    } else {
-      this.assertMockLogin(payload);
+    // Always hash-check to prevent timing oracle on email enumeration
+    const hash = therapist?.passwordHash ?? "$2a$12$invalidsafehashplaceholder00000000000000000000000";
+    const passwordValid = await this.passwordService.verify(payload.password, hash);
+
+    if (!therapist || !passwordValid) {
+      throw new UnauthorizedException("E-mail ou senha incorretos.");
     }
 
     const challengeId = randomUUID();
-
     this.pendingChallenges.set(challengeId, {
-      email: payload.email,
+      therapistId: therapist.id,
+      email: therapist.email,
       expiresAt: Date.now() + 5 * 60 * 1000
     });
 
@@ -59,7 +86,7 @@ export class AuthService {
       requiresMfa: true,
       mfaMethod: "totp",
       expiresInSeconds: 300,
-      hint: "Use o aplicativo autenticador configurado para a conta do terapeuta."
+      hint: "Use o aplicativo autenticador configurado na sua conta."
     };
   }
 
@@ -71,99 +98,54 @@ export class AuthService {
       throw new UnauthorizedException("Desafio de MFA expirado. Inicie o login novamente.");
     }
 
-    if (payload.code !== this.envService.values.MOCK_MFA_CODE) {
-      throw new UnauthorizedException("Codigo de MFA invalido.");
+    const valid = await this.mfaService.verifyForTherapist(challenge.therapistId, payload.code);
+    if (!valid) {
+      throw new UnauthorizedException("Código de MFA inválido.");
     }
-
-    const baseSession = this.internalOpsService.isInternalEmail(challenge.email)
-      ? {
-          accountStatus: "ready_for_operations" as const,
-          capabilities: {
-            audioTranscription: false,
-            brazilOnlyProcessing: true,
-            patientPortalPayments: false,
-            stepUpAuthentication: true
-          },
-          expiresAt: new Date(Date.now() + 8 * 60 * 60 * 1000).toISOString(),
-          mfaVerified: true,
-          therapist: this.internalOpsService.getInternalTherapistProfile(challenge.email)
-        }
-      : (() => {
-          const workspaceAccount = this.workspaceStateService.getAccountByEmail(challenge.email);
-
-          return {
-            accountStatus: workspaceAccount.status,
-            capabilities: workspaceAccount.capabilities,
-            expiresAt: new Date(Date.now() + 8 * 60 * 60 * 1000).toISOString(),
-            mfaVerified: true,
-            therapist: workspaceAccount.therapist
-          };
-        })();
-
-    const accessToken = await this.appSessionService.sign(baseSession);
 
     this.pendingChallenges.delete(payload.challengeId);
 
-    return {
-      ...baseSession,
-      accessToken
+    const therapist = await this.therapistRepository.findByIdWithTenant(challenge.therapistId);
+    if (!therapist) {
+      throw new UnauthorizedException("Conta não encontrada.");
+    }
+
+    const expiresAt = new Date(Date.now() + 8 * 60 * 60 * 1000).toISOString();
+    const session: Omit<AuthSession, "accessToken"> = {
+      therapist: {
+        id: therapist.id,
+        email: therapist.email,
+        fullName: therapist.fullName,
+        firstName: therapist.fullName.split(" ")[0] ?? therapist.fullName,
+        crp: "",
+        practiceName: therapist.practiceName,
+        roleLabel: therapist.role === "owner" ? "Titular" : "Colaborador",
+        timezone: "America/Sao_Paulo"
+      },
+      accountStatus: therapist.status === "pending_onboarding" ? "pending_setup" : "ready_for_operations",
+      capabilities: {
+        audioTranscription: false,
+        brazilOnlyProcessing: true,
+        patientPortalPayments: false,
+        stepUpAuthentication: true
+      },
+      mfaVerified: true,
+      expiresAt
     };
+
+    const accessToken = await this.appSessionService.sign(session);
+    return { ...session, accessToken };
   }
 
-  async getSessionFromAuthorizationHeader(authorization?: string) {
+  async getSessionFromAuthorizationHeader(authorization?: string): Promise<AuthSession> {
     const token = authorization?.replace(/^Bearer\s+/i, "").trim();
-
     if (!token) {
       throw new UnauthorizedException("Credenciais ausentes.");
     }
-
-    const session = await this.appSessionService.verify(token);
-    if (this.internalOpsService.isInternalEmail(session.therapist.email)) {
-      return session;
-    }
-
-    return this.workspaceStateService.hydrateSession(session);
+    return this.appSessionService.verify(token);
   }
 
   async logout() {
     return { success: true };
-  }
-
-  private assertMockLogin(payload: AuthLoginRequest) {
-    const knownWorkspaceUser = (() => {
-      try {
-        this.workspaceStateService.getAccountByEmail(payload.email);
-        return true;
-      } catch {
-        return false;
-      }
-    })();
-
-    const knownInternalUser = this.internalOpsService.isInternalEmail(payload.email);
-
-    if (!knownWorkspaceUser && !knownInternalUser) {
-      throw new UnauthorizedException("E-mail ou senha invalidos.");
-    }
-
-    if (payload.password !== this.envService.values.MOCK_THERAPIST_PASSWORD) {
-      throw new UnauthorizedException("E-mail ou senha invalidos.");
-    }
-  }
-
-  private async assertSupabaseLogin(payload: AuthLoginRequest) {
-    if (!this.supabaseService.adminClient) {
-      throw new NotImplementedException(
-        "SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY precisam estar configurados para auth real."
-      );
-    }
-
-    const { error } = await this.supabaseService.adminClient.auth.signInWithPassword({
-      email: payload.email,
-      password: payload.password
-    });
-
-    if (error) {
-      throw new UnauthorizedException(error.message);
-    }
   }
 }

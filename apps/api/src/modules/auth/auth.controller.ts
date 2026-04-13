@@ -21,6 +21,11 @@ export class AuthController {
     return this.authService.login(body);
   }
 
+  @Post("register")
+  async register(@Body() body: { email: string; password: string; fullName: string; practiceName: string }) {
+    return this.authService.register(body);
+  }
+
   @Post("mfa/verify")
   @HttpCode(200)
   verifyMfa(@Body() body: AuthMfaVerifyRequest) {
