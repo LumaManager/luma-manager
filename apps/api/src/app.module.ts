@@ -41,6 +41,9 @@ import { SupabaseService } from "@/modules/platform/supabase/supabase.service";
 import { PortalController } from "@/modules/portal/portal.controller";
 import { PortalService } from "@/modules/portal/portal.service";
 import { SettingsController } from "@/modules/settings/settings.controller";
+import { OnboardingController } from "@/modules/onboarding/onboarding.controller";
+import { OnboardingRepository } from "@/modules/onboarding/onboarding.repository";
+import { OnboardingService } from "@/modules/onboarding/onboarding.service";
 
 @Module({
   controllers: [
@@ -60,7 +63,8 @@ import { SettingsController } from "@/modules/settings/settings.controller";
     LinkedinLeadsController,
     PatientsController,
     PortalController,
-    WaitlistController
+    WaitlistController,
+    OnboardingController
   ],
   providers: [
     EnvService,
@@ -97,7 +101,9 @@ import { SettingsController } from "@/modules/settings/settings.controller";
     PatientsService,
     PortalService,
     WaitlistService,
-    EmailService
+    EmailService,
+    OnboardingRepository,
+    OnboardingService
   ]
 })
 export class AppModule {}

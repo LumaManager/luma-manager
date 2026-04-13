@@ -9,6 +9,7 @@ import { MfaService } from "./mfa.service";
 import { PasswordService } from "./password.service";
 import { TherapistRepository } from "./therapist.repository";
 import { AppSessionService } from "./app-session.service";
+import { OnboardingService } from "@/modules/onboarding/onboarding.service";
 
 type PendingChallenge = {
   therapistId: string;
@@ -41,7 +42,8 @@ export class AuthService implements OnModuleInit {
     @Inject(AppSessionService) private readonly appSessionService: AppSessionService,
     @Inject(TherapistRepository) private readonly therapistRepository: TherapistRepository,
     @Inject(PasswordService) private readonly passwordService: PasswordService,
-    @Inject(MfaService) private readonly mfaService: MfaService
+    @Inject(MfaService) private readonly mfaService: MfaService,
+    @Inject(OnboardingService) private readonly onboardingService: OnboardingService
   ) {}
 
   async register(input: RegisterInput): Promise<{
@@ -68,6 +70,7 @@ export class AuthService implements OnModuleInit {
     }
 
     const { secret, recoveryCodes } = await this.mfaService.setupForTherapist(therapist.id);
+    await this.onboardingService.initForTherapist(therapist.id);
     const otpAuthUrl = this.mfaService.getOtpAuthUrl(input.email, secret);
 
     return { therapistId: therapist.id, mfaSecret: secret, otpAuthUrl, recoveryCodes };
