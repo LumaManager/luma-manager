@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import Image from "next/image";
+import Link from "next/link";
 import { CalendarDays, FileText, Wallet } from "lucide-react";
 
 import type { AuthSession } from "@terapia/contracts";
@@ -108,9 +109,9 @@ export default async function LoginPage({
             <LoginForm nextPath={params.next ?? "/app/dashboard"} />
             <p className="mt-6 text-center text-sm text-[var(--color-text-muted)]">
               Ainda não tem conta?{" "}
-              <a href="/" className="font-medium text-[var(--color-primary)] hover:underline">
+              <Link href="/" className="font-medium text-[var(--color-primary)] hover:underline">
                 Entre na lista de espera
-              </a>
+              </Link>
             </p>
           </CardContent>
         </Card>

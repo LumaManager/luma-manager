@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { Check, Minus } from "lucide-react";
 
 export const metadata = {
@@ -111,14 +112,14 @@ export default function PricingPage() {
 
       {/* Header */}
       <div className="mx-auto flex w-full max-w-[1200px] items-center gap-2.5">
-        <a href="/" className="flex items-center gap-2.5">
+        <Link href="/" className="flex items-center gap-2.5">
           <Image src="/icon.svg" alt="Luma" width={28} height={28} className="rounded-lg" />
           <span className="text-lg font-semibold tracking-[-0.03em] text-[var(--color-text)]">Luma</span>
-        </a>
+        </Link>
       </div>
 
       {/* Hero */}
-      <div className="mx-auto mt-16 w-full max-w-[1200px] text-center">
+      <div className="mx-auto mt-10 w-full max-w-[1200px] text-center lg:mt-16">
         <h1 className="text-[clamp(2.4rem,4vw,3.6rem)] font-semibold leading-[1.0] tracking-[-0.04em] text-[var(--color-text)]">
           O plano certo para o seu consultório.
         </h1>
@@ -128,14 +129,14 @@ export default function PricingPage() {
       </div>
 
       {/* Cards */}
-      <div className="mx-auto mt-12 grid w-full max-w-[1200px] gap-4 lg:grid-cols-4">
+      <div className="mx-auto mt-12 grid w-full max-w-[1200px] gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {plans.map((plan) => (
           <PlanCard key={plan.id} plan={plan} />
         ))}
       </div>
 
-      {/* Comparison table */}
-      <div className="mx-auto mt-16 w-full max-w-[1200px]">
+      {/* Comparison table — visible only on desktop */}
+      <div className="mx-auto mt-16 hidden w-full max-w-[1200px] lg:block">
         <h2 className="mb-6 text-xl font-semibold tracking-[-0.02em] text-[var(--color-text)]">
           Comparação completa
         </h2>
@@ -255,16 +256,29 @@ function PlanCard({ plan }: { plan: (typeof plans)[number] }) {
         </ul>
       </div>
 
-      <a
-        href={plan.ctaHref}
-        className={`mt-8 block rounded-[18px] px-5 py-3.5 text-center text-sm font-semibold transition ${
-          plan.highlight
-            ? "bg-white text-[var(--color-primary)] hover:bg-[rgba(255,255,255,0.9)]"
-            : "bg-[var(--color-primary)] text-white hover:bg-[#0d3f4e]"
-        }`}
-      >
-        {plan.cta}
-      </a>
+      {plan.ctaHref.startsWith("mailto:") ? (
+        <a
+          href={plan.ctaHref}
+          className={`mt-8 block rounded-[18px] px-5 py-3.5 text-center text-sm font-semibold transition ${
+            plan.highlight
+              ? "bg-white text-[var(--color-primary)] hover:bg-[rgba(255,255,255,0.9)]"
+              : "bg-[var(--color-primary)] text-white hover:bg-[#0d3f4e]"
+          }`}
+        >
+          {plan.cta}
+        </a>
+      ) : (
+        <Link
+          href={plan.ctaHref}
+          className={`mt-8 block rounded-[18px] px-5 py-3.5 text-center text-sm font-semibold transition ${
+            plan.highlight
+              ? "bg-white text-[var(--color-primary)] hover:bg-[rgba(255,255,255,0.9)]"
+              : "bg-[var(--color-primary)] text-white hover:bg-[#0d3f4e]"
+          }`}
+        >
+          {plan.cta}
+        </Link>
+      )}
     </div>
   );
 }
