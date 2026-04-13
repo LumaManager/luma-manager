@@ -53,8 +53,8 @@ const plans = [
   {
     id: "pro",
     name: "Pro",
-    price: 179,
-    priceLabel: "R$ 179",
+    price: 189,
+    priceLabel: "R$ 189",
     description: "Para quem tem agenda cheia e quer recuperar tempo depois da sessão.",
     highlight: true,
     cta: "Assinar Pro",
