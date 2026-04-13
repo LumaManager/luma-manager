@@ -4,6 +4,7 @@ import Link from "next/link";
 import { CalendarDays, FileText, Wallet } from "lucide-react";
 
 import type { AuthSession } from "@terapia/contracts";
+import { Card, CardContent, CardHeader } from "@terapia/ui";
 
 import { apiFetch } from "@/lib/api/client";
 import { getSessionToken } from "@/lib/auth/session";
@@ -32,86 +33,80 @@ export default async function LoginPage({
   }
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-[radial-gradient(circle_at_top_left,rgba(198,122,69,0.16),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(15,76,92,0.18),transparent_34%),linear-gradient(180deg,#f8f3e8_0%,#f4ede2_100%)] px-4 py-10 lg:px-8">
+    <main className="min-h-screen bg-[radial-gradient(circle_at_top_left,rgba(198,122,69,0.16),transparent_26%),radial-gradient(circle_at_top_right,rgba(15,76,92,0.16),transparent_30%),linear-gradient(180deg,#f8f3e8_0%,#f4ede2_100%)] px-2 py-5 lg:px-3 lg:py-6">
+      <div className="mx-auto w-full max-w-[1900px]">
 
-      {/* Logo above card */}
-      <div className="mb-6 flex w-full max-w-[1100px] items-center gap-2.5">
-        <Image src="/icon.svg" alt="Luma" width={26} height={26} className="rounded-lg" />
-        <span className="text-base font-semibold tracking-[-0.03em] text-[var(--color-text)]">
-          Luma
-        </span>
-      </div>
+        {/* Outer dark card — same pattern as landing */}
+        <section className="relative overflow-hidden rounded-[40px] border border-[rgba(15,76,92,0.14)] bg-[linear-gradient(145deg,#103a45_0%,#0f4c5c_42%,#164d59_100%)] p-8 pb-11 text-white shadow-[0_30px_80px_rgba(15,76,92,0.24)] lg:p-10 lg:pb-16">
+          <div className="absolute inset-x-0 top-0 h-40 bg-[radial-gradient(ellipse_at_top,rgba(255,255,255,0.2)_0%,rgba(255,255,255,0.1)_28%,rgba(255,255,255,0.04)_46%,rgba(255,255,255,0)_74%)] opacity-90" />
+          <div className="absolute -right-24 top-20 h-72 w-72 rounded-full bg-[rgba(255,255,255,0.08)] blur-3xl" />
+          <div className="absolute -left-16 bottom-0 h-56 w-56 rounded-full bg-[rgba(198,122,69,0.16)] blur-3xl" />
 
-      {/* Single card containing both panels */}
-      <div className="w-full max-w-[1100px] overflow-hidden rounded-[40px] border border-[rgba(15,76,92,0.14)] bg-white shadow-[0_32px_90px_rgba(15,76,92,0.16)]">
-        <div className="grid xl:grid-cols-[1fr_480px]">
+          <div className="relative">
+            {/* Logo */}
+            <div className="flex items-center gap-2.5">
+              <Image src="/icon.svg" alt="Luma" width={26} height={26} className="rounded-lg" />
+              <span className="text-base font-semibold tracking-[-0.03em] text-white">Luma</span>
+            </div>
 
-          {/* Left — dark panel */}
-          <section className="relative overflow-hidden bg-[linear-gradient(145deg,#103a45_0%,#0f4c5c_42%,#164d59_100%)] p-8 text-white lg:p-12">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_68%_18%,rgba(255,255,255,0.12),transparent_28%),radial-gradient(circle_at_22%_-4%,rgba(255,255,255,0.07),transparent_24%)]" />
-            <div className="absolute -right-16 top-10 h-72 w-72 rounded-full bg-[rgba(255,255,255,0.05)] blur-[110px]" />
-            <div className="absolute -left-12 bottom-0 h-56 w-56 rounded-full bg-[rgba(198,122,69,0.14)] blur-[90px]" />
+            {/* Split grid */}
+            <div className="mt-8 grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(420px,480px)]">
 
-            <div className="relative">
-              <h1 className="mt-2 max-w-[12ch] text-[clamp(2.6rem,4vw,4.2rem)] font-semibold leading-[0.94] tracking-[-0.05em]">
-                Tudo pronto para o seu dia.
-              </h1>
-              <p className="mt-5 max-w-sm text-base leading-7 text-[rgba(255,255,255,0.72)]">
-                Agenda, prontuários e cobranças no mesmo lugar.
-                Sem precisar abrir mais nada.
-              </p>
+              {/* Left — copy */}
+              <div>
+                <h1 className="max-w-[13ch] text-[clamp(2.8rem,4.1vw,4.4rem)] font-semibold leading-[0.96] tracking-[-0.055em]">
+                  Tudo pronto para o seu dia.
+                </h1>
+                <p className="mt-5 max-w-xl text-[17px] leading-8 text-[rgba(255,255,255,0.78)]">
+                  Agenda, prontuários e cobranças no mesmo lugar.
+                  Sem precisar abrir mais nada.
+                </p>
 
-              <div className="mt-8 grid gap-3 sm:grid-cols-3 xl:grid-cols-1 xl:gap-3 2xl:grid-cols-3">
-                <FeaturePanel
-                  icon={CalendarDays}
-                  title="Sua agenda"
-                  description="Sessões do dia organizadas, em ordem."
-                />
-                <FeaturePanel
-                  icon={FileText}
-                  title="Seus pacientes"
-                  description="Histórico acessível a qualquer momento."
-                />
-                <FeaturePanel
-                  icon={Wallet}
-                  title="Suas cobranças"
-                  description="O que foi pago e o que está pendente."
-                />
+                <div className="mt-8 grid gap-3 sm:grid-cols-3">
+                  <FeaturePanel
+                    icon={CalendarDays}
+                    title="Sua agenda"
+                    description="Sessões do dia organizadas, em ordem."
+                  />
+                  <FeaturePanel
+                    icon={FileText}
+                    title="Seus pacientes"
+                    description="Histórico acessível a qualquer momento."
+                  />
+                  <FeaturePanel
+                    icon={Wallet}
+                    title="Suas cobranças"
+                    description="O que foi pago e o que está pendente."
+                  />
+                </div>
               </div>
+
+              {/* Right — form card floating over dark panel */}
+              <Card className="overflow-hidden rounded-[32px] border-[rgba(255,255,255,0.14)] bg-[rgba(250,246,239,0.98)] text-[var(--color-text)] shadow-[0_22px_60px_rgba(7,24,29,0.28)] backdrop-blur">
+                <CardHeader className="gap-2 border-b border-[rgba(15,76,92,0.1)] bg-[linear-gradient(180deg,rgba(255,250,242,0.68)_0%,rgba(251,244,234,0.24)_100%)] px-6 pb-5 pt-6">
+                  <p className="text-[1.6rem] font-semibold tracking-[-0.03em]">
+                    Bem-vindo de volta
+                  </p>
+                  <p className="text-sm leading-6 text-[var(--color-text-muted)]">
+                    Entre com seu e-mail e senha para acessar sua área.
+                  </p>
+                </CardHeader>
+                <CardContent className="px-6 py-7">
+                  <LoginForm nextPath={params.next ?? "/app/dashboard"} />
+                  <p className="mt-7 text-center text-sm text-[var(--color-text-muted)]">
+                    Ainda não tem conta?{" "}
+                    <Link href="/" className="font-medium text-[var(--color-primary)] hover:underline">
+                      Entre na lista de espera
+                    </Link>
+                  </p>
+                </CardContent>
+              </Card>
+
             </div>
-          </section>
-
-          {/* Right — form */}
-          <div className="flex flex-col justify-center border-l border-[rgba(15,76,92,0.1)] bg-[rgba(255,253,248,0.98)] px-8 py-10 lg:px-10 lg:py-12">
-            <p className="text-[1.75rem] font-semibold tracking-[-0.03em] text-[var(--color-text)]">
-              Bem-vindo de volta
-            </p>
-            <p className="mt-2 text-sm leading-6 text-[var(--color-text-muted)]">
-              Entre com seu e-mail e senha para acessar sua área.
-            </p>
-
-            <div className="mt-8">
-              <LoginForm nextPath={params.next ?? "/app/dashboard"} />
-            </div>
-
-            <p className="mt-8 text-center text-sm text-[var(--color-text-muted)]">
-              Ainda não tem conta?{" "}
-              <Link href="/" className="font-medium text-[var(--color-primary)] hover:underline">
-                Entre na lista de espera
-              </Link>
-            </p>
           </div>
+        </section>
 
-        </div>
       </div>
-
-      {/* Trust row */}
-      <div className="mt-6 grid w-full max-w-[1100px] gap-3 sm:grid-cols-3">
-        <TrustNote text="Acesso com dois fatores" />
-        <TrustNote text="Funciona em qualquer dispositivo" />
-        <TrustNote text="Dados armazenados no Brasil" />
-      </div>
-
     </main>
   );
 }
@@ -133,11 +128,5 @@ function FeaturePanel({
       <p className="mt-3 text-sm font-semibold tracking-[-0.01em]">{title}</p>
       <p className="mt-1 text-xs leading-5 text-[rgba(255,255,255,0.62)]">{description}</p>
     </div>
-  );
-}
-
-function TrustNote({ text }: { text: string }) {
-  return (
-    <p className="text-center text-xs text-[var(--color-text-muted)]">{text}</p>
   );
 }
