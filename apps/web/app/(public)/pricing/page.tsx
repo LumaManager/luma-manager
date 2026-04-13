@@ -32,8 +32,8 @@ const plans = [
   {
     id: "solo",
     name: "Solo",
-    price: 79,
-    priceLabel: "R$ 79",
+    price: 99,
+    priceLabel: "R$ 99",
     description: "Para o psicólogo autônomo com agenda em crescimento.",
     highlight: false,
     cta: "Assinar Solo",
