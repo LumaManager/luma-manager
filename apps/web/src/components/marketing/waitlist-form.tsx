@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
 import { ArrowRight, LoaderCircle } from "lucide-react";
 import type {
   WaitlistJoinRequest,
@@ -9,6 +9,7 @@ import type {
   WaitlistSummary
 } from "@terapia/contracts";
 import { Badge, Button, Card, CardContent, CardHeader } from "@terapia/ui";
+import { trackFormStart, trackGenerateLead } from "@/lib/analytics/gtag";
 
 export type WaitlistJoinSuccessPayload = {
   alreadyJoined: boolean;
@@ -60,6 +61,20 @@ export function WaitlistForm({
     useState<WaitlistProfessionalRole>("therapist");
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+  const hasTrackedFormStartRef = useRef(false);
+
+  function handleFormStart() {
+    if (hasTrackedFormStartRef.current) {
+      return;
+    }
+
+    hasTrackedFormStartRef.current = true;
+    trackFormStart({
+      formName: "waitlist",
+      formVariant: embedded ? "embedded" : "standalone",
+      sourcePath
+    });
+  }
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -102,6 +117,16 @@ export function WaitlistForm({
         }
 
         const result = body as WaitlistJoinResponse;
+        trackGenerateLead({
+          leadType: "waitlist",
+          sourcePath,
+          professionalRole,
+          utmSource,
+          utmMedium,
+          utmCampaign,
+          utmContent,
+          utmTerm
+        });
         onJoinSuccess?.({
           alreadyJoined: result.alreadyJoined,
           email,
@@ -176,7 +201,7 @@ export function WaitlistForm({
           <WaitlistSignal label="Tempo" value="Menos de 1 min" />
         </div>
 
-        <form className="space-y-3.5" onSubmit={handleSubmit}>
+        <form className="space-y-3.5" onFocusCapture={handleFormStart} onSubmit={handleSubmit}>
           <div
             className={
               embedded

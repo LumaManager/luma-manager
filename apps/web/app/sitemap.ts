@@ -1,12 +1,12 @@
 import type { MetadataRoute } from "next";
 
+import { buildAbsoluteUrl, indexableRoutes } from "@/lib/marketing/seo-config";
+
 export default function sitemap(): MetadataRoute.Sitemap {
-  return [
-    {
-      url: "https://lumamanager.com.br",
-      lastModified: new Date(),
-      changeFrequency: "weekly",
-      priority: 1
-    }
-  ];
+  return indexableRoutes.map((route) => ({
+    url: buildAbsoluteUrl(route.path),
+    lastModified: new Date(),
+    changeFrequency: route.changeFrequency,
+    priority: route.priority
+  }));
 }

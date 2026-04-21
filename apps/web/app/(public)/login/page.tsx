@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
@@ -9,8 +10,15 @@ import { Card, CardContent, CardHeader } from "@terapia/ui";
 import { apiFetch } from "@/lib/api/client";
 import { getSessionToken } from "@/lib/auth/session";
 import { getAuthenticatedHomePath } from "@/lib/auth/session-destination";
+import { noindexMetadata } from "@/lib/marketing/seo-config";
 
 import { LoginForm } from "./login-form";
+
+export const metadata: Metadata = {
+  ...noindexMetadata,
+  title: "Entrar | Luma Manager",
+  description: "Acesse sua conta Luma Manager."
+};
 
 export default async function LoginPage({
   searchParams

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition, type FormEvent } from "react";
+import Link from "next/link";
 import {
   ArrowRight,
   Ban,
@@ -35,6 +36,7 @@ import type {
   WaitlistSummary
 } from "@terapia/contracts";
 import { Badge, Button, Card, CardContent, CardHeader } from "@terapia/ui";
+import { TrackedCtaLink } from "@/lib/analytics/tracked-cta-link";
 
 import { WaitlistForm, type WaitlistJoinSuccessPayload } from "./waitlist-form";
 
@@ -84,6 +86,7 @@ const biggestPainOptions: { label: string; value: WaitlistBiggestPain }[] = [
 ];
 
 const brandName = "Luma";
+const marketingPageType = "marketing_home";
 const productName = "Luma Manager";
 
 export function LandingPage({
@@ -369,12 +372,12 @@ export function LandingPage({
                       {brandName}
                     </div>
                     <Badge tone="warning" className="bg-[rgba(255,255,255,0.16)] text-white">
-                      Beta do {productName}
+                      Beta com demo guiada
                     </Badge>
                   </div>
 
                   <h1 className="mt-8 max-w-3xl text-[clamp(2.8rem,4.1vw,4.4rem)] font-semibold leading-[0.96] tracking-[-0.055em]">
-                    Chega de rotina clínica espalhada. Tudo roda na {brandName}.
+                    Menos fricção para o consultório. Comece pela demo.
                   </h1>
 
                   <p className="mt-5 max-w-2xl text-[17px] leading-8 text-[rgba(255,255,255,0.8)]">
@@ -394,39 +397,83 @@ export function LandingPage({
                       asChild
                       className="h-[54px] rounded-[22px] border border-[rgba(198,122,69,0.42)] bg-[var(--color-accent)] px-6 text-base font-semibold text-white shadow-[0_18px_38px_rgba(198,122,69,0.28)] hover:bg-[color-mix(in_srgb,var(--color-accent)_88%,black)]"
                     >
-                      <a href="#waitlist">
-                        Entrar na waitlist
+                      <TrackedCtaLink
+                        ctaLabel="Solicitar demo"
+                        ctaLocation="home_hero_primary"
+                        href="/solicitar-demo"
+                        pageType={marketingPageType}
+                      >
+                        Solicitar demo
                         <ArrowRight className="h-4 w-4" />
-                      </a>
+                      </TrackedCtaLink>
                     </Button>
                     <Button
                       asChild
                       className="h-[54px] rounded-[22px] border border-[rgba(255,255,255,0.18)] bg-[rgba(255,255,255,0.08)] px-6 text-base text-white hover:bg-[rgba(255,255,255,0.12)]"
                       variant="ghost"
                     >
-                      <a href="#como-funciona">Ver como funciona</a>
+                      <TrackedCtaLink
+                        ctaLabel="Entrar na waitlist"
+                        ctaLocation="home_hero_secondary"
+                        href="#waitlist"
+                        pageType={marketingPageType}
+                      >
+                        Entrar na waitlist
+                      </TrackedCtaLink>
                     </Button>
+                  </div>
+
+                  <div className="mt-6 flex flex-wrap items-center gap-2">
+                    <TrackedCtaLink
+                      className="rounded-full border border-[rgba(255,255,255,0.16)] bg-[rgba(255,255,255,0.08)] px-4 py-2 text-sm text-[rgba(255,255,255,0.82)] transition hover:bg-[rgba(255,255,255,0.12)]"
+                      ctaLabel="Ver planos"
+                      ctaLocation="home_hero_quicklinks"
+                      href="/pricing"
+                      pageType={marketingPageType}
+                    >
+                      Ver planos
+                    </TrackedCtaLink>
+                    <TrackedCtaLink
+                      className="rounded-full border border-[rgba(255,255,255,0.16)] bg-[rgba(255,255,255,0.08)] px-4 py-2 text-sm text-[rgba(255,255,255,0.82)] transition hover:bg-[rgba(255,255,255,0.12)]"
+                      ctaLabel="Segurança e privacidade"
+                      ctaLocation="home_hero_quicklinks"
+                      href="/seguranca-e-privacidade"
+                      pageType={marketingPageType}
+                    >
+                      Segurança e privacidade
+                    </TrackedCtaLink>
+                    <TrackedCtaLink
+                      className="rounded-full border border-[rgba(255,255,255,0.16)] bg-[rgba(255,255,255,0.08)] px-4 py-2 text-sm text-[rgba(255,255,255,0.82)] transition hover:bg-[rgba(255,255,255,0.12)]"
+                      ctaLabel="Como funciona"
+                      ctaLocation="home_hero_quicklinks"
+                      href="#como-funciona"
+                      pageType={marketingPageType}
+                    >
+                      Como funciona
+                    </TrackedCtaLink>
                   </div>
                 </div>
 
-                <WaitlistForm
-                  embedded
-                  initialSummary={waitlistSummary}
-                  onJoinSuccess={handleJoinSuccess}
-                  sourcePath="/"
-                  utmCampaign={utmCampaign}
-                  utmContent={utmContent}
-                  utmMedium={utmMedium}
-                  utmSource={utmSource}
-                  utmTerm={utmTerm}
-                />
+                <div id="waitlist">
+                  <WaitlistForm
+                    embedded
+                    initialSummary={waitlistSummary}
+                    onJoinSuccess={handleJoinSuccess}
+                    sourcePath="/"
+                    utmCampaign={utmCampaign}
+                    utmContent={utmContent}
+                    utmMedium={utmMedium}
+                    utmSource={utmSource}
+                    utmTerm={utmTerm}
+                  />
+                </div>
               </div>
 
               <div className="mt-8 rounded-[30px] border border-[rgba(255,255,255,0.14)] bg-[rgba(255,255,255,0.08)] p-5 backdrop-blur">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[rgba(255,255,255,0.56)]">
-                      Hoje na {brandName}
+                      Hoje no beta da {brandName}
                     </p>
                     <p className="mt-2 text-2xl font-semibold tracking-[-0.03em]">
                       O consultório em ordem antes, durante e depois da sessão.
@@ -557,6 +604,39 @@ export function LandingPage({
             title="Pensado para o consultório no Brasil"
             description="Cobrança, consentimentos, documentos e a rotina real do consultório entram no produto desde cedo."
           />
+        </section>
+
+        <section className="mt-8 rounded-[32px] border border-[rgba(15,76,92,0.12)] bg-[rgba(255,253,248,0.9)] px-6 py-5 shadow-[0_18px_40px_rgba(15,76,92,0.06)]">
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+            <div className="max-w-3xl">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--color-primary)]">
+                Caminho público
+              </p>
+              <p className="mt-2 text-lg font-semibold tracking-[-0.02em] text-[var(--color-text)]">
+                Demo primeiro, waitlist como apoio e páginas públicas para reduzir dúvida antes do contato.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Link
+                className="rounded-full border border-[rgba(15,76,92,0.14)] bg-white px-4 py-2 text-sm font-medium text-[var(--color-text)] transition hover:border-[var(--color-primary)]"
+                href="/solicitar-demo"
+              >
+                Solicitar demo
+              </Link>
+              <Link
+                className="rounded-full border border-[rgba(15,76,92,0.14)] bg-white px-4 py-2 text-sm font-medium text-[var(--color-text)] transition hover:border-[var(--color-primary)]"
+                href="/pricing"
+              >
+                Ver planos
+              </Link>
+              <Link
+                className="rounded-full border border-[rgba(15,76,92,0.14)] bg-white px-4 py-2 text-sm font-medium text-[var(--color-text)] transition hover:border-[var(--color-primary)]"
+                href="/seguranca-e-privacidade"
+              >
+                Segurança
+              </Link>
+            </div>
+          </div>
         </section>
 
         <section className="mt-16" id="problema">
@@ -796,10 +876,10 @@ export function LandingPage({
           <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-3xl">
               <Badge tone="warning" className="bg-[rgba(255,255,255,0.16)] text-white">
-                Waitlist
+                Waitlist secundária
               </Badge>
               <h2 className="mt-4 text-4xl font-semibold tracking-[-0.04em]">
-                Se essa rotina já pesa hoje, entra cedo na fila.
+                Se a demo ainda não for o seu caminho, entre cedo na fila.
               </h2>
               <p className="mt-4 text-lg leading-8 text-[rgba(255,255,255,0.8)]">
                 O {productName} não é para quem quer mais uma ferramenta solta. Ele é para quem quer
@@ -811,17 +891,29 @@ export function LandingPage({
                 asChild
                 className="h-[58px] rounded-[22px] border border-[rgba(198,122,69,0.42)] bg-[var(--color-accent)] px-8 text-base font-semibold text-white shadow-[0_18px_38px_rgba(198,122,69,0.28)] hover:bg-[color-mix(in_srgb,var(--color-accent)_88%,black)]"
               >
-                <a href="#waitlist">
-                  Entrar na waitlist
+                <TrackedCtaLink
+                  ctaLabel="Solicitar demo"
+                  ctaLocation="home_footer_primary"
+                  href="/solicitar-demo"
+                  pageType={marketingPageType}
+                >
+                  Solicitar demo
                   <ArrowRight className="h-4 w-4" />
-                </a>
+                </TrackedCtaLink>
               </Button>
               <Button
                 asChild
                 className="h-[58px] rounded-[22px] border border-[rgba(255,255,255,0.22)] bg-[rgba(255,255,255,0.08)] px-8 text-base text-white hover:bg-[rgba(255,255,255,0.14)]"
                 variant="ghost"
               >
-                <a href="#como-funciona">Ver como funciona</a>
+                <TrackedCtaLink
+                  ctaLabel="Entrar na waitlist"
+                  ctaLocation="home_footer_secondary"
+                  href="#waitlist"
+                  pageType={marketingPageType}
+                >
+                  Entrar na waitlist
+                </TrackedCtaLink>
               </Button>
             </div>
           </div>
@@ -834,7 +926,7 @@ export function LandingPage({
             </div>
             <p className="max-w-lg text-sm leading-6 text-[var(--color-text-muted)]">
               O {productName} é um produto da {brandName} para psicólogos autônomos no Brasil.
-              Plataforma em desenvolvimento. Acesso por waitlist.
+              Plataforma em desenvolvimento. Acesso por demo e waitlist.
             </p>
             <p className="text-xs text-[var(--color-text-muted)]">
               &copy; {new Date().getFullYear()} {brandName}. Todos os direitos reservados.

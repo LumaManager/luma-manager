@@ -1,12 +1,14 @@
 import type { MetadataRoute } from "next";
 
+import { buildAbsoluteUrl, privateRoutePrefixes } from "@/lib/marketing/seo-config";
+
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: {
       userAgent: "*",
       allow: "/",
-      disallow: ["/app/", "/portal/", "/internal/"]
+      disallow: [...privateRoutePrefixes, "/api/"]
     },
-    sitemap: "https://lumamanager.com.br/sitemap.xml"
+    sitemap: buildAbsoluteUrl("/sitemap.xml")
   };
 }
