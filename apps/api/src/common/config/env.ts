@@ -36,7 +36,7 @@ const envSchema = z.object({
     .default("false")
     .transform((value) => value === "true"),
   RESEND_API_KEY: z.string().optional(),
-  LUMA_ENV: z.string().default("production")
+  LUMA_ENV: z.string().default("production") // deploy trigger
 });
 
 export type Environment = z.infer<typeof envSchema>;
