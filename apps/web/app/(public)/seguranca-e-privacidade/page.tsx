@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
-import type { ElementType } from "react";
-import { ArrowRight, CheckCircle2, Eye, FileLock2, ShieldCheck, Users, Workflow } from "lucide-react";
-import { Badge, Card, CardContent } from "@terapia/ui";
+import { ArrowRight, CheckCircle2, Eye, FileLock2, Users } from "lucide-react";
+import { Badge } from "@terapia/ui";
 
 import { TrackedCtaLink } from "@/lib/analytics/tracked-cta-link";
 import { PublicPageShell, PublicSectionCard } from "@/components/marketing/public-page-shell";
@@ -41,7 +40,7 @@ export default function SegurancaEPrivacidadePage() {
       <div className="grid gap-6">
         <section className="relative overflow-hidden rounded-[36px] border border-[rgba(255,255,255,0.14)] bg-[linear-gradient(145deg,#103a45_0%,#0f4c5c_42%,#164d59_100%)] p-8 text-white shadow-[0_24px_60px_rgba(15,76,92,0.22)] lg:p-10">
           <div className="absolute inset-x-0 top-0 h-40 bg-[radial-gradient(ellipse_at_top,rgba(255,255,255,0.2)_0%,rgba(255,255,255,0.1)_28%,rgba(255,255,255,0.04)_46%,rgba(255,255,255,0)_74%)] opacity-90" />
-          <div className="relative grid gap-8 lg:grid-cols-[minmax(0,1fr)_400px] lg:items-start">
+          <div className="relative grid gap-8 lg:items-start">
             <div>
               <div className="flex flex-wrap items-center gap-3">
                 <Badge tone="warning" className="bg-[rgba(255,255,255,0.14)] text-white">
@@ -90,38 +89,6 @@ export default function SegurancaEPrivacidadePage() {
                 </TrackedCtaLink>
               </div>
             </div>
-
-            <Card className="overflow-hidden border-[rgba(255,255,255,0.14)] bg-[rgba(255,253,248,0.98)] shadow-[0_22px_60px_rgba(7,24,29,0.24)]">
-              <CardContent className="space-y-4 p-6 text-[var(--color-text)]">
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--color-primary)]">
-                  O que a página quer deixar claro
-                </p>
-                <div className="space-y-3">
-                  <MiniCard
-                    icon={ShieldCheck}
-                    title="Controle"
-                    description="A operação não deve depender de acesso amplo para todo mundo."
-                  />
-                  <MiniCard
-                    icon={Workflow}
-                    title="Fluxo"
-                    description="A rotina deve seguir o atendimento, não o contrário."
-                  />
-                  <MiniCard
-                    icon={Eye}
-                    title="Rastreio"
-                    description="O sistema precisa permitir leitura operacional sem expor demais."
-                  />
-                </div>
-                <div className="rounded-[24px] border border-[rgba(15,76,92,0.1)] bg-[rgba(15,76,92,0.04)] p-4">
-                  <p className="text-sm font-semibold text-[var(--color-text)]">Posicionamento correto</p>
-                  <p className="mt-2 text-sm leading-6 text-[var(--color-text-muted)]">
-                    Não é sobre prometer mágica. É sobre mostrar que o produto foi pensado para
-                    reduzir exposição desnecessária e manter o consultório organizado.
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
           </div>
         </section>
 
@@ -159,30 +126,6 @@ export default function SegurancaEPrivacidadePage() {
             </ul>
           </PublicSectionCard>
 
-          <PublicSectionCard
-            eyebrow="Como usar na venda"
-            title="Use esta página para responder objeções cedo"
-            description="A etapa de segurança normalmente destrava o cliente quando ele está comparando opções."
-          >
-            <div className="grid gap-3 md:grid-cols-2">
-              <InfoCard
-                title="Antes da demo"
-                text="Mostre que o produto não é uma caixa-preta e que o cliente consegue entender o fluxo."
-              />
-              <InfoCard
-                title="Durante a demo"
-                text="Explique como acesso, registro e rastreio aparecem na prática."
-              />
-              <InfoCard
-                title="Depois da demo"
-                text="Envie esta página como apoio para a decisão interna do profissional."
-              />
-              <InfoCard
-                title="Na conversa final"
-                text="Volte ao ponto central: menos fricção operacional com mais controle."
-              />
-            </div>
-          </PublicSectionCard>
         </div>
 
         <PublicSectionCard
@@ -227,31 +170,3 @@ function HeroBullet({ text }: { text: string }) {
   );
 }
 
-function MiniCard({
-  description,
-  icon: Icon,
-  title
-}: {
-  description: string;
-  icon: ElementType;
-  title: string;
-}) {
-  return (
-    <div className="rounded-[24px] border border-[rgba(15,76,92,0.1)] bg-[rgba(15,76,92,0.03)] p-4">
-      <div className="flex h-9 w-9 items-center justify-center rounded-[12px] bg-[rgba(15,76,92,0.08)]">
-        <Icon className="h-4 w-4 text-[var(--color-primary)]" />
-      </div>
-      <p className="mt-3 text-sm font-semibold text-[var(--color-text)]">{title}</p>
-      <p className="mt-1 text-sm leading-6 text-[var(--color-text-muted)]">{description}</p>
-    </div>
-  );
-}
-
-function InfoCard({ text, title }: { text: string; title: string }) {
-  return (
-    <div className="rounded-[24px] border border-[rgba(15,76,92,0.1)] bg-[rgba(15,76,92,0.03)] p-4">
-      <p className="text-sm font-semibold text-[var(--color-text)]">{title}</p>
-      <p className="mt-1 text-sm leading-6 text-[var(--color-text-muted)]">{text}</p>
-    </div>
-  );
-}

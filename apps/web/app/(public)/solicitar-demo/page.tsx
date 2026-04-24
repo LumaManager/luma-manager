@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { ArrowRight, CheckCircle2 } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { Badge } from "@terapia/ui";
 
 import { TrackedCtaLink } from "@/lib/analytics/tracked-cta-link";
@@ -76,75 +76,6 @@ export default function SolicitarDemoPage() {
           </div>
         </section>
 
-        <div className="grid gap-4 lg:grid-cols-3">
-          <PublicSectionCard
-            eyebrow="Antes da demo"
-            title="O que a conversa precisa cobrir"
-            description="A demo funciona melhor quando o cenário chega filtrado."
-          >
-            <ul className="space-y-3 text-sm leading-7 text-[var(--color-text-muted)]">
-              <li className="flex items-start gap-3">
-                <CheckCircle2 className="mt-1 h-4 w-4 shrink-0 text-[var(--color-success)]" />
-                Seu modelo de atendimento e volume de sessões.
-              </li>
-              <li className="flex items-start gap-3">
-                <CheckCircle2 className="mt-1 h-4 w-4 shrink-0 text-[var(--color-success)]" />
-                Onde hoje existe mais retrabalho: agenda, notas, documentos ou cobrança.
-              </li>
-              <li className="flex items-start gap-3">
-                <CheckCircle2 className="mt-1 h-4 w-4 shrink-0 text-[var(--color-success)]" />
-                O nível de cuidado que você espera em privacidade e acesso.
-              </li>
-            </ul>
-          </PublicSectionCard>
-
-          <PublicSectionCard
-            eyebrow="Durante a demo"
-            title="O que vale observar"
-            description="A meta não é uma apresentação genérica. É checar encaixe."
-          >
-            <div className="space-y-3">
-              <MiniCard title="Fluxo diário" text="Como o sistema organiza o dia de atendimento." />
-              <MiniCard title="Prontuário" text="Como o registro aparece sem virar formulário interminável." />
-              <MiniCard title="Segurança" text="Como acesso e privacidade entram na operação." />
-            </div>
-          </PublicSectionCard>
-
-          <PublicSectionCard
-            eyebrow="Depois da demo"
-            title="Como avançar sem demora"
-            description="Se houver fit, o próximo passo deve ser claro e objetivo."
-          >
-            <div className="space-y-3">
-              <MiniCard title="Ajuste de fluxo" text="Mapeie o que precisa ser configurado primeiro." />
-              <MiniCard title="Validação" text="Confirme o encaixe com o ritmo real do consultório." />
-              <MiniCard title="Próxima ação" text="Defina se o melhor passo é piloto, migração ou contratação." />
-            </div>
-          </PublicSectionCard>
-        </div>
-
-        <PublicSectionCard
-          eyebrow="Resumo"
-          title="Se o seu consultório é pequeno, a demo precisa ser objetiva"
-          description="O objetivo é descobrir rápido se o produto ajuda a reduzir atrito e dar mais clareza ao dia."
-        >
-          <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,360px)]">
-            <div className="rounded-[24px] border border-[rgba(15,76,92,0.1)] bg-[rgba(15,76,92,0.03)] p-4">
-              <p className="text-sm font-semibold text-[var(--color-text)]">O que você recebe</p>
-              <p className="mt-2 text-sm leading-6 text-[var(--color-text-muted)]">
-                Uma conversa curta por e-mail para alinhar contexto e, se fizer sentido, agendar a
-                demonstração no ritmo do seu consultório.
-              </p>
-            </div>
-            <div className="rounded-[24px] border border-[rgba(15,76,92,0.1)] bg-[rgba(15,76,92,0.03)] p-4">
-              <p className="text-sm font-semibold text-[var(--color-text)]">O que evitar</p>
-              <p className="mt-2 text-sm leading-6 text-[var(--color-text-muted)]">
-                Não vale preencher a página com detalhes que não ajudam a decidir. A ideia é
-                reduzir fricção e acelerar a leitura de valor.
-              </p>
-            </div>
-          </div>
-        </PublicSectionCard>
       </div>
     </PublicPageShell>
   );
@@ -161,11 +92,3 @@ function HeroBullet({ text }: { text: string }) {
   );
 }
 
-function MiniCard({ text, title }: { text: string; title: string }) {
-  return (
-    <div className="rounded-[24px] border border-[rgba(15,76,92,0.1)] bg-[rgba(15,76,92,0.03)] p-4">
-      <p className="text-sm font-semibold text-[var(--color-text)]">{title}</p>
-      <p className="mt-1 text-sm leading-6 text-[var(--color-text-muted)]">{text}</p>
-    </div>
-  );
-}
