@@ -35,7 +35,8 @@ const envSchema = z.object({
     .union([z.literal("true"), z.literal("false")])
     .default("false")
     .transform((value) => value === "true"),
-  RESEND_API_KEY: z.string().optional()
+  RESEND_API_KEY: z.string().optional(),
+  LUMA_ENV: z.string().default("production")
 });
 
 export type Environment = z.infer<typeof envSchema>;
