@@ -3,7 +3,7 @@ import { ArrowRight } from "lucide-react";
 import { Badge } from "@terapia/ui";
 
 import { TrackedCtaLink } from "@/lib/analytics/tracked-cta-link";
-import { PublicPageShell, PublicSectionCard } from "@/components/marketing/public-page-shell";
+import { PublicPageShell } from "@/components/marketing/public-page-shell";
 import { PublicDemoForm } from "@/components/marketing/public-demo-form";
 
 export const metadata: Metadata = {
