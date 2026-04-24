@@ -1,8 +1,8 @@
 # Perguntas em Aberto
 
-## 0. Decisões fechadas (março 2026)
+## 0. Decisões fechadas
 
-Estas perguntas foram respondidas e não estão mais em aberto:
+### Fechadas em março 2026
 
 | Decisão | Resposta |
 |---|---|
@@ -15,16 +15,29 @@ Estas perguntas foram respondidas e não estão mais em aberto:
 | Profundidade da nota | Resumo em tópicos — não nota clínica completa como o Berries |
 | Terapeuta valida os tópicos | Sim — terapeuta revisa e aprova antes de qualquer registro |
 
+### Fechadas em abril 2026
+
+| Decisão | Resposta |
+|---|---|
+| MVP solo ou multi-terapeuta | Solo — um terapeuta autônomo por conta. Clínica multi-terapeuta vira Fase 2. |
+| Refinamento do ICP | Psicólogo autônomo com CRP ativo, atende adultos, 10+ pacientes ativos, capacidade de investir ~R$300/mês em ferramenta. Estagiário/estudante **não é** cliente pagante — no máximo canal de aquisição futura. |
+| Agendamento no MVP | Paciente agenda sozinho em slots livres publicados pelo terapeuta (estilo Calendly). |
+| Chat assíncrono entre sessões | Fora do MVP. Comunicação entre sessões segue por canal externo (WhatsApp). |
+| Atendimento infantil no MVP | Fora do MVP. Apenas pacientes adultos. Infantil é especialização de público distinto e vira feature dedicada em Fase 2 — destrava o segundo ICP (psicólogo infanto-juvenil). |
+| Pricing alvo do MVP | R$300/mês por terapeuta solo, a validar no beta. Benchmark: Berries cobra US$79/mês. |
+
+Detalhamento dessas decisões em [decisoes-de-produto-mvp.md](./decisoes-de-produto-mvp.md).
+
 ---
 
 ## 1. Decisões bloqueantes antes de construir
 
 ### Produto
 
-- O MVP será para terapeuta individual apenas ou já precisa suportar clínica com vários terapeutas?
-- O paciente poderá agendar sozinho ou apenas confirmar convites e horários oferecidos?
-- Haverá chat assíncrono entre sessões?
-- O produto precisa suportar atendimento infantil no MVP?
+- ~~O MVP será para terapeuta individual apenas ou já precisa suportar clínica com vários terapeutas?~~ **Fechada — solo.**
+- ~~O paciente poderá agendar sozinho ou apenas confirmar convites e horários oferecidos?~~ **Fechada — agenda sozinho em slots livres.**
+- ~~Haverá chat assíncrono entre sessões?~~ **Fechada — fora do MVP.**
+- ~~O produto precisa suportar atendimento infantil no MVP?~~ **Fechada — fora do MVP.**
 
 ### Jurídico e compliance
 

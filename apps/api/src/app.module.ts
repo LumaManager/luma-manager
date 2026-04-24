@@ -36,6 +36,7 @@ import { WaitlistController } from "@/modules/marketing/waitlist.controller";
 import { WaitlistService } from "@/modules/marketing/waitlist.service";
 import { EmailService } from "@/modules/platform/email/email.service";
 import { PatientsController } from "@/modules/patients/patients.controller";
+import { PatientsRepository } from "@/modules/patients/patients.repository";
 import { PatientsService } from "@/modules/patients/patients.service";
 import { SupabaseService } from "@/modules/platform/supabase/supabase.service";
 import { PortalController } from "@/modules/portal/portal.controller";
@@ -80,7 +81,13 @@ import { OnboardingService } from "@/modules/onboarding/onboarding.service";
     {
       provide: "MFA_ENCRYPTION_KEY_BUFFER",
       inject: [EnvService],
-      useFactory: (env: EnvService) => Buffer.from(env.values.MFA_ENCRYPTION_KEY, "hex")
+      useFactory: (env: EnvService) => {
+        // Quando REQUIRE_MFA=false a chave é opcional.
+        // Fornecemos um buffer dummy para o MfaRepository inicializar sem erro
+        // (seus métodos nunca serão chamados quando MFA está desativado).
+        const key = env.values.MFA_ENCRYPTION_KEY ?? "0".repeat(64);
+        return Buffer.from(key, "hex");
+      }
     },
     TherapistRepository,
     PasswordService,
@@ -98,6 +105,7 @@ import { OnboardingService } from "@/modules/onboarding/onboarding.service";
     FinanceService,
     InternalOpsService,
     LinkedinLeadsService,
+    PatientsRepository,
     PatientsService,
     PortalService,
     WaitlistService,

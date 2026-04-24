@@ -3,8 +3,15 @@ import { randomUUID } from "node:crypto";
 
 import { ConflictException, Inject, Injectable, UnauthorizedException } from "@nestjs/common";
 import type { OnModuleInit } from "@nestjs/common";
-import { authLoginRequestSchema, authMfaVerifyRequestSchema, type AuthLoginRequest, type AuthLoginResponse, type AuthSession } from "@terapia/contracts";
+import {
+  authLoginRequestSchema,
+  authMfaVerifyRequestSchema,
+  type AuthLoginRequest,
+  type AuthLoginResponse,
+  type AuthSession
+} from "@terapia/contracts";
 
+import { EnvService } from "@/common/config/env.service";
 import { MfaService } from "./mfa.service";
 import { PasswordService } from "./password.service";
 import { TherapistRepository } from "./therapist.repository";
@@ -39,6 +46,7 @@ export class AuthService implements OnModuleInit {
   }
 
   constructor(
+    @Inject(EnvService) private readonly env: EnvService,
     @Inject(AppSessionService) private readonly appSessionService: AppSessionService,
     @Inject(TherapistRepository) private readonly therapistRepository: TherapistRepository,
     @Inject(PasswordService) private readonly passwordService: PasswordService,
@@ -48,9 +56,10 @@ export class AuthService implements OnModuleInit {
 
   async register(input: RegisterInput): Promise<{
     therapistId: string;
-    mfaSecret: string;
-    otpAuthUrl: string;
-    recoveryCodes: string[];
+    mfaSecret?: string;
+    otpAuthUrl?: string;
+    recoveryCodes?: string[];
+    mfaSkipped: boolean;
   }> {
     const existing = await this.therapistRepository.findByEmail(input.email);
     if (existing) {
@@ -69,14 +78,20 @@ export class AuthService implements OnModuleInit {
       throw new Error("Failed to create therapist account.");
     }
 
-    const { secret, recoveryCodes } = await this.mfaService.setupForTherapist(therapist.id);
     await this.onboardingService.initForTherapist(therapist.id);
+
+    // Quando REQUIRE_MFA=false, pula o setup de TOTP no cadastro
+    if (!this.env.values.REQUIRE_MFA) {
+      return { therapistId: therapist.id, mfaSkipped: true };
+    }
+
+    const { secret, recoveryCodes } = await this.mfaService.setupForTherapist(therapist.id);
     const otpAuthUrl = this.mfaService.getOtpAuthUrl(input.email, secret);
 
-    return { therapistId: therapist.id, mfaSecret: secret, otpAuthUrl, recoveryCodes };
+    return { therapistId: therapist.id, mfaSecret: secret, otpAuthUrl, recoveryCodes, mfaSkipped: false };
   }
 
-  async login(input: AuthLoginRequest): Promise<AuthLoginResponse> {
+  async login(input: AuthLoginRequest): Promise<AuthLoginResponse & { accessToken?: string }> {
     const payload = authLoginRequestSchema.parse(input);
     const therapist = await this.therapistRepository.findByEmail(payload.email);
 
@@ -88,6 +103,22 @@ export class AuthService implements OnModuleInit {
       throw new UnauthorizedException("E-mail ou senha incorretos.");
     }
 
+    // --- REQUIRE_MFA=false: emite sessão direto sem etapa TOTP ---
+    if (!this.env.values.REQUIRE_MFA) {
+      const session = await this.buildSession(therapist.id);
+      const accessToken = await this.appSessionService.sign(session);
+      // Retorna requiresMfa:false + accessToken para o frontend completar login direto
+      return {
+        challengeId: "",
+        requiresMfa: false,
+        mfaMethod: "totp",
+        expiresInSeconds: 0,
+        hint: "MFA desativado neste ambiente.",
+        accessToken
+      };
+    }
+
+    // --- REQUIRE_MFA=true (padrão): fluxo normal com desafio TOTP ---
     const challengeId = randomUUID();
     this.pendingChallenges.set(challengeId, {
       therapistId: therapist.id,
@@ -112,20 +143,53 @@ export class AuthService implements OnModuleInit {
       throw new UnauthorizedException("Desafio de MFA expirado. Inicie o login novamente.");
     }
 
-    const valid = await this.mfaService.verifyForTherapist(challenge.therapistId, payload.code);
+    // Quando REQUIRE_MFA=false, qualquer código é aceito (fallback de segurança)
+    const valid = this.env.values.REQUIRE_MFA
+      ? await this.mfaService.verifyForTherapist(challenge.therapistId, payload.code)
+      : true;
+
     if (!valid) {
       throw new UnauthorizedException("Código de MFA inválido.");
     }
 
     this.pendingChallenges.delete(payload.challengeId);
 
-    const therapist = await this.therapistRepository.findByIdWithTenant(challenge.therapistId);
+    const session = await this.buildSession(challenge.therapistId);
+    const accessToken = await this.appSessionService.sign(session);
+    return { ...session, accessToken };
+  }
+
+  async getSessionFromAuthorizationHeader(authorization?: string): Promise<AuthSession> {
+    const token = authorization?.replace(/^Bearer\s+/i, "").trim();
+    if (!token) {
+      throw new UnauthorizedException("Credenciais ausentes.");
+    }
+    return this.appSessionService.verify(token);
+  }
+
+  async logout() {
+    return { success: true };
+  }
+
+  // ---------------------------------------------------------------------------
+  // Helpers
+  // ---------------------------------------------------------------------------
+
+  private async buildSession(therapistId: string): Promise<Omit<AuthSession, "accessToken">> {
+    const therapist = await this.therapistRepository.findByIdWithTenant(therapistId);
     if (!therapist) {
       throw new UnauthorizedException("Conta não encontrada.");
     }
 
     const expiresAt = new Date(Date.now() + 8 * 60 * 60 * 1000).toISOString();
-    const session: Omit<AuthSession, "accessToken"> = {
+
+    return {
+      tenant: {
+        id: therapist.tenantId,
+        name: therapist.practiceName,
+        shortName: therapist.practiceName.slice(0, 30),
+        status: therapist.status === "pending_onboarding" ? "pending_setup" : "ready_for_operations"
+      },
       therapist: {
         id: therapist.id,
         email: therapist.email,
@@ -141,25 +205,10 @@ export class AuthService implements OnModuleInit {
         audioTranscription: false,
         brazilOnlyProcessing: true,
         patientPortalPayments: false,
-        stepUpAuthentication: true
+        stepUpAuthentication: this.env.values.REQUIRE_MFA
       },
       mfaVerified: true,
       expiresAt
     };
-
-    const accessToken = await this.appSessionService.sign(session);
-    return { ...session, accessToken };
-  }
-
-  async getSessionFromAuthorizationHeader(authorization?: string): Promise<AuthSession> {
-    const token = authorization?.replace(/^Bearer\s+/i, "").trim();
-    if (!token) {
-      throw new UnauthorizedException("Credenciais ausentes.");
-    }
-    return this.appSessionService.verify(token);
-  }
-
-  async logout() {
-    return { success: true };
   }
 }

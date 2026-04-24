@@ -72,6 +72,7 @@ Tudo o que for decidido, esclarecido ou alterado no projeto deve ser salvo em ar
 62. [planejamento/mercado-e-icp.md](./planejamento/mercado-e-icp.md)
 63. [planejamento/unidade-e-precificacao.md](./planejamento/unidade-e-precificacao.md)
 64. [planejamento/perguntas-em-aberto.md](./planejamento/perguntas-em-aberto.md)
+65. [planejamento/decisoes-de-produto-mvp.md](./planejamento/decisoes-de-produto-mvp.md)
 
 ## Como usar este pacote
 

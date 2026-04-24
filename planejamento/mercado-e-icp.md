@@ -8,6 +8,27 @@ O ICP definido para o produto:
 
 > Psicólogo autônomo, clínica privada própria, sem vínculo com convênio ou instituição, que realiza todos os atendimentos sozinho e documenta manualmente após cada sessão.
 
+### 1.1 Refinamento para o MVP (abril 2026)
+
+Para qualificar o primeiro lote de clientes pagantes, o ICP foi afunilado com critérios objetivos:
+
+| Critério | Valor mínimo |
+|---|---|
+| CRP ativo | Sim |
+| Público atendido | Adultos |
+| Base de pacientes ativos | 10 ou mais |
+| Capacidade de investir em ferramenta | ~R$300/mês |
+| Vínculo institucional | Nenhum (mantém o ICP original) |
+
+Estão **explicitamente fora** do ICP do MVP:
+
+- Estagiário e estudante de psicologia (não têm ticket compatível)
+- Psicólogo infanto-juvenil (não terá infantil no MVP — entra em Fase 2)
+- Psicólogo em início de carreira sem base consolidada
+- Clínica multi-terapeuta (Fase 2)
+
+Ver justificativas em [decisoes-de-produto-mvp.md](./decisoes-de-produto-mvp.md).
+
 ### Por que esse ICP
 
 | Critério | Justificativa |

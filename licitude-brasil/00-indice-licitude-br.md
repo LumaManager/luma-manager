@@ -11,6 +11,7 @@ Este arquivo define a ordem oficial de leitura da investigação regulatória do
 5. [04-matriz-de-cenarios-audio-ia-e-registro.md](./04-matriz-de-cenarios-audio-ia-e-registro.md)
 6. [05-gates-juridicos-para-go-live.md](./05-gates-juridicos-para-go-live.md)
 7. [06-perguntas-para-parecer-juridico.md](./06-perguntas-para-parecer-juridico.md)
+8. [docs-lgpd/](./docs-lgpd/) — **Pacote documental LGPD completo (minuta)** — gerado em 2026-04-19 pela skill `lgpd-psicoterapia`. Ler [docs-lgpd/00-INDICE-LGPD-LUMA.md](./docs-lgpd/00-INDICE-LGPD-LUMA.md) como ponto de entrada
 
 ## Resultado esperado desta leitura
 

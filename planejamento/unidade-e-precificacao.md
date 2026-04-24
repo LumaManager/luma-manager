@@ -90,6 +90,19 @@ Depois disso, decidir entre:
 - mensalidade base + franquia de minutos
 - mensalidade base + limite de pacientes ativos
 
+### 5.1 Pricing alvo do MVP (abril 2026)
+
+Âncora a ser validada no beta privado: **R$300/mês por terapeuta solo**.
+
+Sanidade do número:
+
+- Berries (EUA) cobra US$79/mês, equivalente a ~R$400 em paridade local
+- Ticket de sessão privada no Brasil: R$150–300
+- Terapeuta com 10 pacientes semanais (ICP do MVP) fatura R$6.000–12.000/mês
+- R$300/mês = 2,5%–5% do faturamento do terapeuta — dentro da faixa padrão de investimento em ferramenta profissional
+
+Este valor é **âncora de qualificação de ICP**, não preço final. O preço definitivo sai depois da instrumentação de custo por sessão. Ver [decisoes-de-produto-mvp.md](./decisoes-de-produto-mvp.md).
+
 ## 6. Perguntas comerciais que precisam de resposta
 
 - O cliente aceita pagar mais por transcript ilimitado?

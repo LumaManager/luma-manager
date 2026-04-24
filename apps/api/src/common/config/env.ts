@@ -4,8 +4,15 @@ const envSchema = z.object({
   API_PORT: z.coerce.number().default(4000),
   WEB_ORIGIN: z.string().url().default("http://localhost:3000"),
   APP_SESSION_SECRET: z.string().min(12),
-  MFA_ENCRYPTION_KEY: z.string().regex(/^[0-9a-fA-F]{64}$/, "MFA_ENCRYPTION_KEY must be 64 hex characters").transform(v => v.toLowerCase()),
+  MFA_ENCRYPTION_KEY: z.string().regex(/^[0-9a-fA-F]{64}$/, "MFA_ENCRYPTION_KEY must be 64 hex characters").transform(v => v.toLowerCase()).optional(),
   AUTH_PROVIDER: z.enum(["real", "mock"]).default("real"),
+  // Quando false: login completa direto após email+senha, sem TOTP.
+  // Use false em dev/staging para testar sem autenticador.
+  // NUNCA false em produção com dados reais.
+  REQUIRE_MFA: z
+    .union([z.literal("true"), z.literal("false")])
+    .default("true")
+    .transform((value) => value === "true"),
   SUPABASE_URL: z.string().optional(),
   SUPABASE_ANON_KEY: z.string().optional(),
   SUPABASE_SERVICE_ROLE_KEY: z.string().optional(),

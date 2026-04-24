@@ -104,6 +104,12 @@ export const authSessionSchema = z.object({
   expiresAt: z.string(),
   mfaVerified: z.boolean(),
   therapist: therapistProfileSchema,
+  tenant: z.object({
+    id: z.string(),
+    name: z.string(),
+    shortName: z.string(),
+    status: therapistAccountStatusSchema
+  }),
   accountStatus: therapistAccountStatusSchema,
   capabilities: accountCapabilitiesSchema
 });
