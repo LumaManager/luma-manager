@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, CheckCircle2 } from "lucide-react";
 import { Badge } from "@terapia/ui";
 
 import { TrackedCtaLink } from "@/lib/analytics/tracked-cta-link";

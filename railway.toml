@@ -1,10 +1,10 @@
 [build]
 builder = "nixpacks"
 buildCommand = "npm install && npm run build --workspace @terapia/api"
-installCommand = "npm install --legacy-peer-deps"
+installCommand = "rm -rf node_modules && npm install --legacy-peer-deps"
 
 [deploy]
 startCommand = "node apps/api/dist/main.js"
 restartPolicyType = "on_failure"
 healthcheckPath = "/v1/health"
-healthcheckTimeout = 30
+healthcheckTimeout = 120
