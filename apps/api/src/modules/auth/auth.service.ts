@@ -177,6 +177,12 @@ export class AuthService implements OnModuleInit {
   // Helpers
   // ---------------------------------------------------------------------------
 
+  private readonly internalEmails = ["dev@lumamanager.com.br", "ops@terapia.internal"];
+
+  private isInternalEmail(email: string): boolean {
+    return this.internalEmails.includes(email) || email.endsWith("@terapia.internal");
+  }
+
   private async buildSession(therapistId: string): Promise<Omit<AuthSession, "accessToken">> {
     const therapist = await this.therapistRepository.findByIdWithTenant(therapistId);
     if (!therapist) {
@@ -184,6 +190,7 @@ export class AuthService implements OnModuleInit {
     }
 
     const expiresAt = new Date(Date.now() + 8 * 60 * 60 * 1000).toISOString();
+    const isInternal = this.isInternalEmail(therapist.email);
 
     return {
       tenant: {
@@ -197,7 +204,7 @@ export class AuthService implements OnModuleInit {
         email: therapist.email,
         fullName: therapist.fullName,
         firstName: therapist.fullName.split(" ")[0] ?? therapist.fullName,
-        crp: "",
+        crp: isInternal ? "INTERNAL" : "",
         practiceName: therapist.practiceName,
         roleLabel: therapist.role === "owner" ? "Titular" : "Colaborador",
         timezone: "America/Sao_Paulo"
