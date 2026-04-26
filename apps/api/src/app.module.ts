@@ -10,6 +10,7 @@ import { PasswordService } from "@/modules/auth/password.service";
 import { TherapistRepository } from "@/modules/auth/therapist.repository";
 import { AccountController } from "@/modules/account/account.controller";
 import { AppointmentsController } from "@/modules/appointments/appointments.controller";
+import { AppointmentsRepository } from "@/modules/appointments/appointments.repository";
 import { AppointmentsService } from "@/modules/appointments/appointments.service";
 import { WorkspaceStateService } from "@/modules/account/workspace-state.service";
 import { AppShellController } from "@/modules/app-shell/app-shell.controller";
@@ -97,6 +98,7 @@ import { OnboardingService } from "@/modules/onboarding/onboarding.service";
       useFactory: (db: DrizzleClient, key: Buffer) => new MfaRepository(db, key)
     },
     MfaService,
+    AppointmentsRepository,
     AppointmentsService,
     DashboardService,
     ClinicalReviewService,
