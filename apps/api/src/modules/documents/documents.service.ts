@@ -1,4 +1,5 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+// apps/api/src/modules/documents/documents.service.ts
+import { Inject, Injectable, NotFoundException } from "@nestjs/common";
 import type {
   AuthSession,
   DocumentConsentStatus,
@@ -7,473 +8,273 @@ import type {
   DocumentCriticality,
   DocumentDetail,
   DocumentListItem,
-  DocumentOperationalImpact,
   DocumentSignatureStatus,
   DocumentsListFilters,
   DocumentsListResponse,
-  DocumentTimelineEvent,
   DocumentType
 } from "@terapia/contracts";
 import { documentCreateRequestSchema } from "@terapia/contracts";
 
-type DocumentRecord = {
-  id: string;
-  code: string;
-  patientId: string;
-  patientName: string;
-  patientContactLabel: string;
-  documentType: DocumentType;
-  documentTitle: string;
-  templateVersion: string;
-  generatedAtIso: string;
-  generatedAtLabel: string;
-  lastSentAtLabel: string;
-  lastEventAtIso: string;
-  lastEventAtLabel: string;
-  lastEventLabel: string;
-  sessionContextLabel: string;
-  deliveryChannelLabel: string;
-  fileReferenceLabel: string;
-  signatureStatus: DocumentSignatureStatus;
-  signatureStatusLabel: string;
-  consentStatus: DocumentConsentStatus;
-  consentStatusLabel: string;
-  criticality: DocumentCriticality;
-  criticalityLabel: string;
-  criticalReason: string;
-  signedByLabel: string;
-  legalRepresentativeLabel: string;
-  blockedFlowLabels: string[];
-  canResend: boolean;
-  canRevoke: boolean;
-  canGenerateNewVersion: boolean;
-  previewSections: DocumentDetail["previewSections"];
-  operationalImpacts: DocumentOperationalImpact[];
-  timeline: DocumentTimelineEvent[];
+import type { DocumentEventRow, DocumentWithPatient } from "./documents.repository";
+import { DocumentsRepository } from "./documents.repository";
+
+// ---------------------------------------------------------------------------
+// Internal enriched type
+// ---------------------------------------------------------------------------
+
+type DocRecord = DocumentWithPatient & {
+  events: DocumentEventRow[];
 };
 
-const seedDocuments: DocumentRecord[] = [
-  {
-    id: "doc_002",
-    code: "DOC-2026-002",
-    patientId: "patient_maria_souza",
-    patientName: "Maria Souza",
-    patientContactLabel: "maria.souza@email.com · (11) 98888-1101",
-    documentType: "telehealth",
-    documentTitle: "Termo de teleatendimento",
-    templateVersion: "v2.3",
-    generatedAtIso: "2026-03-19T08:10:00-03:00",
-    generatedAtLabel: "Gerado em 19 Mar 2026",
-    lastSentAtLabel: "Enviado por e-mail em 19 Mar · 08:12",
-    lastEventAtIso: "2026-03-19T08:18:00-03:00",
-    lastEventAtLabel: "19 Mar · 08:18",
-    lastEventLabel: "Assinado pela paciente",
-    sessionContextLabel: "Teleatendimento semanal · quartas 13:30",
-    deliveryChannelLabel: "E-mail",
-    fileReferenceLabel: "Arquivo PDF versionado no storage gerenciado",
-    signatureStatus: "signed",
-    signatureStatusLabel: "Assinado",
-    consentStatus: "valid",
-    consentStatusLabel: "Valido",
-    criticality: "normal",
-    criticalityLabel: "Sem bloqueio",
-    criticalReason: "Documento vigente e consentimento operacional valido.",
-    signedByLabel: "Maria Souza",
-    legalRepresentativeLabel: "Nao se aplica",
-    blockedFlowLabels: [],
-    canResend: false,
-    canRevoke: true,
-    canGenerateNewVersion: true,
-    previewSections: [
+// ---------------------------------------------------------------------------
+// Formatting helpers
+// ---------------------------------------------------------------------------
+
+const PT_MONTHS = [
+  "Jan", "Fev", "Mar", "Abr", "Mai", "Jun",
+  "Jul", "Ago", "Set", "Out", "Nov", "Dez"
+];
+
+function formatTimestamp(ts: Date): string {
+  const m = ts.getMonth();
+  return `${ts.getDate()} ${PT_MONTHS[m] ?? ""} ${ts.getFullYear()} · ${String(ts.getHours()).padStart(2, "0")}:${String(ts.getMinutes()).padStart(2, "0")}`;
+}
+
+function generatedAtLabel(ts: Date): string {
+  return `Gerado em ${ts.getDate()} ${PT_MONTHS[ts.getMonth()] ?? ""} ${ts.getFullYear()}`;
+}
+
+const documentTypeTitles: Record<string, string> = {
+  lgpd: "Termo LGPD do paciente",
+  telehealth: "Termo de teleatendimento",
+  transcript_ai: "Termo de transcript e IA documental",
+  therapy_contract: "Contrato terapêutico",
+  operational: "Documento operacional"
+};
+
+const eventTitles: Record<string, string> = {
+  generated: "Documento gerado",
+  sent: "Documento enviado",
+  signed: "Documento assinado",
+  revoked: "Consentimento revogado",
+  expired: "Documento expirou",
+  resent: "Documento reenviado"
+};
+
+function docTitle(documentType: string): string {
+  return documentTypeTitles[documentType] ?? "Documento";
+}
+
+function criticalityLabel(criticality: string): string {
+  return (
+    { normal: "Sem bloqueio", attention: "Acompanha operação", critical: "Bloqueia sessão online" }[
+      criticality
+    ] ?? criticality
+  );
+}
+
+function sigStatusLabel(s: string): string {
+  return (
+    {
+      not_sent: "Não enviado",
+      pending: "Pendente",
+      signed: "Assinado",
+      expired: "Expirado",
+      revoked: "Revogado"
+    }[s] ?? s
+  );
+}
+
+function conStatusLabel(s: string): string {
+  return (
+    { valid: "Válido", pending: "Pendente", revoked: "Revogado", not_applicable: "Não aplicável" }[s] ?? s
+  );
+}
+
+function blockedFlowLabels(documentType: string, signatureStatus: string): string[] {
+  if (signatureStatus === "signed") return [];
+  if (documentType === "telehealth") return ["Teleatendimento"];
+  if (documentType === "transcript_ai") return ["Transcript e IA documental"];
+  if (documentType === "therapy_contract") return ["Ativação completa do paciente"];
+  return [];
+}
+
+function buildPreviewSections(documentType: string): DocumentDetail["previewSections"] {
+  const sections: Record<string, { title: string; body: string }[]> = {
+    lgpd: [
+      {
+        title: "Base legal do tratamento",
+        body: "Registra as bases legais para tratamento de dados pessoais no contexto clínico, incluindo dados sensíveis de saúde."
+      },
+      {
+        title: "Direitos do titular",
+        body: "Informa os direitos de acesso, correção, exclusão e portabilidade, bem como o contato do DPO responsável."
+      }
+    ],
+    telehealth: [
       {
         title: "Escopo do consentimento",
-        body:
-          "Autoriza a realizacao de sessoes por videochamada na plataforma, incluindo regras de confidencialidade, estabilidade de conexao e reconexao."
+        body: "Autoriza a realização de sessões por videochamada na plataforma, incluindo regras de confidencialidade e reconexão."
       },
       {
         title: "Condições de uso",
-        body:
-          "Explica responsabilidade de ambiente privado, orientacoes de seguranca e como a sessao pode ser interrompida em caso de falha operacional."
+        body: "Explica responsabilidade de ambiente privado, orientações de segurança e como a sessão pode ser interrompida."
       }
     ],
-    operationalImpacts: [
-      {
-        id: "impact_doc_002_1",
-        title: "Teleatendimento liberado",
-        description: "A paciente pode entrar na sala sem bloqueio documental.",
-        tone: "success"
-      },
-      {
-        id: "impact_doc_002_2",
-        title: "Transcript opcional",
-        description: "Nenhum bloqueio documental atual para fluxo pos-sessao assistido.",
-        tone: "info"
-      }
-    ],
-    timeline: [
-      {
-        id: "timeline_doc_002_1",
-        title: "Documento assinado",
-        description: "Aceite confirmado pela paciente no fluxo de assinatura.",
-        occurredAtLabel: "19 Mar · 08:18",
-        actorLabel: "Paciente"
-      },
-      {
-        id: "timeline_doc_002_2",
-        title: "Documento reenviado",
-        description: "Link de assinatura reenviado por e-mail apos troca de versao.",
-        occurredAtLabel: "19 Mar · 08:12",
-        actorLabel: "Sistema"
-      },
-      {
-        id: "timeline_doc_002_3",
-        title: "Documento gerado",
-        description: "Versao padrao do template vinculada ao caso da paciente.",
-        occurredAtLabel: "19 Mar · 08:10",
-        actorLabel: "Terapeuta"
-      }
-    ]
-  },
-  {
-    id: "doc_101",
-    code: "DOC-2026-101",
-    patientId: "patient_lucas_santos",
-    patientName: "Lucas Santos",
-    patientContactLabel: "lucas.santos@email.com · (11) 97777-2012",
-    documentType: "transcript_ai",
-    documentTitle: "Termo de transcript e IA documental",
-    templateVersion: "v1.4",
-    generatedAtIso: "2026-03-30T09:05:00-03:00",
-    generatedAtLabel: "Gerado em 30 Mar 2026",
-    lastSentAtLabel: "Enviado por e-mail hoje · 09:06",
-    lastEventAtIso: "2026-03-30T10:10:00-03:00",
-    lastEventAtLabel: "Hoje · 10:10",
-    lastEventLabel: "Reenvio realizado",
-    sessionContextLabel: "Primeira avaliacao · presencial hoje 15:00",
-    deliveryChannelLabel: "E-mail",
-    fileReferenceLabel: "Arquivo PDF versionado no storage gerenciado",
-    signatureStatus: "pending",
-    signatureStatusLabel: "Pendente",
-    consentStatus: "pending",
-    consentStatusLabel: "Pendente",
-    criticality: "attention",
-    criticalityLabel: "Acompanha operacao",
-    criticalReason: "Fluxo assistido por transcript/IA fica desativado ate o aceite do paciente.",
-    signedByLabel: "Aguardando assinatura do paciente",
-    legalRepresentativeLabel: "Nao se aplica",
-    blockedFlowLabels: ["Transcript e IA documental"],
-    canResend: true,
-    canRevoke: true,
-    canGenerateNewVersion: true,
-    previewSections: [
+    transcript_ai: [
       {
         title: "Escopo do uso de IA",
-        body:
-          "Define que transcript e rascunho documental sao capacidades opcionais e condicionadas ao aceite do paciente, sem reter bruto apos processamento."
+        body: "Define que transcript e rascunho documental são capacidades opcionais e condicionadas ao aceite do paciente."
       },
       {
         title: "Descarte e processamento",
-        body:
-          "Indica processamento com direcao Brasil-first e descarte tecnico de transcript bruto e audio bruto apos a janela operacional."
+        body: "Indica processamento com direção Brasil-first e descarte técnico de transcript bruto após a janela operacional."
       }
     ],
-    operationalImpacts: [
+    therapy_contract: [
       {
-        id: "impact_doc_101_1",
-        title: "Pos-sessao manual",
-        description: "A sessao continua possivel, mas o fechamento clinico fica em fluxo manual puro.",
-        tone: "warning"
+        title: "Partes do contrato",
+        body: "Identifica paciente e responsável legal, incluindo regras de agendamento, faltas, pagamentos e contato."
       },
       {
-        id: "impact_doc_101_2",
-        title: "Sem bloqueio para atendimento",
-        description: "Nao bloqueia a sessao presencial de hoje.",
-        tone: "info"
+        title: "Representação legal",
+        body: "Explica que o aceite do responsável legal é o marco válido para liberar operação com menor de idade."
       }
     ],
-    timeline: [
+    operational: [
       {
-        id: "timeline_doc_101_1",
-        title: "Documento reenviado",
-        description: "Novo link de assinatura disparado para reduzir atraso no aceite.",
-        occurredAtLabel: "Hoje · 10:10",
-        actorLabel: "Terapeuta"
-      },
-      {
-        id: "timeline_doc_101_2",
-        title: "Documento enviado",
-        description: "Primeiro envio por e-mail logo apos a geracao.",
-        occurredAtLabel: "Hoje · 09:06",
-        actorLabel: "Sistema"
+        title: "Escopo da política",
+        body: "Registra janelas de remarcação, faltas, atrasos e organização operacional sem carregar conteúdo clínico narrativo."
       }
     ]
-  },
-  {
-    id: "doc_201",
-    code: "DOC-2026-201",
-    patientId: "patient_renata_costa",
-    patientName: "Renata Costa",
-    patientContactLabel: "renata.costa@email.com · (11) 96666-3313",
-    documentType: "telehealth",
-    documentTitle: "Termo de teleatendimento",
-    templateVersion: "v2.2",
-    generatedAtIso: "2026-02-02T11:20:00-03:00",
-    generatedAtLabel: "Gerado em 02 Fev 2026",
-    lastSentAtLabel: "Reenviado hoje · 11:48",
-    lastEventAtIso: "2026-03-30T11:48:00-03:00",
-    lastEventAtLabel: "Hoje · 11:48",
-    lastEventLabel: "Reenvio realizado",
-    sessionContextLabel: "Teleatendimento hoje · 17:10",
-    deliveryChannelLabel: "E-mail",
-    fileReferenceLabel: "Arquivo PDF versionado no storage gerenciado",
-    signatureStatus: "expired",
-    signatureStatusLabel: "Expirado",
-    consentStatus: "pending",
-    consentStatusLabel: "Pendente",
-    criticality: "critical",
-    criticalityLabel: "Bloqueia sessao online",
-    criticalReason: "Sem revalidacao do teleatendimento a sala deve permanecer bloqueada.",
-    signedByLabel: "Aceite anterior expirado",
-    legalRepresentativeLabel: "Nao se aplica",
-    blockedFlowLabels: ["Teleatendimento de hoje"],
-    canResend: true,
-    canRevoke: false,
-    canGenerateNewVersion: true,
-    previewSections: [
+  };
+  return sections[documentType] ?? [{ title: "Documento gerado", body: "Versão criada a partir do catálogo padrão da plataforma." }];
+}
+
+function buildOperationalImpacts(doc: DocumentWithPatient): DocumentDetail["operationalImpacts"] {
+  if (doc.signatureStatus === "signed") {
+    return [
       {
-        title: "Validade do aceite",
-        body:
-          "Esclarece que o aceite tem vigencia controlada e pode exigir revalidacao quando houver mudanca de politica, template ou janela regulatoria."
-      },
-      {
-        title: "Consequencia operacional",
-        body:
-          "Enquanto expirado, o sistema deve tratar a sessao online como bloqueada para entrada segura."
+        id: `impact_${doc.id}_signed`,
+        title: `${docTitle(doc.documentType)} ativo`,
+        description: "Documento vigente e consentimento validado.",
+        tone: "success"
       }
-    ],
-    operationalImpacts: [
+    ];
+  }
+
+  if (doc.criticality === "critical") {
+    return [
       {
-        id: "impact_doc_201_1",
+        id: `impact_${doc.id}_1`,
         title: "Entrada na sala bloqueada",
-        description: "A paciente nao deve entrar na call ate novo aceite.",
+        description: "O paciente não deve entrar na call até novo aceite.",
         tone: "critical"
       },
       {
-        id: "impact_doc_201_2",
-        title: "Dashboard com alerta",
-        description: "A pendencia aparece na dashboard, agenda e detalhe da sessao.",
+        id: `impact_${doc.id}_2`,
+        title: "Reenvio disponível",
+        description: "Use o botão de reenvio para disparar novo link ao paciente.",
         tone: "warning"
       }
-    ],
-    timeline: [
-      {
-        id: "timeline_doc_201_1",
-        title: "Documento reenviado",
-        description: "Novo envio disparado para tentar revalidacao antes da sessao.",
-        occurredAtLabel: "Hoje · 11:48",
-        actorLabel: "Terapeuta"
-      },
-      {
-        id: "timeline_doc_201_2",
-        title: "Documento expirou",
-        description: "A vigencia do aceite anterior encerrou e abriu bloqueio operacional.",
-        occurredAtLabel: "Hoje · 08:00",
-        actorLabel: "Sistema"
-      }
-    ]
-  },
-  {
-    id: "doc_301",
-    code: "DOC-2026-301",
-    patientId: "patient_julia_prado",
-    patientName: "Julia Prado",
-    patientContactLabel: "julia.prado@email.com · (11) 95555-4414",
-    documentType: "therapy_contract",
-    documentTitle: "Contrato terapeutico",
-    templateVersion: "v1.1",
-    generatedAtIso: "2026-03-29T14:05:00-03:00",
-    generatedAtLabel: "Gerado em 29 Mar 2026",
-    lastSentAtLabel: "Enviado ontem · 14:08",
-    lastEventAtIso: "2026-03-29T14:08:00-03:00",
-    lastEventAtLabel: "Ontem · 14:08",
-    lastEventLabel: "Aguardando responsavel legal",
-    sessionContextLabel: "Convite inicial de menor de idade",
-    deliveryChannelLabel: "E-mail",
-    fileReferenceLabel: "Arquivo PDF versionado no storage gerenciado",
-    signatureStatus: "pending",
-    signatureStatusLabel: "Pendente",
-    consentStatus: "pending",
-    consentStatusLabel: "Pendente",
-    criticality: "attention",
-    criticalityLabel: "Precisa concluir antes da ativacao",
-    criticalReason: "Como menor de idade, a assinatura precisa vir do responsavel legal.",
-    signedByLabel: "Aguardando mae responsavel",
-    legalRepresentativeLabel: "Mae responsavel cadastrada",
-    blockedFlowLabels: ["Ativacao completa do paciente"],
-    canResend: true,
-    canRevoke: true,
-    canGenerateNewVersion: true,
-    previewSections: [
-      {
-        title: "Partes do contrato",
-        body:
-          "Identifica paciente e responsavel legal, incluindo regras de agendamento, faltas, pagamentos e contato."
-      },
-      {
-        title: "Representacao legal",
-        body:
-          "Explica que o aceite do responsavel legal e o marco valido para liberar operacao com menor de idade."
-      }
-    ],
-    operationalImpacts: [
-      {
-        id: "impact_doc_301_1",
-        title: "Cadastro parcial",
-        description: "Paciente segue como convidada ate concluir o aceite com o responsavel.",
-        tone: "warning"
-      }
-    ],
-    timeline: [
-      {
-        id: "timeline_doc_301_1",
-        title: "Documento enviado",
-        description: "Convite documental disparado para a responsavel legal.",
-        occurredAtLabel: "Ontem · 14:08",
-        actorLabel: "Sistema"
-      }
-    ]
-  },
-  {
-    id: "doc_401",
-    code: "DOC-2026-401",
-    patientId: "patient_caio_oliveira",
-    patientName: "Caio Oliveira",
-    patientContactLabel: "caio.oliveira@email.com · (11) 94444-5515",
-    documentType: "operational",
-    documentTitle: "Politica de cancelamento",
-    templateVersion: "v1.0",
-    generatedAtIso: "2026-01-12T09:30:00-03:00",
-    generatedAtLabel: "Gerado em 12 Jan 2026",
-    lastSentAtLabel: "Assinado em 12 Jan · 10:02",
-    lastEventAtIso: "2026-03-24T16:15:00-03:00",
-    lastEventAtLabel: "24 Mar · 16:15",
-    lastEventLabel: "Consentimento revogado",
-    sessionContextLabel: "Politica operacional do consultorio",
-    deliveryChannelLabel: "E-mail",
-    fileReferenceLabel: "Arquivo PDF versionado no storage gerenciado",
-    signatureStatus: "revoked",
-    signatureStatusLabel: "Revogado",
-    consentStatus: "revoked",
-    consentStatusLabel: "Revogado",
-    criticality: "attention",
-    criticalityLabel: "Historico com consequencia operacional",
-    criticalReason: "O historico precisa ser preservado e uma nova versao deve ser gerada se o fluxo for retomado.",
-    signedByLabel: "Caio Oliveira",
-    legalRepresentativeLabel: "Nao se aplica",
-    blockedFlowLabels: ["Politica de faltas e remarcacoes"],
-    canResend: false,
-    canRevoke: false,
-    canGenerateNewVersion: true,
-    previewSections: [
-      {
-        title: "Escopo da politica",
-        body:
-          "Registra janelas de remarcacao, faltas, atrasos e organizacao operacional sem carregar conteudo clinico narrativo."
-      },
-      {
-        title: "Revogacao",
-        body:
-          "A revogacao nao apaga o historico anterior e exige nova apresentacao documental se o fluxo voltar a ser utilizado."
-      }
-    ],
-    operationalImpacts: [
-      {
-        id: "impact_doc_401_1",
-        title: "Historico preservado",
-        description: "Documento segue rastreavel mesmo apos a revogacao.",
-        tone: "info"
-      },
-      {
-        id: "impact_doc_401_2",
-        title: "Nova versao necessaria",
-        description: "Para retomar o paciente ativo, gere novo documento antes do retorno.",
-        tone: "warning"
-      }
-    ],
-    timeline: [
-      {
-        id: "timeline_doc_401_1",
-        title: "Consentimento revogado",
-        description: "Paciente solicitou descontinuidade do aceite operacional anterior.",
-        occurredAtLabel: "24 Mar · 16:15",
-        actorLabel: "Terapeuta"
-      },
-      {
-        id: "timeline_doc_401_2",
-        title: "Documento assinado",
-        description: "Aceite registrado no onboarding documental do paciente.",
-        occurredAtLabel: "12 Jan · 10:02",
-        actorLabel: "Paciente"
-      }
-    ]
+    ];
   }
-];
+
+  if (doc.criticality === "attention") {
+    return [
+      {
+        id: `impact_${doc.id}_1`,
+        title: "Funcionalidade em espera",
+        description: "O fluxo associado fica desativado até o aceite do paciente.",
+        tone: "warning"
+      }
+    ];
+  }
+
+  return [
+    {
+      id: `impact_${doc.id}_1`,
+      title: "Documento operacional registrado",
+      description: "Nenhum bloqueio clínico direto.",
+      tone: "info"
+    }
+  ];
+}
+
+// ---------------------------------------------------------------------------
+// Template catalog (static — not stored in DB)
+// ---------------------------------------------------------------------------
 
 const templateCatalog: DocumentsListResponse["templateOptions"] = [
   {
     documentType: "lgpd",
     label: "Termo LGPD do paciente",
-    description: "Base minima de tratamento de dados pessoais e operacao do consultorio.",
+    description: "Base mínima de tratamento de dados pessoais e operação do consultório.",
     defaultVersion: "v1.2",
     versionOptions: ["v1.2", "v1.1"]
   },
   {
     documentType: "telehealth",
     label: "Termo de teleatendimento",
-    description: "Regras de atendimento online, ambiente privado e estabilidade da sessao.",
+    description: "Regras de atendimento online, ambiente privado e estabilidade da sessão.",
     defaultVersion: "v2.3",
     versionOptions: ["v2.3", "v2.2"]
   },
   {
     documentType: "transcript_ai",
     label: "Termo de transcript e IA documental",
-    description: "Habilita fluxo assistido opcional de transcript e rascunho pos-sessao.",
+    description: "Habilita fluxo assistido opcional de transcript e rascunho pós-sessão.",
     defaultVersion: "v1.4",
     versionOptions: ["v1.4", "v1.3"]
   },
   {
     documentType: "therapy_contract",
-    label: "Contrato terapeutico",
-    description: "Acordos operacionais do acompanhamento e regras de relacao terapêutica.",
+    label: "Contrato terapêutico",
+    description: "Acordos operacionais do acompanhamento e regras de relação terapêutica.",
     defaultVersion: "v1.1",
     versionOptions: ["v1.1"]
   },
   {
     documentType: "operational",
     label: "Documento operacional",
-    description: "Comprovantes e politicas operacionais vinculadas ao consultorio.",
+    description: "Comprovantes e políticas operacionais vinculadas ao consultório.",
     defaultVersion: "v1.0",
     versionOptions: ["v1.0"]
   }
 ];
 
+// ---------------------------------------------------------------------------
+// Service
+// ---------------------------------------------------------------------------
+
 @Injectable()
 export class DocumentsService {
-  private readonly documentsByEmail = new Map<string, DocumentRecord[]>();
+  constructor(
+    @Inject(DocumentsRepository) private readonly repo: DocumentsRepository
+  ) {}
 
-  listDocuments(
+  async listDocuments(
     session: AuthSession,
     query: Partial<Record<string, string>>
-  ): DocumentsListResponse {
-    const records = this.getRecordsForSession(session);
+  ): Promise<DocumentsListResponse> {
+    const docs = await this.repo.listWithPatient(session.tenant.id);
+    const allEvents = await this.repo.listEventsForDocuments(docs.map((d) => d.id));
+
+    const eventsByDoc = new Map<string, DocumentEventRow[]>();
+    for (const ev of allEvents) {
+      const list = eventsByDoc.get(ev.documentId) ?? [];
+      list.push(ev);
+      eventsByDoc.set(ev.documentId, list);
+    }
+
+    const records: DocRecord[] = docs.map((d) => ({ ...d, events: eventsByDoc.get(d.id) ?? [] }));
+
     const filters: DocumentsListFilters = {
       search: query.search?.trim() ?? "",
       patientId: query.patientId?.trim() ?? "",
-      documentType: this.isDocumentTypeFilter(query.documentType) ? query.documentType : "all",
-      signatureStatus: this.isSignatureStatusFilter(query.signatureStatus)
-        ? query.signatureStatus
-        : "all",
-      consentStatus: this.isConsentStatusFilter(query.consentStatus) ? query.consentStatus : "all",
+      documentType: this.isDocTypeFilter(query.documentType) ? query.documentType : "all",
+      signatureStatus: this.isSigStatusFilter(query.signatureStatus) ? query.signatureStatus : "all",
+      consentStatus: this.isConStatusFilter(query.consentStatus) ? query.consentStatus : "all",
       criticality: this.isCriticalityFilter(query.criticality) ? query.criticality : "all",
       onlyCritical: query.onlyCritical === "true",
       thisWeekOnly: query.thisWeekOnly === "true",
@@ -481,268 +282,193 @@ export class DocumentsService {
     };
 
     const filtered = records
-      .filter((record) => this.matchesFilters(record, filters))
-      .sort((left, right) => this.priorityWeight(right) - this.priorityWeight(left));
+      .filter((r) => this.matchesFilters(r, filters))
+      .sort((a, b) => this.priorityWeight(b) - this.priorityWeight(a));
 
     const page = Math.max(Number(query.page ?? "1") || 1, 1);
     const pageSize = [25, 50, 100].includes(Number(query.pageSize)) ? Number(query.pageSize) : 25;
     const start = (page - 1) * pageSize;
-    const pageItems = filtered.slice(start, start + pageSize).map((record) => this.toListItem(record));
+
+    const patientOptions = [
+      ...new Map(records.map((r) => [r.patientId, r.patientName])).entries()
+    ].map(([value, label]) => ({ value, label }));
 
     return {
       summary: {
-        criticalCount: records.filter((record) => record.criticality === "critical").length,
-        pendingSignatureCount: records.filter((record) => record.signatureStatus === "pending").length,
-        revokedCount: records.filter((record) => record.signatureStatus === "revoked" || record.consentStatus === "revoked").length,
-        affectedPatientsLabel: `${new Set(records.filter((record) => record.criticality !== "normal").map((record) => record.patientId)).size} pacientes com impacto`
+        criticalCount: records.filter((r) => r.criticality === "critical").length,
+        pendingSignatureCount: records.filter((r) => r.signatureStatus === "pending").length,
+        revokedCount: records.filter(
+          (r) => r.signatureStatus === "revoked" || r.consentStatus === "revoked"
+        ).length,
+        affectedPatientsLabel: `${new Set(records.filter((r) => r.criticality !== "normal").map((r) => r.patientId)).size} pacientes com impacto`
       },
-      items: pageItems,
+      items: filtered.slice(start, start + pageSize).map((r) => this.toListItem(r)),
       total: filtered.length,
       page,
       pageSize,
       filters,
       availablePageSizes: [25, 50, 100],
-      patientOptions: this.getPatientOptions(records),
+      patientOptions,
       templateOptions: templateCatalog
     };
   }
 
-  getDocumentDetail(session: AuthSession, documentId: string): DocumentDetail {
-    const record = this.getRecord(session, documentId);
+  async getDocumentDetail(session: AuthSession, documentId: string): Promise<DocumentDetail> {
+    const doc = await this.repo.findByIdWithPatient(session.tenant.id, documentId);
+    if (!doc) throw new NotFoundException("Documento não encontrado.");
 
-    return this.toDetail(record);
+    const events = await this.repo.listEvents(documentId);
+    return this.toDetail({ ...doc, events });
   }
 
-  createDocument(session: AuthSession, input: DocumentCreateRequest): DocumentCreateResponse {
+  async createDocument(session: AuthSession, input: DocumentCreateRequest): Promise<DocumentCreateResponse> {
     const payload = documentCreateRequestSchema.parse(input);
-    const records = this.getRecordsForSession(session);
-    const timestamp = Date.now();
-    const template = templateCatalog.find((item) => item.documentType === payload.documentType);
-    const patient = this.findPatientContext(payload.patientId);
-    const title = template?.label ?? "Documento";
-    const documentId = `doc_${timestamp}`;
-    const generatedLabel = "Gerado agora";
-    const eventLabel = payload.deliveryChannel === "email" ? "Enviado por e-mail" : "Documento gerado";
-    const criticality = payload.documentType === "telehealth" ? "critical" : payload.documentType === "transcript_ai" ? "attention" : "normal";
-    const consentStatus = payload.documentType === "operational" ? "not_applicable" : "pending";
-    const blockedFlowLabels =
+    const count = await this.repo.countForTenant(session.tenant.id);
+    const code = `DOC-${new Date().getFullYear()}-${String(count + 1).padStart(3, "0")}`;
+
+    const criticality =
       payload.documentType === "telehealth"
-        ? ["Teleatendimento ate aceite"]
+        ? "critical"
         : payload.documentType === "transcript_ai"
-          ? ["Transcript e IA documental"]
-          : [];
+          ? "attention"
+          : "normal";
 
-    const record: DocumentRecord = {
-      id: documentId,
-      code: `DOC-${new Date().getFullYear()}-${String(records.length + 1).padStart(3, "0")}`,
-      patientId: patient.patientId,
-      patientName: patient.patientName,
-      patientContactLabel: patient.patientContactLabel,
+    const consentStatus =
+      payload.documentType === "operational" ? "not_applicable" : "pending";
+
+    const criticalReason =
+      criticality === "critical"
+        ? "Documento novo de teleatendimento aguarda aceite antes de liberar a sessão."
+        : criticality === "attention"
+          ? "A funcionalidade opcional depende do aceite do paciente."
+          : "Documento operacional registrado sem bloqueio clínico direto.";
+
+    const doc = await this.repo.create({
+      tenantId: session.tenant.id,
+      patientId: payload.patientId,
+      appointmentId: "",
+      code,
       documentType: payload.documentType,
-      documentTitle: title,
       templateVersion: payload.templateVersion,
-      generatedAtIso: new Date(timestamp).toISOString(),
-      generatedAtLabel: generatedLabel,
-      lastSentAtLabel: "Enviado agora",
-      lastEventAtIso: new Date(timestamp).toISOString(),
-      lastEventAtLabel: "Agora",
-      lastEventLabel: eventLabel,
-      sessionContextLabel: patient.sessionContextLabel,
-      deliveryChannelLabel: "E-mail",
-      fileReferenceLabel: "Arquivo PDF versionado no storage gerenciado",
+      deliveryChannel: payload.deliveryChannel ?? "email",
       signatureStatus: "pending",
-      signatureStatusLabel: "Pendente",
       consentStatus,
-      consentStatusLabel: consentStatus === "not_applicable" ? "Nao aplicavel" : "Pendente",
       criticality,
-      criticalityLabel:
-        criticality === "critical"
-          ? "Pode bloquear operacao"
-          : criticality === "attention"
-            ? "Afeta capability"
-            : "Sem bloqueio",
-      criticalReason:
-        criticality === "critical"
-          ? "Documento novo de teleatendimento aguarda aceite antes de liberar a sessao."
-          : criticality === "attention"
-            ? "A capability opcional depende do aceite do paciente."
-            : "Documento operacional registrado sem bloqueio clinico direto.",
-      signedByLabel: "Aguardando assinatura do paciente",
-      legalRepresentativeLabel: patient.legalRepresentativeLabel,
-      blockedFlowLabels,
-      canResend: true,
-      canRevoke: true,
-      canGenerateNewVersion: true,
-      previewSections: [
-        {
-          title: "Documento gerado",
-          body:
-            "Versao criada a partir do catalogo padrao da plataforma, pronta para evoluir para provider real de assinatura."
-        },
-        {
-          title: "Canal de envio",
-          body: "Neste MVP visual o envio segue por e-mail com trilha operacional rastreavel."
-        }
-      ],
-      operationalImpacts: [
-        {
-          id: `impact_${documentId}_1`,
-          title: "Fluxo em acompanhamento",
-          description: "O documento aparece na lista operacional imediatamente apos a geracao.",
-          tone: criticality === "normal" ? "info" : "warning"
-        }
-      ],
-      timeline: [
-        {
-          id: `timeline_${documentId}_1`,
-          title: "Documento gerado",
-          description: "Novo documento criado manualmente na area documental.",
-          occurredAtLabel: "Agora",
-          actorLabel: "Terapeuta"
-        },
-        {
-          id: `timeline_${documentId}_2`,
-          title: "Documento enviado",
-          description: "Link de assinatura disparado para o paciente pelo canal selecionado.",
-          occurredAtLabel: "Agora",
-          actorLabel: "Sistema"
-        }
-      ]
-    };
+      criticalReason
+    });
 
-    records.unshift(record);
+    await this.repo.addEvent({
+      documentId: doc.id,
+      eventType: "generated",
+      actorType: "therapist",
+      actorId: session.therapist.id,
+      description: "Novo documento criado manualmente na área documental."
+    });
 
-    return {
+    if (payload.deliveryChannel === "email") {
+      await this.repo.addEvent({
+        documentId: doc.id,
+        eventType: "sent",
+        actorType: "system",
+        actorId: "system",
+        description: "Link de assinatura disparado para o paciente por e-mail."
+      });
+    }
+
+    return { documentId: doc.id, redirectTo: `/app/documents/${doc.id}` };
+  }
+
+  async resendDocument(session: AuthSession, documentId: string): Promise<DocumentDetail> {
+    const doc = await this.repo.findByIdWithPatient(session.tenant.id, documentId);
+    if (!doc) throw new NotFoundException("Documento não encontrado.");
+
+    await this.repo.update(documentId, { lastSentAt: new Date(), lastEventAt: new Date() });
+
+    await this.repo.addEvent({
       documentId,
-      redirectTo: `/app/documents/${documentId}`
-    };
-  }
-
-  resendDocument(session: AuthSession, documentId: string): DocumentDetail {
-    const record = this.getRecord(session, documentId);
-
-    record.lastEventAtIso = new Date().toISOString();
-    record.lastEventAtLabel = "Agora";
-    record.lastSentAtLabel = "Reenviado agora";
-    record.lastEventLabel = "Documento reenviado";
-    record.canResend = record.signatureStatus === "pending" || record.signatureStatus === "expired";
-    record.timeline.unshift({
-      id: `timeline_${documentId}_${record.timeline.length + 1}`,
-      title: "Documento reenviado",
-      description: "Novo link enviado para reduzir atraso na conclusao documental.",
-      occurredAtLabel: "Agora",
-      actorLabel: "Terapeuta"
+      eventType: "resent",
+      actorType: "therapist",
+      actorId: session.therapist.id,
+      description: "Novo link enviado para reduzir atraso na conclusão documental."
     });
 
-    return this.toDetail(record);
+    const updated = await this.repo.findByIdWithPatient(session.tenant.id, documentId);
+    const events = await this.repo.listEvents(documentId);
+    return this.toDetail({ ...updated!, events });
   }
 
-  revokeDocument(session: AuthSession, documentId: string): DocumentDetail {
-    const record = this.getRecord(session, documentId);
+  async revokeDocument(session: AuthSession, documentId: string): Promise<DocumentDetail> {
+    const doc = await this.repo.findByIdWithPatient(session.tenant.id, documentId);
+    if (!doc) throw new NotFoundException("Documento não encontrado.");
 
-    record.signatureStatus = "revoked";
-    record.signatureStatusLabel = "Revogado";
-    if (record.consentStatus !== "not_applicable") {
-      record.consentStatus = "revoked";
-      record.consentStatusLabel = "Revogado";
-    }
-    record.criticality = "attention";
-    record.criticalityLabel = "Historico preservado";
-    record.criticalReason =
-      "A revogacao foi registrada e o historico permanece auditavel. Gere nova versao para retomar o fluxo.";
-    record.lastEventAtIso = new Date().toISOString();
-    record.lastEventAtLabel = "Agora";
-    record.lastEventLabel = "Consentimento revogado";
-    record.canResend = false;
-    record.canRevoke = false;
-    record.timeline.unshift({
-      id: `timeline_${documentId}_${record.timeline.length + 1}`,
-      title: "Consentimento revogado",
-      description: "Revogacao registrada pelo terapeuta para refletir o estado operacional atual.",
-      occurredAtLabel: "Agora",
-      actorLabel: "Terapeuta"
+    await this.repo.update(documentId, {
+      signatureStatus: "revoked",
+      consentStatus: doc.consentStatus !== "not_applicable" ? "revoked" : doc.consentStatus,
+      criticality: "attention",
+      criticalReason: "A revogação foi registrada e o histórico permanece auditável. Gere nova versão para retomar o fluxo.",
+      revokedAt: new Date(),
+      lastEventAt: new Date()
     });
 
-    return this.toDetail(record);
-  }
-
-  signDocument(session: AuthSession, documentId: string): DocumentDetail {
-    const record = this.getRecord(session, documentId);
-
-    record.signatureStatus = "signed";
-    record.signatureStatusLabel = "Assinado";
-    if (record.consentStatus !== "not_applicable") {
-      record.consentStatus = "valid";
-      record.consentStatusLabel = "Valido";
-    }
-    record.criticality = "normal";
-    record.criticalityLabel = "Sem bloqueio";
-    record.criticalReason = "Documento vigente e consentimento validado para o contexto atual.";
-    record.lastEventAtIso = new Date().toISOString();
-    record.lastEventAtLabel = "Agora";
-    record.lastEventLabel = "Documento assinado";
-    record.signedByLabel =
-      record.legalRepresentativeLabel === "Nao se aplica"
-        ? record.patientName
-        : record.legalRepresentativeLabel;
-    record.blockedFlowLabels = [];
-    record.canResend = false;
-    record.timeline.unshift({
-      id: `timeline_${documentId}_${record.timeline.length + 1}`,
-      title: "Documento assinado",
-      description: "Aceite simulado para apoiar a avaliacao visual do fluxo.",
-      occurredAtLabel: "Agora",
-      actorLabel: "Paciente"
+    await this.repo.addEvent({
+      documentId,
+      eventType: "revoked",
+      actorType: "therapist",
+      actorId: session.therapist.id,
+      description: "Revogação registrada pelo terapeuta para refletir o estado operacional atual."
     });
 
-    return this.toDetail(record);
+    const updated = await this.repo.findByIdWithPatient(session.tenant.id, documentId);
+    const events = await this.repo.listEvents(documentId);
+    return this.toDetail({ ...updated!, events });
   }
 
-  private getRecordsForSession(session: AuthSession) {
-    const key = session.therapist.email;
+  async signDocument(session: AuthSession, documentId: string): Promise<DocumentDetail> {
+    const doc = await this.repo.findByIdWithPatient(session.tenant.id, documentId);
+    if (!doc) throw new NotFoundException("Documento não encontrado.");
 
-    if (!this.documentsByEmail.has(key)) {
-      this.documentsByEmail.set(
-        key,
-        seedDocuments.map((record) => ({
-          ...record,
-          blockedFlowLabels: [...record.blockedFlowLabels],
-          previewSections: [...record.previewSections],
-          operationalImpacts: [...record.operationalImpacts],
-          timeline: [...record.timeline]
-        }))
-      );
-    }
+    await this.repo.update(documentId, {
+      signatureStatus: "signed",
+      consentStatus: doc.consentStatus !== "not_applicable" ? "valid" : doc.consentStatus,
+      criticality: "normal",
+      criticalReason: "Documento vigente e consentimento validado para o contexto atual.",
+      signedByLabel: doc.patientName,
+      lastEventAt: new Date()
+    });
 
-    return this.documentsByEmail.get(key) ?? [];
+    await this.repo.addEvent({
+      documentId,
+      eventType: "signed",
+      actorType: "patient",
+      actorId: doc.patientId,
+      description: "Aceite confirmado pela paciente no fluxo de assinatura."
+    });
+
+    const updated = await this.repo.findByIdWithPatient(session.tenant.id, documentId);
+    const events = await this.repo.listEvents(documentId);
+    return this.toDetail({ ...updated!, events });
   }
 
-  private getRecord(session: AuthSession, documentId: string) {
-    const record = this.getRecordsForSession(session).find((item) => item.id === documentId);
+  // ---------------------------------------------------------------------------
+  // Private helpers
+  // ---------------------------------------------------------------------------
 
-    if (!record) {
-      throw new NotFoundException("Documento nao encontrado.");
-    }
-
-    return record;
-  }
-
-  private matchesFilters(record: DocumentRecord, filters: DocumentsListFilters) {
+  private matchesFilters(record: DocRecord, filters: DocumentsListFilters): boolean {
     const query = filters.search.toLowerCase();
     const matchesQuery =
       query.length === 0 ||
-      `${record.patientName} ${record.code} ${record.documentTitle}`.toLowerCase().includes(query);
+      `${record.patientName} ${record.code} ${docTitle(record.documentType)}`.toLowerCase().includes(query);
     const matchesPatient = filters.patientId.length === 0 || record.patientId === filters.patientId;
     const matchesType = filters.documentType === "all" || record.documentType === filters.documentType;
-    const matchesSignature =
-      filters.signatureStatus === "all" || record.signatureStatus === filters.signatureStatus;
-    const matchesConsent =
-      filters.consentStatus === "all" || record.consentStatus === filters.consentStatus;
-    const matchesCriticality =
-      filters.criticality === "all" || record.criticality === filters.criticality;
+    const matchesSig = filters.signatureStatus === "all" || record.signatureStatus === filters.signatureStatus;
+    const matchesConsent = filters.consentStatus === "all" || record.consentStatus === filters.consentStatus;
+    const matchesCriticality = filters.criticality === "all" || record.criticality === filters.criticality;
     const matchesOnlyCritical = !filters.onlyCritical || record.criticality === "critical";
+
+    const weekAgo = new Date();
+    weekAgo.setDate(weekAgo.getDate() - 7);
     const matchesThisWeek =
-      !filters.thisWeekOnly || Date.parse(record.lastEventAtIso) >= Date.parse("2026-03-24T00:00:00-03:00");
+      !filters.thisWeekOnly || (record.lastEventAt ? record.lastEventAt >= weekAgo : false);
     const matchesRevoked =
       !filters.onlyRevoked ||
       record.signatureStatus === "revoked" ||
@@ -752,7 +478,7 @@ export class DocumentsService {
       matchesQuery &&
       matchesPatient &&
       matchesType &&
-      matchesSignature &&
+      matchesSig &&
       matchesConsent &&
       matchesCriticality &&
       matchesOnlyCritical &&
@@ -761,146 +487,112 @@ export class DocumentsService {
     );
   }
 
-  private toListItem(record: DocumentRecord): DocumentListItem {
+  private toListItem(record: DocRecord): DocumentListItem {
+    const latestEvent = record.events[0];
+
     return {
       id: record.id,
       code: record.code,
       patientId: record.patientId,
       patientName: record.patientName,
       patientHref: `/app/patients/${record.patientId}`,
-      documentType: record.documentType,
-      documentTitle: record.documentTitle,
+      documentType: record.documentType as DocumentType,
+      documentTitle: docTitle(record.documentType),
       templateVersion: record.templateVersion,
-      generatedAtLabel: record.generatedAtLabel,
-      signatureStatus: record.signatureStatus,
-      signatureStatusLabel: record.signatureStatusLabel,
-      consentStatus: record.consentStatus,
-      consentStatusLabel: record.consentStatusLabel,
-      lastEventAtLabel: record.lastEventAtLabel,
-      lastEventLabel: record.lastEventLabel,
-      criticality: record.criticality,
-      criticalityLabel: record.criticalityLabel,
+      generatedAtLabel: generatedAtLabel(record.generatedAt),
+      signatureStatus: record.signatureStatus as DocumentSignatureStatus,
+      signatureStatusLabel: sigStatusLabel(record.signatureStatus),
+      consentStatus: record.consentStatus as DocumentConsentStatus,
+      consentStatusLabel: conStatusLabel(record.consentStatus),
+      lastEventAtLabel: latestEvent ? formatTimestamp(latestEvent.occurredAt) : "",
+      lastEventLabel: latestEvent ? (eventTitles[latestEvent.eventType] ?? latestEvent.eventType) : "",
+      criticality: record.criticality as DocumentCriticality,
+      criticalityLabel: criticalityLabel(record.criticality),
       criticalReason: record.criticalReason,
       signedByLabel: record.signedByLabel,
-      blockedFlowLabels: record.blockedFlowLabels,
-      canResend: record.canResend,
-      canGenerateNewVersion: record.canGenerateNewVersion,
+      blockedFlowLabels: blockedFlowLabels(record.documentType, record.signatureStatus),
+      canResend: record.signatureStatus === "pending" || record.signatureStatus === "expired",
+      canGenerateNewVersion: true,
       openHref: `/app/documents/${record.id}`
     };
   }
 
-  private toDetail(record: DocumentRecord): DocumentDetail {
+  private toDetail(record: DocRecord): DocumentDetail {
+    const latestEvent = record.events[0];
+    const canResend = record.signatureStatus === "pending" || record.signatureStatus === "expired";
+    const canRevoke = record.signatureStatus !== "revoked" && record.signatureStatus !== "signed";
+
     return {
       id: record.id,
       code: record.code,
       patientId: record.patientId,
       patientName: record.patientName,
       patientHref: `/app/patients/${record.patientId}`,
-      patientContactLabel: record.patientContactLabel,
-      documentType: record.documentType,
-      documentTitle: record.documentTitle,
+      patientContactLabel: `${record.patientEmail} · ${record.patientPhone}`,
+      documentType: record.documentType as DocumentType,
+      documentTitle: docTitle(record.documentType),
       templateVersion: record.templateVersion,
-      generatedAtLabel: record.generatedAtLabel,
-      lastSentAtLabel: record.lastSentAtLabel,
-      lastEventAtLabel: record.lastEventAtLabel,
-      lastEventLabel: record.lastEventLabel,
-      sessionContextLabel: record.sessionContextLabel,
-      deliveryChannelLabel: record.deliveryChannelLabel,
-      fileReferenceLabel: record.fileReferenceLabel,
-      signatureStatus: record.signatureStatus,
-      signatureStatusLabel: record.signatureStatusLabel,
-      consentStatus: record.consentStatus,
-      consentStatusLabel: record.consentStatusLabel,
-      criticality: record.criticality,
-      criticalityLabel: record.criticalityLabel,
+      generatedAtLabel: generatedAtLabel(record.generatedAt),
+      lastSentAtLabel: record.lastSentAt
+        ? `Enviado em ${formatTimestamp(record.lastSentAt)}`
+        : "Não enviado",
+      lastEventAtLabel: latestEvent ? formatTimestamp(latestEvent.occurredAt) : "",
+      lastEventLabel: latestEvent ? (eventTitles[latestEvent.eventType] ?? latestEvent.eventType) : "",
+      sessionContextLabel: "Atendimento registrado no sistema",
+      deliveryChannelLabel: "E-mail",
+      fileReferenceLabel: "Arquivo PDF versionado no storage gerenciado",
+      signatureStatus: record.signatureStatus as DocumentSignatureStatus,
+      signatureStatusLabel: sigStatusLabel(record.signatureStatus),
+      consentStatus: record.consentStatus as DocumentConsentStatus,
+      consentStatusLabel: conStatusLabel(record.consentStatus),
+      criticality: record.criticality as DocumentCriticality,
+      criticalityLabel: criticalityLabel(record.criticality),
       criticalReason: record.criticalReason,
-      signedByLabel: record.signedByLabel,
-      legalRepresentativeLabel: record.legalRepresentativeLabel,
-      blockedFlowLabels: record.blockedFlowLabels,
-      previewSections: record.previewSections,
-      operationalImpacts: record.operationalImpacts,
-      timeline: record.timeline,
+      signedByLabel: record.signedByLabel || "Aguardando assinatura do paciente",
+      legalRepresentativeLabel: "Não se aplica",
+      blockedFlowLabels: blockedFlowLabels(record.documentType, record.signatureStatus),
+      previewSections: buildPreviewSections(record.documentType),
+      operationalImpacts: buildOperationalImpacts(record),
+      timeline: record.events.map((ev) => ({
+        id: ev.id,
+        title: eventTitles[ev.eventType] ?? ev.eventType,
+        description: ev.description,
+        occurredAtLabel: formatTimestamp(ev.occurredAt),
+        actorLabel: ev.actorType === "patient" ? "Paciente" : ev.actorType === "system" ? "Sistema" : "Terapeuta"
+      })),
       primaryActions: {
-        canResend: record.canResend,
-        canRevoke: record.canRevoke,
-        canGenerateNewVersion: record.canGenerateNewVersion
+        canResend,
+        canRevoke,
+        canGenerateNewVersion: true
       },
       nextGenerationDefaults: {
         patientId: record.patientId,
-        documentType: record.documentType,
+        documentType: record.documentType as DocumentType,
         templateVersion: record.templateVersion,
-        deliveryChannel: "email"
+        deliveryChannel: "email" as const
       }
     };
   }
 
-  private getPatientOptions(records: DocumentRecord[]) {
-    return [...new Map(records.map((record) => [record.patientId, record.patientName])).entries()].map(
-      ([value, label]) => ({
-        value,
-        label
-      })
-    );
+  private priorityWeight(record: DocRecord): number {
+    const cw: Record<string, number> = { normal: 1, attention: 2, critical: 4 };
+    const sw: Record<string, number> = { not_sent: 0, pending: 2, signed: 0, expired: 3, revoked: 3 };
+    return (cw[record.criticality] ?? 0) + (sw[record.signatureStatus] ?? 0);
   }
 
-  private findPatientContext(patientId: string) {
-    const fallback = seedDocuments.find((record) => record.patientId === patientId);
-
-    if (!fallback) {
-      return {
-        patientId,
-        patientName: "Paciente novo",
-        patientContactLabel: "contato pendente",
-        sessionContextLabel: "Contexto operacional a definir",
-        legalRepresentativeLabel: "Nao se aplica"
-      };
-    }
-
-    return {
-      patientId: fallback.patientId,
-      patientName: fallback.patientName,
-      patientContactLabel: fallback.patientContactLabel,
-      sessionContextLabel: fallback.sessionContextLabel,
-      legalRepresentativeLabel: fallback.legalRepresentativeLabel
-    };
+  private isDocTypeFilter(v: string | undefined): v is DocumentsListFilters["documentType"] {
+    return ["all", "lgpd", "telehealth", "transcript_ai", "therapy_contract", "operational"].includes(v ?? "");
   }
 
-  private priorityWeight(record: DocumentRecord) {
-    const criticalityWeight = {
-      normal: 1,
-      attention: 2,
-      critical: 4
-    } satisfies Record<DocumentCriticality, number>;
-    const signatureWeight = {
-      not_sent: 0,
-      pending: 2,
-      signed: 0,
-      expired: 3,
-      revoked: 3
-    } satisfies Record<DocumentSignatureStatus, number>;
-
-    return criticalityWeight[record.criticality] + signatureWeight[record.signatureStatus];
+  private isSigStatusFilter(v: string | undefined): v is DocumentsListFilters["signatureStatus"] {
+    return ["all", "not_sent", "pending", "signed", "expired", "revoked"].includes(v ?? "");
   }
 
-  private isDocumentTypeFilter(value: string | undefined): value is DocumentsListFilters["documentType"] {
-    return ["all", "lgpd", "telehealth", "transcript_ai", "therapy_contract", "operational"].includes(
-      value ?? ""
-    );
+  private isConStatusFilter(v: string | undefined): v is DocumentsListFilters["consentStatus"] {
+    return ["all", "valid", "pending", "revoked", "not_applicable"].includes(v ?? "");
   }
 
-  private isSignatureStatusFilter(
-    value: string | undefined
-  ): value is DocumentsListFilters["signatureStatus"] {
-    return ["all", "not_sent", "pending", "signed", "expired", "revoked"].includes(value ?? "");
-  }
-
-  private isConsentStatusFilter(
-    value: string | undefined
-  ): value is DocumentsListFilters["consentStatus"] {
-    return ["all", "valid", "pending", "revoked", "not_applicable"].includes(value ?? "");
-  }
-
-  private isCriticalityFilter(value: string | undefined): value is DocumentsListFilters["criticality"] {
-    return ["all", "normal", "attention", "critical"].includes(value ?? "");
+  private isCriticalityFilter(v: string | undefined): v is DocumentsListFilters["criticality"] {
+    return ["all", "normal", "attention", "critical"].includes(v ?? "");
   }
 }

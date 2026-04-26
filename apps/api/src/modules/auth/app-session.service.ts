@@ -12,6 +12,7 @@ type SessionPayload = {
   expiresAt: string;
   mfaVerified: boolean;
   therapist: AuthSession["therapist"];
+  tenant: AuthSession["tenant"];
 };
 
 @Injectable()
@@ -27,6 +28,7 @@ export class AppSessionService {
 
     return new SignJWT({
       therapist: session.therapist,
+      tenant: session.tenant,
       accountStatus: session.accountStatus,
       capabilities: session.capabilities,
       mfaVerified: session.mfaVerified,
@@ -49,7 +51,8 @@ export class AppSessionService {
         capabilities: sessionPayload.capabilities,
         expiresAt: sessionPayload.expiresAt,
         mfaVerified: sessionPayload.mfaVerified,
-        therapist: sessionPayload.therapist
+        therapist: sessionPayload.therapist,
+        tenant: sessionPayload.tenant
       };
     } catch {
       throw new UnauthorizedException("Sessao invalida ou expirada.");

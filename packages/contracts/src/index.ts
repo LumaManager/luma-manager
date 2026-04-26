@@ -86,13 +86,23 @@ export const authLoginRequestSchema = z.object({
   password: z.string().min(8)
 });
 
-export const authLoginResponseSchema = z.object({
-  challengeId: z.string(),
-  requiresMfa: z.literal(true),
-  mfaMethod: z.literal("totp"),
-  expiresInSeconds: z.number().int().positive(),
-  hint: z.string()
-});
+export const authLoginResponseSchema = z.discriminatedUnion("requiresMfa", [
+  z.object({
+    requiresMfa: z.literal(true),
+    challengeId: z.string(),
+    mfaMethod: z.literal("totp"),
+    expiresInSeconds: z.number().int().positive(),
+    hint: z.string()
+  }),
+  z.object({
+    requiresMfa: z.literal(false),
+    challengeId: z.string(),
+    mfaMethod: z.literal("totp"),
+    expiresInSeconds: z.number().int(),
+    hint: z.string(),
+    accessToken: z.string()
+  })
+]);
 
 export const authMfaVerifyRequestSchema = z.object({
   challengeId: z.string(),

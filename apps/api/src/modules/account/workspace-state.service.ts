@@ -1004,7 +1004,13 @@ export class WorkspaceStateService {
         capabilities: record.capabilities,
         expiresAt: "",
         mfaVerified: true,
-        therapist: record.therapist
+        therapist: record.therapist,
+        tenant: {
+          id: "",
+          name: record.therapist.practiceName,
+          shortName: record.therapist.practiceName,
+          status: record.status
+        }
       })
     };
   }

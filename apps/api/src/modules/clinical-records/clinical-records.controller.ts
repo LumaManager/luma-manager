@@ -17,8 +17,8 @@ export class ClinicalRecordsController {
     @Headers("authorization") authorization: string | undefined,
     @Param("patientId") patientId: string
   ) {
-    await this.authService.getSessionFromAuthorizationHeader(authorization);
-    return this.clinicalRecordsService.getPatientClinicalRecord(patientId);
+    const session = await this.authService.getSessionFromAuthorizationHeader(authorization);
+    return this.clinicalRecordsService.getPatientClinicalRecord(session.therapist.id, patientId);
   }
 
   @Get(":patientId/:recordId")
@@ -27,8 +27,12 @@ export class ClinicalRecordsController {
     @Param("patientId") patientId: string,
     @Param("recordId") recordId: string
   ) {
-    await this.authService.getSessionFromAuthorizationHeader(authorization);
-    return this.clinicalRecordsService.getClinicalRecordEntry(patientId, recordId);
+    const session = await this.authService.getSessionFromAuthorizationHeader(authorization);
+    return this.clinicalRecordsService.getClinicalRecordEntry(
+      session.therapist.id,
+      patientId,
+      recordId
+    );
   }
 
   @Get(":patientId/:recordId/versions")
@@ -37,7 +41,11 @@ export class ClinicalRecordsController {
     @Param("patientId") patientId: string,
     @Param("recordId") recordId: string
   ) {
-    await this.authService.getSessionFromAuthorizationHeader(authorization);
-    return this.clinicalRecordsService.getClinicalRecordVersions(patientId, recordId);
+    const session = await this.authService.getSessionFromAuthorizationHeader(authorization);
+    return this.clinicalRecordsService.getClinicalRecordVersions(
+      session.therapist.id,
+      patientId,
+      recordId
+    );
   }
 }

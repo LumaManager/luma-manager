@@ -246,19 +246,64 @@ export class AppointmentsService {
   // Video call (stub — fora do escopo MVP)
   // ---------------------------------------------------------------------------
 
-  async getAppointmentCall(_session: AuthSession, _appointmentId: string): Promise<AppointmentCall> {
+  async getAppointmentCall(_session: AuthSession, appointmentId: string): Promise<AppointmentCall> {
+    // Video call is out of MVP scope — return a valid "unavailable" stub
     return {
-      appointmentId: _appointmentId,
-      connection: { state: "unavailable", roomUrl: "", token: "" },
-      participants: {
-        therapistPresence: "offline",
-        patientPresence: "offline"
+      appointment: {
+        id: appointmentId,
+        patientName: "",
+        dateLabel: "",
+        timeRangeLabel: "",
+        durationLabel: "",
+        detailHref: `/app/appointments/${appointmentId}`
       },
-      ui: {
-        title: "Teleatendimento",
-        subtitle: "Sala não disponível neste plano.",
-        primaryAction: { label: "Voltar", href: `/app/appointments/${_appointmentId}` }
-      }
+      experienceState: "unavailable",
+      experienceLabel: "Sala não disponível",
+      roomSummary: {
+        state: "not_provisioned",
+        label: "Não provisionada",
+        providerLabel: "—",
+        joinUrlLabel: "—"
+      },
+      joinWindow: {
+        therapistOpensAtLabel: "",
+        patientOpensAtLabel: "",
+        scheduledStartLabel: "",
+        scheduledEndLabel: "",
+        canJoinNow: false,
+        blockedReason: "Teleatendimento fora do escopo MVP."
+      },
+      readiness: { outcome: "blocked", items: [] },
+      transcript: {
+        state: "disabled_by_policy",
+        label: "Transcript desativado",
+        description: "Funcionalidade fora do escopo MVP."
+      },
+      devices: {
+        cameraPermission: "prompt",
+        microphonePermission: "prompt",
+        availableCameras: [],
+        availableMicrophones: [],
+        previewAvailable: false,
+        microphoneLevel: 0
+      },
+      callPermissions: {
+        canProvisionRoom: false,
+        canCheckIn: false,
+        canEndSession: false
+      },
+      connection: {
+        state: "failed",
+        label: "Sem conexão",
+        description: "Sala não disponível neste plano."
+      },
+      participants: {
+        therapistJoined: false,
+        patientPresence: "absent",
+        patientLabel: "Paciente"
+      },
+      sidePanel: [],
+      notices: []
     };
   }
 

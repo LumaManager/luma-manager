@@ -1,4 +1,5 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+// apps/api/src/modules/finance/finance.service.ts
+import { Inject, Injectable, NotFoundException } from "@nestjs/common";
 import type {
   AuthSession,
   ChargeCreateRequest,
@@ -15,253 +16,166 @@ import type {
 } from "@terapia/contracts";
 import { chargeCreateRequestSchema, chargePaymentRequestSchema } from "@terapia/contracts";
 
-type ChargeRecord = {
-  chargeId: string;
-  code: string;
-  patientId: string;
-  patientName: string;
-  patientContactLabel: string;
-  appointmentId: string;
-  appointmentLabel: string;
-  appointmentHref: string;
-  amountCents: number;
-  dueAtIso: string;
-  dueAtLabel: string;
-  paidAtLabel: string;
-  originType: FinanceOriginType;
-  originLabel: string;
-  status: FinanceChargeStatus;
-  statusLabel: string;
-  lastEventAtIso: string;
-  lastEventAtLabel: string;
-  lastEventLabel: string;
-  exportReferenceLabel: string;
-  paymentMethodLabel: string;
-  notes: string;
-  highlights: ChargeDetail["highlights"];
-  timeline: ChargeDetail["timeline"];
+import type { ChargeEventRow, ChargeWithPatient } from "./finance.repository";
+import { FinanceRepository } from "./finance.repository";
+
+// ---------------------------------------------------------------------------
+// Internal enriched type
+// ---------------------------------------------------------------------------
+
+type ChargeRecord = ChargeWithPatient & {
+  events: ChargeEventRow[];
 };
 
-const seedCharges: ChargeRecord[] = [
-  {
-    chargeId: "charge_101",
-    code: "CHG-2026-101",
-    patientId: "patient_lucas_santos",
-    patientName: "Lucas Santos",
-    patientContactLabel: "lucas.santos@email.com · (11) 97777-2012",
-    appointmentId: "appt_1038",
-    appointmentLabel: "Sessao 30 Mar 2026 · 15:00",
-    appointmentHref: "/app/appointments/appt_1038",
-    amountCents: 22000,
-    dueAtIso: "2026-03-30T18:00:00-03:00",
-    dueAtLabel: "Hoje, 18:00",
-    paidAtLabel: "Nao registrado",
-    originType: "private",
-    originLabel: "Particular",
-    status: "pending",
-    statusLabel: "Pendente",
-    lastEventAtIso: "2026-03-30T09:05:00-03:00",
-    lastEventAtLabel: "Hoje · 09:05",
-    lastEventLabel: "Cobranca criada",
-    exportReferenceLabel: "Particular · atendimento avulso",
-    paymentMethodLabel: "Pix recomendado",
-    notes: "Cobranca criada automaticamente a partir da sessao de hoje.",
-    highlights: [
-      { label: "Origem", value: "Particular" },
-      { label: "Sessao vinculada", value: "Sim" },
-      { label: "Estado", value: "Aguardando pagamento" }
-    ],
-    timeline: [
-      {
-        id: "timeline_charge_101_1",
-        title: "Cobranca criada",
-        description: "Gerada para a sessao presencial de hoje.",
-        occurredAtLabel: "Hoje · 09:05",
-        actorLabel: "Sistema"
-      }
-    ]
-  },
-  {
-    chargeId: "charge_401",
-    code: "CHG-2026-401",
-    patientId: "patient_caio_oliveira",
-    patientName: "Caio Oliveira",
-    patientContactLabel: "caio.oliveira@email.com · (11) 94444-5515",
-    appointmentId: "appt_0999",
-    appointmentLabel: "Sessao 12 Mar 2026 · 11:00",
-    appointmentHref: "/app/appointments/appt_0999",
-    amountCents: 22000,
-    dueAtIso: "2026-03-20T18:00:00-03:00",
-    dueAtLabel: "20 Mar 2026",
-    paidAtLabel: "Nao registrado",
-    originType: "private",
-    originLabel: "Particular",
-    status: "overdue",
-    statusLabel: "Vencido",
-    lastEventAtIso: "2026-03-21T08:00:00-03:00",
-    lastEventAtLabel: "21 Mar · 08:00",
-    lastEventLabel: "Prazo expirou sem baixa",
-    exportReferenceLabel: "Particular · tratamento pausado",
-    paymentMethodLabel: "Pix ou transferencia",
-    notes: "Paciente inativo com sessao anterior ainda em aberto.",
-    highlights: [
-      { label: "Origem", value: "Particular" },
-      { label: "Sessao vinculada", value: "Sim" },
-      { label: "Estado", value: "Exige tratativa financeira" }
-    ],
-    timeline: [
-      {
-        id: "timeline_charge_401_1",
-        title: "Cobranca venceu",
-        description: "Prazo expirou e a cobranca passou para fila critica.",
-        occurredAtLabel: "21 Mar · 08:00",
-        actorLabel: "Sistema"
-      },
-      {
-        id: "timeline_charge_401_2",
-        title: "Cobranca criada",
-        description: "Gerada a partir da ultima sessao concluida.",
-        occurredAtLabel: "12 Mar · 12:05",
-        actorLabel: "Sistema"
-      }
-    ]
-  },
-  {
-    chargeId: "charge_601",
-    code: "CHG-2026-601",
-    patientId: "patient_maria_souza",
-    patientName: "Maria Souza",
-    patientContactLabel: "maria.souza@email.com · (11) 98888-1101",
-    appointmentId: "appt_1018",
-    appointmentLabel: "Sessao 23 Mar 2026 · 13:30",
-    appointmentHref: "/app/appointments/appt_1018",
-    amountCents: 22000,
-    dueAtIso: "2026-03-23T18:00:00-03:00",
-    dueAtLabel: "23 Mar 2026",
-    paidAtLabel: "23 Mar 2026",
-    originType: "private",
-    originLabel: "Particular",
-    status: "paid",
-    statusLabel: "Pago",
-    lastEventAtIso: "2026-03-23T16:10:00-03:00",
-    lastEventAtLabel: "23 Mar · 16:10",
-    lastEventLabel: "Pagamento conciliado",
-    exportReferenceLabel: "Particular · acompanhamento semanal",
-    paymentMethodLabel: "Pix",
-    notes: "Pagamento confirmado automaticamente no mesmo dia.",
-    highlights: [
-      { label: "Origem", value: "Particular" },
-      { label: "Sessao vinculada", value: "Sim" },
-      { label: "Estado", value: "Recebido" }
-    ],
-    timeline: [
-      {
-        id: "timeline_charge_601_1",
-        title: "Pagamento registrado",
-        description: "Baixa automatica confirmada para a cobranca.",
-        occurredAtLabel: "23 Mar · 16:10",
-        actorLabel: "Sistema"
-      }
-    ]
-  },
-  {
-    chargeId: "charge_701",
-    code: "CHG-2026-701",
-    patientId: "patient_renata_costa",
-    patientName: "Renata Costa",
-    patientContactLabel: "renata.costa@email.com · (11) 96666-3313",
-    appointmentId: "appt_1045",
-    appointmentLabel: "Sessao 30 Mar 2026 · 17:10",
-    appointmentHref: "/app/appointments/appt_1045",
-    amountCents: 26000,
-    dueAtIso: "2026-04-02T18:00:00-03:00",
-    dueAtLabel: "02 Abr 2026",
-    paidAtLabel: "Nao registrado",
-    originType: "insurance",
-    originLabel: "Convenio",
-    status: "pending",
-    statusLabel: "Pendente",
-    lastEventAtIso: "2026-03-29T17:40:00-03:00",
-    lastEventAtLabel: "29 Mar · 17:40",
-    lastEventLabel: "Cobranca criada para lote de convenio",
-    exportReferenceLabel: "Convenio · classificacao operacional",
-    paymentMethodLabel: "Repasse externo",
-    notes: "Convênio tratado apenas como classificacao operacional no MVP.",
-    highlights: [
-      { label: "Origem", value: "Convenio" },
-      { label: "Sessao vinculada", value: "Sim" },
-      { label: "Estado", value: "Aguardando repasse" }
-    ],
-    timeline: [
-      {
-        id: "timeline_charge_701_1",
-        title: "Cobranca criada",
-        description: "Item separado no financeiro por classificacao de convenio.",
-        occurredAtLabel: "29 Mar · 17:40",
-        actorLabel: "Terapeuta"
-      }
-    ]
-  },
-  {
-    chargeId: "charge_801",
-    code: "CHG-2026-801",
-    patientId: "patient_julia_prado",
-    patientName: "Julia Prado",
-    patientContactLabel: "julia.prado@email.com · (11) 95555-4414",
-    appointmentId: "",
-    appointmentLabel: "Sem sessao vinculada",
-    appointmentHref: "",
-    amountCents: 18000,
-    dueAtIso: "2026-04-03T18:00:00-03:00",
-    dueAtLabel: "03 Abr 2026",
-    paidAtLabel: "Nao registrado",
-    originType: "private",
-    originLabel: "Particular",
-    status: "pending",
-    statusLabel: "Pendente",
-    lastEventAtIso: "2026-03-29T14:12:00-03:00",
-    lastEventAtLabel: "29 Mar · 14:12",
-    lastEventLabel: "Cobranca operacional criada",
-    exportReferenceLabel: "Particular · onboarding inicial",
-    paymentMethodLabel: "Pix",
-    notes: "Item operacional sem sessao vinculada para organizar taxa inicial.",
-    highlights: [
-      { label: "Origem", value: "Particular" },
-      { label: "Sessao vinculada", value: "Nao" },
-      { label: "Estado", value: "Em aberto" }
-    ],
-    timeline: [
-      {
-        id: "timeline_charge_801_1",
-        title: "Cobranca criada",
-        description: "Registro manual aberto sem sessao vinculada.",
-        occurredAtLabel: "29 Mar · 14:12",
-        actorLabel: "Terapeuta"
-      }
-    ]
-  }
+// ---------------------------------------------------------------------------
+// Formatting helpers
+// ---------------------------------------------------------------------------
+
+const PT_MONTHS = [
+  "Jan", "Fev", "Mar", "Abr", "Mai", "Jun",
+  "Jul", "Ago", "Set", "Out", "Nov", "Dez"
 ];
 
-const patientCatalog = [
-  { value: "patient_maria_souza", label: "Maria Souza" },
-  { value: "patient_lucas_santos", label: "Lucas Santos" },
-  { value: "patient_renata_costa", label: "Renata Costa" },
-  { value: "patient_julia_prado", label: "Julia Prado" },
-  { value: "patient_caio_oliveira", label: "Caio Oliveira" }
-] as const;
+function formatCurrency(value: number): string {
+  return new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL"
+  }).format(value / 100);
+}
 
-const appointmentCatalog = [
-  { value: "appt_1032", label: "Maria Souza · 30 Mar 2026 · 13:30", patientId: "patient_maria_souza" },
-  { value: "appt_1038", label: "Lucas Santos · 30 Mar 2026 · 15:00", patientId: "patient_lucas_santos" },
-  { value: "appt_1045", label: "Renata Costa · 30 Mar 2026 · 17:10", patientId: "patient_renata_costa" }
-] as const;
+function formatDate(isoDate: string): string {
+  const [year, month, day] = isoDate.split("-");
+  const m = parseInt(month ?? "1", 10) - 1;
+  return `${parseInt(day ?? "1", 10)} ${PT_MONTHS[m] ?? ""} ${year ?? ""}`;
+}
+
+function formatTimestamp(ts: Date): string {
+  const m = ts.getMonth();
+  const d = ts.getDate();
+  const hh = String(ts.getHours()).padStart(2, "0");
+  const mm = String(ts.getMinutes()).padStart(2, "0");
+  return `${d} ${PT_MONTHS[m] ?? ""} ${ts.getFullYear()} · ${hh}:${mm}`;
+}
+
+function chargeStatusLabel(status: string): string {
+  const map: Record<string, string> = {
+    pending: "Pendente",
+    paid: "Pago",
+    overdue: "Vencido",
+    canceled: "Cancelado"
+  };
+  return map[status] ?? status;
+}
+
+function chargeOriginLabel(originType: string): string {
+  return originType === "insurance" ? "Convênio" : "Particular";
+}
+
+function chargePaymentMethodLabel(originType: string, paymentNote: string): string {
+  if (paymentNote.length > 0) return paymentNote;
+  return originType === "insurance" ? "Repasse externo" : "Pix recomendado";
+}
+
+function buildHighlights(charge: ChargeWithPatient): ChargeDetail["highlights"] {
+  return [
+    { label: "Origem", value: chargeOriginLabel(charge.originType) },
+    { label: "Sessão vinculada", value: charge.appointmentId.length > 0 ? "Sim" : "Não" },
+    {
+      label: "Estado",
+      value:
+        ({
+          pending: "Aguardando pagamento",
+          paid: "Recebido",
+          overdue: "Exige tratativa financeira",
+          canceled: "Cancelado"
+        } as Record<string, string>)[charge.status] ?? charge.status
+    }
+  ];
+}
+
+const eventTitles: Record<string, string> = {
+  created: "Cobrança criada",
+  payment_registered: "Pagamento registrado",
+  overdue_flagged: "Prazo expirou sem baixa",
+  canceled: "Cobrança cancelada"
+};
+
+function buildTimeline(events: ChargeEventRow[]): ChargeDetail["timeline"] {
+  return events.map((ev) => ({
+    id: ev.id,
+    title: eventTitles[ev.eventType] ?? ev.eventType,
+    description: ev.description,
+    occurredAtLabel: formatTimestamp(ev.occurredAt),
+    actorLabel: ev.actorId === "system" ? "Sistema" : "Terapeuta"
+  }));
+}
+
+function chargeAppointmentLabel(charge: ChargeWithPatient): string {
+  if (!charge.appointmentId || !charge.appointmentDate) return "Sem sessão vinculada";
+  const time = charge.appointmentStartTime ? charge.appointmentStartTime.slice(0, 5) : "";
+  return `Sessão ${formatDate(charge.appointmentDate)} · ${time}`;
+}
+
+// ---------------------------------------------------------------------------
+// Period date helpers
+// ---------------------------------------------------------------------------
+
+function getPeriodBounds(period: FinanceListFilters["period"]): { start: string; end: string } | null {
+  if (period === "all") return null;
+
+  const now = new Date();
+  const pad = (n: number) => String(n).padStart(2, "0");
+  const toIso = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+
+  if (period === "current_month") {
+    const start = new Date(now.getFullYear(), now.getMonth(), 1);
+    const end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+    return { start: toIso(start), end: toIso(end) };
+  }
+
+  if (period === "next_30_days") {
+    const end = new Date(now);
+    end.setDate(end.getDate() + 30);
+    return { start: toIso(now), end: toIso(end) };
+  }
+
+  // last_30_days
+  const start = new Date(now);
+  start.setDate(start.getDate() - 30);
+  return { start: toIso(start), end: toIso(now) };
+}
+
+// ---------------------------------------------------------------------------
+// Service
+// ---------------------------------------------------------------------------
 
 @Injectable()
 export class FinanceService {
-  private readonly chargesByEmail = new Map<string, ChargeRecord[]>();
+  constructor(@Inject(FinanceRepository) private readonly repo: FinanceRepository) {}
 
-  listCharges(session: AuthSession, query: Partial<Record<string, string>>): FinanceListResponse {
-    const records = this.getRecordsForSession(session);
+  async listCharges(
+    session: AuthSession,
+    query: Partial<Record<string, string>>
+  ): Promise<FinanceListResponse> {
+    const [charges, patientOptions, appointmentOptions] = await Promise.all([
+      this.repo.listWithPatient(session.tenant.id),
+      this.repo.listDistinctPatients(session.tenant.id),
+      this.repo.listLinkableAppointments(session.tenant.id)
+    ]);
+
+    const allEvents = await this.repo.listEventsForCharges(charges.map((c) => c.id));
+    const eventsByCharge = new Map<string, ChargeEventRow[]>();
+    for (const ev of allEvents) {
+      const list = eventsByCharge.get(ev.chargeId) ?? [];
+      list.push(ev);
+      eventsByCharge.set(ev.chargeId, list);
+    }
+
+    const records: ChargeRecord[] = charges.map((c) => ({
+      ...c,
+      events: eventsByCharge.get(c.id) ?? []
+    }));
+
     const filters: FinanceListFilters = {
       search: query.search?.trim() ?? "",
       status: this.isStatusFilter(query.status) ? query.status : "all",
@@ -272,8 +186,8 @@ export class FinanceService {
     };
 
     const filtered = records
-      .filter((record) => this.matchesFilters(record, filters))
-      .sort((left, right) => this.priorityWeight(right) - this.priorityWeight(left));
+      .filter((r) => this.matchesFilters(r, filters))
+      .sort((a, b) => this.priorityWeight(b) - this.priorityWeight(a));
 
     const page = Math.max(Number(query.page ?? "1") || 1, 1);
     const pageSize = [25, 50, 100].includes(Number(query.pageSize)) ? Number(query.pageSize) : 25;
@@ -281,29 +195,37 @@ export class FinanceService {
 
     return {
       summary: this.buildSummary(filtered, filters.period),
-      items: filtered.slice(start, start + pageSize).map((record) => this.toListItem(record)),
+      items: filtered.slice(start, start + pageSize).map((r) => this.toListItem(r)),
       total: filtered.length,
       page,
       pageSize,
       filters,
       availablePageSizes: [25, 50, 100],
-      patientOptions: [...patientCatalog],
-      appointmentOptions: [...appointmentCatalog]
+      patientOptions,
+      appointmentOptions
     };
   }
 
-  getChargeDetail(session: AuthSession, chargeId: string): ChargeDetail {
-    const record = this.getRecord(session, chargeId);
-    return this.toDetail(record);
+  async getChargeDetail(session: AuthSession, chargeId: string): Promise<ChargeDetail> {
+    const charge = await this.repo.findByIdWithPatient(session.tenant.id, chargeId);
+    if (!charge) throw new NotFoundException("Cobrança não encontrada.");
+
+    const events = await this.repo.listEvents(chargeId);
+    return this.toDetail({ ...charge, events });
   }
 
-  getSummary(session: AuthSession, query: Partial<Record<string, string>>): FinanceSummary {
-    const data = this.listCharges(session, query);
-    return data.summary;
+  async getSummary(
+    session: AuthSession,
+    query: Partial<Record<string, string>>
+  ): Promise<FinanceSummary> {
+    return (await this.listCharges(session, query)).summary;
   }
 
-  exportCharges(session: AuthSession, query: Partial<Record<string, string>>): FinanceExportResponse {
-    const data = this.listCharges(session, query);
+  async exportCharges(
+    session: AuthSession,
+    query: Partial<Record<string, string>>
+  ): Promise<FinanceExportResponse> {
+    const data = await this.listCharges(session, query);
     return {
       filename: `financeiro-${data.summary.periodLabel.toLowerCase().replace(/[^a-z0-9]+/g, "-")}.csv`,
       rowCount: data.items.length,
@@ -311,189 +233,126 @@ export class FinanceService {
     };
   }
 
-  createCharge(session: AuthSession, input: ChargeCreateRequest): ChargeCreateResponse {
+  async createCharge(session: AuthSession, input: ChargeCreateRequest): Promise<ChargeCreateResponse> {
     const payload = chargeCreateRequestSchema.parse(input);
-    const records = this.getRecordsForSession(session);
-    const patient = patientCatalog.find((item) => item.value === payload.patientId);
-    const appointment = appointmentCatalog.find((item) => item.value === payload.appointmentId);
-    const chargeId = `charge_${Date.now()}`;
+    const count = await this.repo.countForTenant(session.tenant.id);
+    const code = `CHG-${new Date().getFullYear()}-${String(count + 1).padStart(3, "0")}`;
 
-    const record: ChargeRecord = {
-      chargeId,
-      code: `CHG-${new Date().getFullYear()}-${String(records.length + 1).padStart(3, "0")}`,
+    const charge = await this.repo.create({
+      tenantId: session.tenant.id,
       patientId: payload.patientId,
-      patientName: patient?.label ?? "Paciente novo",
-      patientContactLabel: "contato pendente",
-      appointmentId: appointment?.value ?? "",
-      appointmentLabel: appointment?.label ?? "Sem sessao vinculada",
-      appointmentHref: appointment ? `/app/appointments/${appointment.value}` : "",
+      appointmentId: payload.appointmentId ?? "",
+      code,
       amountCents: payload.amountCents,
-      dueAtIso: `${payload.dueDate}T18:00:00-03:00`,
-      dueAtLabel: payload.dueDate,
-      paidAtLabel: "Nao registrado",
+      dueDate: payload.dueDate,
       originType: payload.originType,
-      originLabel: payload.originType === "private" ? "Particular" : "Convenio",
-      status: "pending",
-      statusLabel: "Pendente",
-      lastEventAtIso: new Date().toISOString(),
-      lastEventAtLabel: "Agora",
-      lastEventLabel: "Cobranca criada",
-      exportReferenceLabel: payload.originType === "private" ? "Particular" : "Convenio",
-      paymentMethodLabel: payload.originType === "private" ? "Pix recomendado" : "Repasse externo",
-      notes: "Cobranca criada manualmente pelo terapeuta.",
-      highlights: [
-        { label: "Origem", value: payload.originType === "private" ? "Particular" : "Convenio" },
-        { label: "Sessao vinculada", value: appointment ? "Sim" : "Nao" },
-        { label: "Estado", value: "Pendente" }
-      ],
-      timeline: [
-        {
-          id: `timeline_${chargeId}_1`,
-          title: "Cobranca criada",
-          description: "Novo item financeiro registrado no drawer da lista.",
-          occurredAtLabel: "Agora",
-          actorLabel: "Terapeuta"
-        }
-      ]
-    };
+      exportReference: payload.originType === "private" ? "Particular" : "Convênio"
+    });
 
-    records.unshift(record);
+    await this.repo.addEvent({
+      chargeId: charge.id,
+      eventType: "created",
+      actorId: session.therapist.id,
+      description: "Cobrança criada manualmente pelo terapeuta."
+    });
 
-    return {
-      chargeId,
-      redirectTo: `/app/finance/charges/${chargeId}`
-    };
+    return { chargeId: charge.id, redirectTo: `/app/finance/charges/${charge.id}` };
   }
 
-  registerPayment(
+  async registerPayment(
     session: AuthSession,
     chargeId: string,
     input: ChargePaymentRequest
-  ): ChargeDetail {
+  ): Promise<ChargeDetail> {
     const payload = chargePaymentRequestSchema.parse(input);
-    const record = this.getRecord(session, chargeId);
+    const charge = await this.repo.findByIdWithPatient(session.tenant.id, chargeId);
+    if (!charge) throw new NotFoundException("Cobrança não encontrada.");
 
-    record.status = "paid";
-    record.statusLabel = "Pago";
-    record.paidAtLabel = payload.paidAt;
-    record.lastEventAtIso = new Date().toISOString();
-    record.lastEventAtLabel = "Agora";
-    record.lastEventLabel = "Pagamento registrado";
-    record.paymentMethodLabel = payload.note.length > 0 ? payload.note : "Baixa manual";
-    record.timeline.unshift({
-      id: `timeline_${chargeId}_${record.timeline.length + 1}`,
-      title: "Pagamento registrado",
-      description: `Baixa manual registrada no valor de ${formatCurrency(payload.amountCents)}.`,
-      occurredAtLabel: "Agora",
-      actorLabel: "Terapeuta"
+    await this.repo.updateStatus(chargeId, {
+      status: "paid",
+      paidAt: payload.paidAt,
+      paidAmountCents: payload.amountCents,
+      paymentNote: payload.note
     });
 
-    return this.toDetail(record);
-  }
-
-  cancelCharge(session: AuthSession, chargeId: string): ChargeDetail {
-    const record = this.getRecord(session, chargeId);
-
-    record.status = "canceled";
-    record.statusLabel = "Cancelado";
-    record.lastEventAtIso = new Date().toISOString();
-    record.lastEventAtLabel = "Agora";
-    record.lastEventLabel = "Cobranca cancelada";
-    record.timeline.unshift({
-      id: `timeline_${chargeId}_${record.timeline.length + 1}`,
-      title: "Cobranca cancelada",
-      description: "Cancelamento manual registrado para preservar rastreabilidade.",
-      occurredAtLabel: "Agora",
-      actorLabel: "Terapeuta"
+    await this.repo.addEvent({
+      chargeId,
+      eventType: "payment_registered",
+      actorId: session.therapist.id,
+      description: `Baixa manual registrada no valor de ${formatCurrency(payload.amountCents)}.`
     });
 
-    return this.toDetail(record);
+    const updated = await this.repo.findByIdWithPatient(session.tenant.id, chargeId);
+    const events = await this.repo.listEvents(chargeId);
+    return this.toDetail({ ...updated!, events });
   }
 
-  private getRecordsForSession(session: AuthSession) {
-    const key = session.therapist.email;
+  async cancelCharge(session: AuthSession, chargeId: string): Promise<ChargeDetail> {
+    const charge = await this.repo.findByIdWithPatient(session.tenant.id, chargeId);
+    if (!charge) throw new NotFoundException("Cobrança não encontrada.");
 
-    if (!this.chargesByEmail.has(key)) {
-      this.chargesByEmail.set(
-        key,
-        seedCharges.map((record) => ({
-          ...record,
-          highlights: [...record.highlights],
-          timeline: [...record.timeline]
-        }))
-      );
-    }
+    await this.repo.updateStatus(chargeId, { status: "canceled" });
 
-    return this.chargesByEmail.get(key) ?? [];
+    await this.repo.addEvent({
+      chargeId,
+      eventType: "canceled",
+      actorId: session.therapist.id,
+      description: "Cancelamento manual registrado para preservar rastreabilidade."
+    });
+
+    const updated = await this.repo.findByIdWithPatient(session.tenant.id, chargeId);
+    const events = await this.repo.listEvents(chargeId);
+    return this.toDetail({ ...updated!, events });
   }
 
-  private getRecord(session: AuthSession, chargeId: string) {
-    const record = this.getRecordsForSession(session).find((item) => item.chargeId === chargeId);
+  // ---------------------------------------------------------------------------
+  // Private helpers
+  // ---------------------------------------------------------------------------
 
-    if (!record) {
-      throw new NotFoundException("Cobranca nao encontrada.");
-    }
-
-    return record;
-  }
-
-  private matchesFilters(record: ChargeRecord, filters: FinanceListFilters) {
+  private matchesFilters(record: ChargeRecord, filters: FinanceListFilters): boolean {
     const query = filters.search.toLowerCase();
     const matchesQuery =
       query.length === 0 ||
       `${record.patientName} ${record.code} ${record.amountCents}`.toLowerCase().includes(query);
     const matchesStatus = filters.status === "all" || record.status === filters.status;
     const matchesOrigin = filters.originType === "all" || record.originType === filters.originType;
-    const matchesPeriod = this.matchesPeriod(record, filters.period);
+    const matchesPeriod = this.matchesPeriod(record.dueDate, filters.period);
     const matchesOverdue = !filters.overdueOnly || record.status === "overdue";
-    const matchesAppointment = !filters.withoutAppointmentOnly || record.appointmentId.length === 0;
+    const matchesAppointment =
+      !filters.withoutAppointmentOnly || record.appointmentId.length === 0;
 
-    return (
-      matchesQuery &&
-      matchesStatus &&
-      matchesOrigin &&
-      matchesPeriod &&
-      matchesOverdue &&
-      matchesAppointment
-    );
+    return matchesQuery && matchesStatus && matchesOrigin && matchesPeriod && matchesOverdue && matchesAppointment;
   }
 
-  private matchesPeriod(record: ChargeRecord, period: FinanceListFilters["period"]) {
-    const date = Date.parse(record.dueAtIso);
-    const currentMonthStart = Date.parse("2026-03-01T00:00:00-03:00");
-    const currentMonthEnd = Date.parse("2026-03-31T23:59:59-03:00");
-    const next30Start = Date.parse("2026-03-30T00:00:00-03:00");
-    const next30End = Date.parse("2026-04-29T23:59:59-03:00");
-    const last30Start = Date.parse("2026-02-28T00:00:00-03:00");
-    const last30End = Date.parse("2026-03-30T23:59:59-03:00");
-
-    if (period === "all") return true;
-    if (period === "current_month") return date >= currentMonthStart && date <= currentMonthEnd;
-    if (period === "next_30_days") return date >= next30Start && date <= next30End;
-    return date >= last30Start && date <= last30End;
+  private matchesPeriod(dueDate: string, period: FinanceListFilters["period"]): boolean {
+    const bounds = getPeriodBounds(period);
+    if (!bounds) return true;
+    return dueDate >= bounds.start && dueDate <= bounds.end;
   }
 
   private buildSummary(records: ChargeRecord[], period: FinanceListFilters["period"]): FinanceSummary {
     const totals = records.reduce(
-      (acc, record) => {
-        acc.charged += record.amountCents;
-        if (record.status === "paid") acc.received += record.amountCents;
-        if (record.status === "pending") acc.open += record.amountCents;
-        if (record.status === "overdue") acc.overdue += record.amountCents;
+      (acc, r) => {
+        acc.charged += r.amountCents;
+        if (r.status === "paid") acc.received += r.amountCents;
+        if (r.status === "pending") acc.open += r.amountCents;
+        if (r.status === "overdue") acc.overdue += r.amountCents;
         return acc;
       },
       { charged: 0, received: 0, open: 0, overdue: 0 }
     );
 
+    const periodLabel =
+      period === "all"
+        ? "Tudo"
+        : period === "next_30_days"
+          ? "Próximos 30 dias"
+          : period === "last_30_days"
+            ? "Últimos 30 dias"
+            : "Mês atual";
+
     return {
-      periodLabel:
-        period === "all"
-          ? "Tudo"
-          : period === "next_30_days"
-            ? "Proximos 30 dias"
-            : period === "last_30_days"
-              ? "Ultimos 30 dias"
-              : "Mes atual",
+      periodLabel,
       totalChargedLabel: formatCurrency(totals.charged),
       totalReceivedLabel: formatCurrency(totals.received),
       totalOpenLabel: formatCurrency(totals.open),
@@ -506,56 +365,60 @@ export class FinanceService {
   }
 
   private toListItem(record: ChargeRecord): FinanceChargeListItem {
+    const latestEvent = record.events[0];
+
     return {
-      chargeId: record.chargeId,
+      chargeId: record.id,
       code: record.code,
       patientId: record.patientId,
       patientName: record.patientName,
       patientHref: `/app/patients/${record.patientId}`,
       appointmentId: record.appointmentId,
-      appointmentLabel: record.appointmentLabel,
-      appointmentHref: record.appointmentHref,
-      originType: record.originType,
-      originLabel: record.originLabel,
+      appointmentLabel: chargeAppointmentLabel(record),
+      appointmentHref: record.appointmentId ? `/app/appointments/${record.appointmentId}` : "",
+      originType: record.originType as FinanceOriginType,
+      originLabel: chargeOriginLabel(record.originType),
       amountLabel: formatCurrency(record.amountCents),
       amountCents: record.amountCents,
-      dueAtLabel: record.dueAtLabel,
-      status: record.status,
-      statusLabel: record.statusLabel,
-      lastEventAtLabel: record.lastEventAtLabel,
-      lastEventLabel: record.lastEventLabel,
+      dueAtLabel: formatDate(record.dueDate),
+      status: record.status as FinanceChargeStatus,
+      statusLabel: chargeStatusLabel(record.status),
+      lastEventAtLabel: latestEvent ? formatTimestamp(latestEvent.occurredAt) : "",
+      lastEventLabel: latestEvent ? (eventTitles[latestEvent.eventType] ?? latestEvent.eventType) : "",
       canRegisterPayment: record.status === "pending" || record.status === "overdue",
       canCancel: record.status === "pending" || record.status === "overdue",
-      chargeHref: `/app/finance/charges/${record.chargeId}`
+      chargeHref: `/app/finance/charges/${record.id}`
     };
   }
 
   private toDetail(record: ChargeRecord): ChargeDetail {
+    const latestEvent = record.events[0];
+
     return {
-      chargeId: record.chargeId,
+      chargeId: record.id,
       code: record.code,
       patientId: record.patientId,
       patientName: record.patientName,
       patientHref: `/app/patients/${record.patientId}`,
-      patientContactLabel: record.patientContactLabel,
+      patientContactLabel: `${record.patientEmail} · ${record.patientPhone}`,
       appointmentId: record.appointmentId,
-      appointmentLabel: record.appointmentLabel,
-      appointmentHref: record.appointmentHref,
+      appointmentLabel: chargeAppointmentLabel(record),
+      appointmentHref: record.appointmentId ? `/app/appointments/${record.appointmentId}` : "",
       amountLabel: formatCurrency(record.amountCents),
       amountCents: record.amountCents,
-      dueAtLabel: record.dueAtLabel,
-      paidAtLabel: record.paidAtLabel,
-      originType: record.originType,
-      originLabel: record.originLabel,
-      status: record.status,
-      statusLabel: record.statusLabel,
-      lastEventAtLabel: record.lastEventAtLabel,
-      lastEventLabel: record.lastEventLabel,
-      exportReferenceLabel: record.exportReferenceLabel,
-      paymentMethodLabel: record.paymentMethodLabel,
-      notes: record.notes,
-      highlights: record.highlights,
-      timeline: record.timeline,
+      dueAtLabel: formatDate(record.dueDate),
+      paidAtLabel: record.paidAt ? formatDate(record.paidAt) : "Não registrado",
+      originType: record.originType as FinanceOriginType,
+      originLabel: chargeOriginLabel(record.originType),
+      status: record.status as FinanceChargeStatus,
+      statusLabel: chargeStatusLabel(record.status),
+      lastEventAtLabel: latestEvent ? formatTimestamp(latestEvent.occurredAt) : "",
+      lastEventLabel: latestEvent ? (eventTitles[latestEvent.eventType] ?? latestEvent.eventType) : "",
+      exportReferenceLabel: record.exportReference,
+      paymentMethodLabel: chargePaymentMethodLabel(record.originType, record.paymentNote),
+      notes: record.paymentNote,
+      highlights: buildHighlights(record),
+      timeline: buildTimeline(record.events),
       primaryActions: {
         canRegisterPayment: record.status === "pending" || record.status === "overdue",
         canCancel: record.status === "pending" || record.status === "overdue"
@@ -563,15 +426,11 @@ export class FinanceService {
     };
   }
 
-  private priorityWeight(record: ChargeRecord) {
-    const statusWeight = {
-      canceled: 0,
-      paid: 1,
-      pending: 3,
-      overdue: 5
-    } satisfies Record<FinanceChargeStatus, number>;
-
-    return statusWeight[record.status] + Math.round(record.amountCents / 10000);
+  private priorityWeight(record: ChargeRecord): number {
+    const statusWeight: Record<string, number> = {
+      canceled: 0, paid: 1, pending: 3, overdue: 5
+    };
+    return (statusWeight[record.status] ?? 0) + Math.round(record.amountCents / 10000);
   }
 
   private isStatusFilter(value: string | undefined): value is FinanceListFilters["status"] {
@@ -585,11 +444,4 @@ export class FinanceService {
   private isPeriodFilter(value: string | undefined): value is FinanceListFilters["period"] {
     return ["all", "current_month", "next_30_days", "last_30_days"].includes(value ?? "");
   }
-}
-
-function formatCurrency(value: number) {
-  return new Intl.NumberFormat("pt-BR", {
-    style: "currency",
-    currency: "BRL"
-  }).format(value / 100);
 }

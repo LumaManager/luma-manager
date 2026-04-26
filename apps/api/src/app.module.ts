@@ -23,11 +23,14 @@ import { HealthController } from "@/modules/health/health.controller";
 import { ClinicalReviewController } from "@/modules/clinical-review/clinical-review.controller";
 import { ClinicalReviewService } from "@/modules/clinical-review/clinical-review.service";
 import { ClinicalRecordsController } from "@/modules/clinical-records/clinical-records.controller";
+import { ClinicalRecordsRepository } from "@/modules/clinical-records/clinical-records.repository";
 import { ClinicalRecordsService } from "@/modules/clinical-records/clinical-records.service";
 import { DocumentsController } from "@/modules/documents/documents.controller";
+import { DocumentsRepository } from "@/modules/documents/documents.repository";
 import { DocumentsService } from "@/modules/documents/documents.service";
 import { ChargesController } from "@/modules/finance/charges.controller";
 import { FinanceController } from "@/modules/finance/finance.controller";
+import { FinanceRepository } from "@/modules/finance/finance.repository";
 import { FinanceService } from "@/modules/finance/finance.service";
 import { InternalController } from "@/modules/internal/internal.controller";
 import { InternalOpsService } from "@/modules/internal/internal-ops.service";
@@ -102,8 +105,11 @@ import { OnboardingService } from "@/modules/onboarding/onboarding.service";
     AppointmentsService,
     DashboardService,
     ClinicalReviewService,
+    ClinicalRecordsRepository,
     ClinicalRecordsService,
+    DocumentsRepository,
     DocumentsService,
+    FinanceRepository,
     FinanceService,
     InternalOpsService,
     LinkedinLeadsService,
