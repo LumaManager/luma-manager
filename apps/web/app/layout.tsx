@@ -17,6 +17,31 @@ export const metadata: Metadata = {
   }
 };
 
+const organizationSchema = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: "Luma Manager",
+  url: "https://www.lumamanager.com.br",
+  logo: "https://www.lumamanager.com.br/icon.svg",
+  description: "A plataforma para psicólogos que querem fechar o dia sem carregar o peso do pós-sessão.",
+  sameAs: [],
+};
+
+const websiteSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: "Luma Manager",
+  url: "https://www.lumamanager.com.br",
+  potentialAction: {
+    "@type": "SearchAction",
+    target: {
+      "@type": "EntryPoint",
+      urlTemplate: "https://www.lumamanager.com.br/blog?q={search_term_string}",
+    },
+    "query-input": "required name=search_term_string",
+  },
+};
+
 export default function RootLayout({
   children
 }: Readonly<{
@@ -26,6 +51,16 @@ export default function RootLayout({
 
   return (
     <html lang="pt-BR">
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
+        />
+      </head>
       <body>
         {children}
         <MarketingPageViewTracker />
