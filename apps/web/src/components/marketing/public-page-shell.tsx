@@ -15,7 +15,7 @@ export function PublicPageShell({
   actions,
   children,
   className,
-  primaryHref = "/solicitar-demo",
+  primaryHref = "/#waitlist",
   secondaryHref = "/seguranca-e-privacidade"
 }: {
   actions?: ReactNode;
@@ -59,11 +59,11 @@ export function PublicPageShell({
                 <TrackedCtaLink
                   href={primaryHref}
                   className={shellPrimaryButtonClassName}
-                  ctaLabel="Solicitar demo"
+                  ctaLabel="Entrar na waitlist"
                   ctaLocation="public_shell_header_primary"
                   pageType={pageType}
                 >
-                  Solicitar demo
+                  Entrar na waitlist
                 </TrackedCtaLink>
               </div>
             </div>

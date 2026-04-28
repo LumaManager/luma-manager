@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useTransition, type FormEvent } from "react";
-import Link from "next/link";
 import {
   ArrowRight,
   Ban,
@@ -359,7 +358,7 @@ export function LandingPage({
     <main className="min-h-screen bg-[radial-gradient(circle_at_top_left,rgba(198,122,69,0.16),transparent_26%),radial-gradient(circle_at_top_right,rgba(15,76,92,0.16),transparent_30%),linear-gradient(180deg,#f8f3e8_0%,#f4ede2_100%)] px-2 py-5 lg:px-3 lg:py-6">
       <div className="mx-auto w-full max-w-[1900px]">
         <section>
-          <div className="relative overflow-hidden rounded-[40px] border border-[rgba(15,76,92,0.14)] bg-[linear-gradient(145deg,#103a45_0%,#0f4c5c_42%,#164d59_100%)] p-8 pb-11 text-white shadow-[0_30px_80px_rgba(15,76,92,0.24)] lg:p-10 lg:pb-16">
+          <div className="relative overflow-hidden rounded-[32px] border border-[rgba(15,76,92,0.14)] bg-[linear-gradient(145deg,#103a45_0%,#0f4c5c_42%,#164d59_100%)] p-5 pb-8 text-white shadow-[0_30px_80px_rgba(15,76,92,0.24)] sm:rounded-[40px] sm:p-8 sm:pb-11 lg:p-10 lg:pb-16">
             <div className="absolute inset-x-0 top-0 h-40 bg-[radial-gradient(ellipse_at_top,rgba(255,255,255,0.2)_0%,rgba(255,255,255,0.1)_28%,rgba(255,255,255,0.04)_46%,rgba(255,255,255,0)_74%)] opacity-90" />
             <div className="absolute -right-24 top-20 h-72 w-72 rounded-full bg-[rgba(255,255,255,0.08)] blur-3xl" />
             <div className="absolute -left-16 bottom-0 h-56 w-56 rounded-full bg-[rgba(198,122,69,0.16)] blur-3xl" />
@@ -372,53 +371,39 @@ export function LandingPage({
                       {brandName}
                     </div>
                     <Badge tone="warning" className="bg-[rgba(255,255,255,0.16)] text-white">
-                      Beta com demo guiada
+                      Waitlist aberta
                     </Badge>
                   </div>
 
-                  <h1 className="mt-8 max-w-3xl text-[clamp(2.8rem,4.1vw,4.4rem)] font-semibold leading-[0.96] tracking-[-0.055em]">
-                    Menos fricção para o consultório. Comece pela demo.
+                  <h1 className="mt-5 max-w-3xl text-[clamp(2rem,4.1vw,4.4rem)] font-semibold leading-[0.96] tracking-[-0.055em] sm:mt-8 sm:text-[clamp(2.4rem,4.1vw,4.4rem)]">
+                    Menos fricção para o consultório.
                   </h1>
 
-                  <p className="mt-5 max-w-2xl text-[17px] leading-8 text-[rgba(255,255,255,0.8)]">
+                  <p className="mt-3 max-w-2xl text-[15px] leading-6 text-[rgba(255,255,255,0.8)] sm:mt-5 sm:text-[17px] sm:leading-8">
                     O {productName} é o produto da {brandName} para psicólogo(a) autônomo(a) no Brasil.
                     Ele junta o que hoje fica em Google Agenda, WhatsApp, planilha, documento solto
                     e cobrança espalhada, sem abrir mão de revisão humana obrigatória.
                   </p>
 
-                  <div className="mt-6 grid gap-2 sm:max-w-2xl">
+                  <div className="mt-4 grid gap-2 sm:mt-6 sm:max-w-2xl">
                     <HeroBullet text="Veja cedo o que pode travar atendimento, consentimento, continuidade ou pagamento." />
                     <HeroBullet text="Feche o pós-sessão com contexto, rascunho assistido e decisão humana." />
                     <HeroBullet text="Saia do remendo entre Google Agenda, WhatsApp, planilha, documento e cobrança." />
                   </div>
 
-                  <div className="mt-7 flex flex-wrap gap-3">
+                  <div className="mt-5 flex flex-wrap gap-3 sm:mt-7">
                     <Button
                       asChild
                       className="h-[54px] rounded-[22px] border border-[rgba(198,122,69,0.42)] bg-[var(--color-accent)] px-6 text-base font-semibold text-white shadow-[0_18px_38px_rgba(198,122,69,0.28)] hover:bg-[color-mix(in_srgb,var(--color-accent)_88%,black)]"
                     >
                       <TrackedCtaLink
-                        ctaLabel="Solicitar demo"
-                        ctaLocation="home_hero_primary"
-                        href="/solicitar-demo"
-                        pageType={marketingPageType}
-                      >
-                        Solicitar demo
-                        <ArrowRight className="h-4 w-4" />
-                      </TrackedCtaLink>
-                    </Button>
-                    <Button
-                      asChild
-                      className="h-[54px] rounded-[22px] border border-[rgba(255,255,255,0.18)] bg-[rgba(255,255,255,0.08)] px-6 text-base text-white hover:bg-[rgba(255,255,255,0.12)]"
-                      variant="ghost"
-                    >
-                      <TrackedCtaLink
                         ctaLabel="Entrar na waitlist"
-                        ctaLocation="home_hero_secondary"
+                        ctaLocation="home_hero_primary"
                         href="#waitlist"
                         pageType={marketingPageType}
                       >
                         Entrar na waitlist
+                        <ArrowRight className="h-4 w-4" />
                       </TrackedCtaLink>
                     </Button>
                   </div>
@@ -606,40 +591,7 @@ export function LandingPage({
           />
         </section>
 
-        <section className="mt-8 rounded-[32px] border border-[rgba(15,76,92,0.12)] bg-[rgba(255,253,248,0.9)] px-6 py-5 shadow-[0_18px_40px_rgba(15,76,92,0.06)]">
-          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-            <div className="max-w-3xl">
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--color-primary)]">
-                Caminho público
-              </p>
-              <p className="mt-2 text-lg font-semibold tracking-[-0.02em] text-[var(--color-text)]">
-                Demo primeiro, waitlist como apoio e páginas públicas para reduzir dúvida antes do contato.
-              </p>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              <Link
-                className="rounded-full border border-[rgba(15,76,92,0.14)] bg-white px-4 py-2 text-sm font-medium text-[var(--color-text)] transition hover:border-[var(--color-primary)]"
-                href="/solicitar-demo"
-              >
-                Solicitar demo
-              </Link>
-              <Link
-                className="rounded-full border border-[rgba(15,76,92,0.14)] bg-white px-4 py-2 text-sm font-medium text-[var(--color-text)] transition hover:border-[var(--color-primary)]"
-                href="/pricing"
-              >
-                Ver planos
-              </Link>
-              <Link
-                className="rounded-full border border-[rgba(15,76,92,0.14)] bg-white px-4 py-2 text-sm font-medium text-[var(--color-text)] transition hover:border-[var(--color-primary)]"
-                href="/seguranca-e-privacidade"
-              >
-                Segurança
-              </Link>
-            </div>
-          </div>
-        </section>
-
-        <section className="mt-16" id="problema">
+        <section className="mt-10 sm:mt-16" id="problema">
           <div className="max-w-3xl">
             <Badge tone="warning" className="px-3">
               O problema hoje
@@ -677,7 +629,7 @@ export function LandingPage({
           </div>
         </section>
 
-        <section className="mt-16" id="como-funciona">
+        <section className="mt-10 sm:mt-16" id="como-funciona">
           <div className="max-w-3xl">
             <Badge tone="info" className="px-3">
               Plataforma única
@@ -725,7 +677,7 @@ export function LandingPage({
           </div>
         </section>
 
-        <section className="mt-16">
+        <section className="mt-10 sm:mt-16">
           <div className="grid gap-5 lg:grid-cols-3">
             <DeepDiveCard
               badge="Deep dive 01"
@@ -763,7 +715,7 @@ export function LandingPage({
           </div>
         </section>
 
-        <section className="mt-16">
+        <section className="mt-10 sm:mt-16">
           <div className="max-w-3xl">
             <Badge tone="neutral" className="px-3">
               Redução de risco
@@ -801,7 +753,7 @@ export function LandingPage({
           </div>
         </section>
 
-        <section className="mt-16">
+        <section className="mt-10 sm:mt-16">
           <Card className="overflow-hidden border-[rgba(15,76,92,0.14)] bg-[rgba(255,253,248,0.94)]">
             <CardHeader className="border-b border-[var(--color-border)] pb-5">
               <Badge tone="warning" className="w-fit px-3">
@@ -835,7 +787,7 @@ export function LandingPage({
           </Card>
         </section>
 
-        <section className="mt-16">
+        <section className="mt-10 sm:mt-16">
           <div className="mx-auto max-w-3xl text-center">
             <Badge tone="neutral" className="px-3">
               FAQ
@@ -872,17 +824,17 @@ export function LandingPage({
           </div>
         </section>
 
-        <section className="mt-16 rounded-[40px] border border-[rgba(15,76,92,0.14)] bg-[linear-gradient(145deg,#103a45_0%,#0f4c5c_50%,#164d59_100%)] px-8 py-10 text-white shadow-[0_30px_80px_rgba(15,76,92,0.24)]">
+        <section className="mt-10 rounded-[32px] border border-[rgba(15,76,92,0.14)] bg-[linear-gradient(145deg,#103a45_0%,#0f4c5c_50%,#164d59_100%)] px-5 py-8 text-white shadow-[0_30px_80px_rgba(15,76,92,0.24)] sm:mt-16 sm:rounded-[40px] sm:px-8 sm:py-10">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-3xl">
               <Badge tone="warning" className="bg-[rgba(255,255,255,0.16)] text-white">
-                Waitlist secundária
+                Waitlist aberta
               </Badge>
-              <h2 className="mt-4 text-4xl font-semibold tracking-[-0.04em]">
-                Se a demo ainda não for o seu caminho, entre cedo na fila.
+              <h2 className="mt-4 text-[clamp(1.8rem,3.5vw,2.8rem)] font-semibold tracking-[-0.04em]">
+                Garanta seu lugar antes do lançamento.
               </h2>
-              <p className="mt-4 text-lg leading-8 text-[rgba(255,255,255,0.8)]">
-                O {productName} não é para quem quer mais uma ferramenta solta. Ele é para quem quer
+              <p className="mt-4 text-base leading-7 text-[rgba(255,255,255,0.8)] sm:text-lg sm:leading-8">
+                O {productName} não é para quem quer mais uma ferramenta solta. É para quem quer
                 parar de remendar agenda, sessão, documento, revisão e cobrança em cinco lugares diferentes.
               </p>
             </div>
@@ -892,41 +844,27 @@ export function LandingPage({
                 className="h-[58px] rounded-[22px] border border-[rgba(198,122,69,0.42)] bg-[var(--color-accent)] px-8 text-base font-semibold text-white shadow-[0_18px_38px_rgba(198,122,69,0.28)] hover:bg-[color-mix(in_srgb,var(--color-accent)_88%,black)]"
               >
                 <TrackedCtaLink
-                  ctaLabel="Solicitar demo"
-                  ctaLocation="home_footer_primary"
-                  href="/solicitar-demo"
-                  pageType={marketingPageType}
-                >
-                  Solicitar demo
-                  <ArrowRight className="h-4 w-4" />
-                </TrackedCtaLink>
-              </Button>
-              <Button
-                asChild
-                className="h-[58px] rounded-[22px] border border-[rgba(255,255,255,0.22)] bg-[rgba(255,255,255,0.08)] px-8 text-base text-white hover:bg-[rgba(255,255,255,0.14)]"
-                variant="ghost"
-              >
-                <TrackedCtaLink
                   ctaLabel="Entrar na waitlist"
-                  ctaLocation="home_footer_secondary"
+                  ctaLocation="home_footer_primary"
                   href="#waitlist"
                   pageType={marketingPageType}
                 >
                   Entrar na waitlist
+                  <ArrowRight className="h-4 w-4" />
                 </TrackedCtaLink>
               </Button>
             </div>
           </div>
         </section>
 
-        <footer className="mt-16 border-t border-[rgba(15,76,92,0.1)] py-10">
+        <footer className="mt-10 border-t border-[rgba(15,76,92,0.1)] py-8 sm:mt-16 sm:py-10">
           <div className="flex flex-col items-center gap-4 text-center">
             <div className="rounded-2xl border border-[rgba(15,76,92,0.1)] bg-[rgba(15,76,92,0.04)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
               {brandName}
             </div>
             <p className="max-w-lg text-sm leading-6 text-[var(--color-text-muted)]">
               O {productName} é um produto da {brandName} para psicólogos autônomos no Brasil.
-              Plataforma em desenvolvimento. Acesso por demo e waitlist.
+              Plataforma em desenvolvimento. Acesso por waitlist.
             </p>
             <p className="text-xs text-[var(--color-text-muted)]">
               &copy; {new Date().getFullYear()} {brandName}. Todos os direitos reservados.
