@@ -94,9 +94,8 @@ export function OnboardingWizard({ initialData }: OnboardingWizardProps) {
       <OperationalHero
         badges={
           <>
-            <Badge tone="warning">Ativação da conta</Badge>
             <Badge tone={data.accountStatus === "ready_for_operations" ? "success" : "warning"}>
-              {data.accountStatus}
+              {data.accountStatus === "ready_for_operations" ? "Conta pronta" : "Ativação em curso"}
             </Badge>
           </>
         }
@@ -181,7 +180,9 @@ export function OnboardingWizard({ initialData }: OnboardingWizardProps) {
                     {currentStepMeta?.description}
                   </p>
                 </div>
-                <Badge tone="warning">{data.accountStatus}</Badge>
+                <Badge tone={data.accountStatus === "ready_for_operations" ? "success" : "warning"}>
+                  {data.accountStatus === "ready_for_operations" ? "Conta pronta" : "Em ativação"}
+                </Badge>
               </div>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -216,7 +217,7 @@ export function OnboardingWizard({ initialData }: OnboardingWizardProps) {
             <CardHeader>
               <p className="text-lg font-semibold">Checklist bloqueante</p>
               <p className="text-sm text-[var(--color-text-muted)]">
-                Estes itens controlam a transição para `ready_for_operations`.
+                Todos precisam estar concluídos para liberar a operação completa.
               </p>
             </CardHeader>
             <CardContent className="space-y-3">
