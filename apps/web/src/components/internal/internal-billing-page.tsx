@@ -16,10 +16,10 @@ export function InternalBillingPage({ data }: { data: InternalBillingResponse })
         <CardHeader>
           <p className="text-lg font-semibold">Fila de billing ops</p>
         </CardHeader>
-        <CardContent className="space-y-3">
+        <CardContent className="space-y-3 p-4">
           {data.items.map((item) => (
-            <div key={item.id} className="rounded-3xl border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.04)] p-4">
-              <div className="flex items-center justify-between gap-4">
+            <div key={item.id} className="rounded-2xl border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.04)] p-5">
+              <div className="flex items-start justify-between gap-4">
                 <div>
                   <p className="font-semibold">{item.tenantName}</p>
                   <p className="mt-1 text-sm text-[rgba(255,255,255,0.62)]">{item.planLabel} · {item.invoiceLabel}</p>
@@ -28,9 +28,9 @@ export function InternalBillingPage({ data }: { data: InternalBillingResponse })
                   {item.subscriptionStatusLabel}
                 </Badge>
               </div>
-              <div className="mt-4 grid gap-3 md:grid-cols-3">
+              <div className="mt-4 grid grid-cols-3 gap-6 border-t border-[rgba(255,255,255,0.06)] pt-4">
                 <InfoItem label="Valor" value={item.amountLabel} />
-                <InfoItem label="Ultimo evento" value={item.lastEventLabel} />
+                <InfoItem label="Último evento" value={item.lastEventLabel} />
                 <InfoItem label="Atualizado" value={item.lastEventAtLabel} />
               </div>
             </div>
@@ -43,9 +43,9 @@ export function InternalBillingPage({ data }: { data: InternalBillingResponse })
 
 function InfoItem({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-3xl border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.04)] p-4">
-      <p className="text-sm font-semibold">{label}</p>
-      <p className="mt-2 text-sm leading-6 text-[rgba(255,255,255,0.68)]">{value}</p>
+    <div>
+      <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[rgba(255,255,255,0.42)]">{label}</p>
+      <p className="mt-1.5 text-sm text-[rgba(255,255,255,0.82)]">{value}</p>
     </div>
   );
 }

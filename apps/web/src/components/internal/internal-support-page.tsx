@@ -9,6 +9,7 @@ export function InternalSupportPage({ data }: { data: InternalSupportQueueRespon
       title="Fila de suporte interno"
       description="Tickets operacionais com metadata do fluxo afetado, sem payload clínico."
       columns={["Tenant", "Categoria", "Prioridade", "Status", "Último evento"]}
+      gridTemplate="1.8fr 1fr 0.7fr 1.1fr 1fr"
       rows={data.items.map((item) => [
         <div key={`${item.ticketId}-tenant`}><p className="font-semibold">{item.tenantName}</p><p className="mt-1 text-sm text-[rgba(255,255,255,0.62)]">{item.ticketId} · {item.flowLabel}</p></div>,
         item.categoryLabel,
@@ -25,14 +26,17 @@ function InternalSimpleTable({
   title,
   description,
   columns,
-  rows
+  rows,
+  gridTemplate
 }: {
   badge: string;
   title: string;
   description: string;
   columns: string[];
   rows: ReactNode[][];
+  gridTemplate?: string;
 }) {
+  gridTemplate ??= `repeat(${columns.length}, minmax(0, 1fr))`;
   return (
     <div className="space-y-6 text-white">
       <section className="rounded-[32px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.04)] p-7">
@@ -46,25 +50,29 @@ function InternalSimpleTable({
           <p className="text-lg font-semibold">Lista operacional</p>
         </CardHeader>
         <CardContent className="overflow-hidden p-0">
-          <div
-            className="grid gap-4 border-b border-[rgba(255,255,255,0.08)] px-6 py-4 text-xs font-semibold uppercase tracking-[0.14em] text-[rgba(255,255,255,0.5)]"
-            style={{ gridTemplateColumns: `repeat(${columns.length}, minmax(0, 1fr))` }}
-          >
-            {columns.map((column) => (
-              <span key={column}>{column}</span>
-            ))}
-          </div>
-          {rows.map((row, index) => (
-            <div
-              key={index}
-              className="grid gap-4 border-b border-[rgba(255,255,255,0.08)] px-6 py-5 text-sm text-[rgba(255,255,255,0.72)]"
-              style={{ gridTemplateColumns: `repeat(${columns.length}, minmax(0, 1fr))` }}
-            >
-              {row.map((cell, cellIndex) => (
-                <div key={cellIndex}>{cell}</div>
+          <div className="overflow-x-auto">
+            <div style={{ minWidth: "640px" }}>
+              <div
+                className="grid gap-4 border-b border-[rgba(255,255,255,0.08)] px-6 py-4 text-xs font-semibold uppercase tracking-[0.14em] text-[rgba(255,255,255,0.5)]"
+                style={{ gridTemplateColumns }}
+              >
+                {columns.map((column) => (
+                  <span key={column}>{column}</span>
+                ))}
+              </div>
+              {rows.map((row, index) => (
+                <div
+                  key={index}
+                  className="grid items-center gap-4 border-b border-[rgba(255,255,255,0.08)] px-6 py-5 text-sm text-[rgba(255,255,255,0.72)]"
+                  style={{ gridTemplateColumns }}
+                >
+                  {row.map((cell, cellIndex) => (
+                    <div key={cellIndex}>{cell}</div>
+                  ))}
+                </div>
               ))}
             </div>
-          ))}
+          </div>
         </CardContent>
       </Card>
     </div>

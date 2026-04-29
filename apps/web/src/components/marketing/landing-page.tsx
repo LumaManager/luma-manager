@@ -411,15 +411,6 @@ export function LandingPage({
                   <div className="mt-6 flex flex-wrap items-center gap-2">
                     <TrackedCtaLink
                       className="rounded-full border border-[rgba(255,255,255,0.16)] bg-[rgba(255,255,255,0.08)] px-4 py-2 text-sm text-[rgba(255,255,255,0.82)] transition hover:bg-[rgba(255,255,255,0.12)]"
-                      ctaLabel="Ver planos"
-                      ctaLocation="home_hero_quicklinks"
-                      href="/pricing"
-                      pageType={marketingPageType}
-                    >
-                      Ver planos
-                    </TrackedCtaLink>
-                    <TrackedCtaLink
-                      className="rounded-full border border-[rgba(255,255,255,0.16)] bg-[rgba(255,255,255,0.08)] px-4 py-2 text-sm text-[rgba(255,255,255,0.82)] transition hover:bg-[rgba(255,255,255,0.12)]"
                       ctaLabel="Segurança e privacidade"
                       ctaLocation="home_hero_quicklinks"
                       href="/seguranca-e-privacidade"

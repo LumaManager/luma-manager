@@ -27,14 +27,18 @@ export function InternalIncidentsPage({ data }: { data: InternalIncidentsRespons
                 <Badge tone="info">{item.statusLabel}</Badge>
               </div>
             </CardHeader>
-            <CardContent className="space-y-3">
-              {item.timeline.map((event) => (
-                <div key={event.id} className="rounded-3xl border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.04)] p-4">
-                  <p className="font-semibold">{event.title}</p>
-                  <p className="mt-2 text-sm leading-6 text-[rgba(255,255,255,0.68)]">{event.description}</p>
-                  <p className="mt-2 text-xs uppercase tracking-[0.12em] text-[rgba(255,255,255,0.46)]">{event.occurredAtLabel}</p>
-                </div>
-              ))}
+            <CardContent className="space-y-0 p-4 pt-0">
+              <div className="space-y-2">
+                {item.timeline.map((event) => (
+                  <div key={event.id} className="flex gap-4 rounded-xl border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.04)] px-5 py-4">
+                    <div className="min-w-0 flex-1">
+                      <p className="font-semibold">{event.title}</p>
+                      <p className="mt-1 text-sm leading-6 text-[rgba(255,255,255,0.68)]">{event.description}</p>
+                    </div>
+                    <p className="shrink-0 text-xs uppercase tracking-[0.12em] text-[rgba(255,255,255,0.38)]">{event.occurredAtLabel}</p>
+                  </div>
+                ))}
+              </div>
             </CardContent>
           </Card>
         ))}

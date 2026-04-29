@@ -16,18 +16,22 @@ export function InternalAuditPage({ data }: { data: InternalAuditResponse }) {
         <CardHeader>
           <p className="text-lg font-semibold">Eventos recentes</p>
         </CardHeader>
-        <CardContent className="space-y-3">
+        <CardContent className="space-y-2 p-4">
           {data.items.map((item) => (
-            <div key={item.id} className="rounded-3xl border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.04)] p-4">
-              <div className="flex items-center justify-between gap-4">
-                <p className="font-semibold">{item.eventLabel}</p>
-                <Badge tone={item.sensitivityLabel === "Interno" ? "info" : "warning"}>{item.sensitivityLabel}</Badge>
+            <div key={item.id} className="rounded-xl border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.04)] px-5 py-4">
+              <div className="flex items-start justify-between gap-4">
+                <div className="min-w-0">
+                  <p className="font-semibold">{item.eventLabel}</p>
+                  <p className="mt-1 text-sm text-[rgba(255,255,255,0.62)]">
+                    {item.actorLabel} · {item.moduleLabel} · {item.tenantLabel}
+                  </p>
+                  <p className="mt-1 text-sm text-[rgba(255,255,255,0.62)]">{item.targetLabel}</p>
+                </div>
+                <div className="flex shrink-0 flex-col items-end gap-2">
+                  <Badge tone={item.sensitivityLabel === "Interno" ? "info" : "warning"}>{item.sensitivityLabel}</Badge>
+                  <p className="text-xs uppercase tracking-[0.12em] text-[rgba(255,255,255,0.38)]">{item.occurredAtLabel}</p>
+                </div>
               </div>
-              <p className="mt-2 text-sm leading-6 text-[rgba(255,255,255,0.68)]">
-                {item.actorLabel} · {item.moduleLabel} · {item.tenantLabel}
-              </p>
-              <p className="mt-2 text-sm leading-6 text-[rgba(255,255,255,0.68)]">{item.targetLabel}</p>
-              <p className="mt-2 text-xs uppercase tracking-[0.12em] text-[rgba(255,255,255,0.46)]">{item.occurredAtLabel}</p>
             </div>
           ))}
         </CardContent>

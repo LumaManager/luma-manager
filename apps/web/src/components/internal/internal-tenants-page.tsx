@@ -146,15 +146,15 @@ export function InternalTenantsPage({ initialData }: { initialData: InternalTena
             <Link
               key={item.tenantId}
               href={item.detailHref}
-              className="grid grid-cols-[minmax(0,1.6fr)_0.9fr_0.9fr_0.9fr_1fr] gap-4 border-b border-[rgba(255,255,255,0.08)] px-6 py-5 transition hover:bg-[rgba(255,255,255,0.05)]"
+              className="grid grid-cols-[minmax(0,1.6fr)_0.9fr_0.9fr_0.9fr_1fr] items-center gap-4 border-b border-[rgba(255,255,255,0.08)] px-6 py-5 transition hover:bg-[rgba(255,255,255,0.05)]"
             >
               <div className="min-w-0">
                 <p className="truncate font-semibold">{item.name}</p>
                 <p className="mt-1 text-sm text-[rgba(255,255,255,0.62)]">{item.planLabel} · {item.createdAtLabel}</p>
               </div>
-              <TenantBadge kind="ops" value={item.operationalStatus} />
-              <TenantBadge kind="onboarding" value={item.onboardingStatus} />
-              <TenantBadge kind="billing" value={item.billingStatus} />
+              <div><TenantBadge kind="ops" value={item.operationalStatus} /></div>
+              <div><TenantBadge kind="onboarding" value={item.onboardingStatus} /></div>
+              <div><TenantBadge kind="billing" value={item.billingStatus} /></div>
               <div className="text-sm text-[rgba(255,255,255,0.68)]">
                 <p>{item.lastEventLabel}</p>
                 <p className="mt-1 text-xs uppercase tracking-[0.12em] text-[rgba(255,255,255,0.46)]">{item.lastEventAtLabel}</p>
