@@ -179,39 +179,29 @@ export function SettingsPageView({ activeSection, initialData }: SettingsPagePro
         </Card>
       ) : null}
 
-      <div className="grid gap-4 xl:grid-cols-[290px_minmax(0,1fr)_340px]">
-        <Card>
-          <CardHeader>
-            <p className="text-lg font-semibold">Seções</p>
-            <p className="text-sm text-[var(--color-text-muted)]">
-              O salvamento acontece por seção e suporta deep link.
-            </p>
-          </CardHeader>
-          <CardContent className="space-y-2">
+      <div className="grid gap-4 xl:grid-cols-[220px_minmax(0,1fr)_340px]">
+        <div className="rounded-3xl border border-[var(--color-border)] bg-[rgba(15,76,92,0.03)] p-3">
+          <p className="mb-2 px-2 pt-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--color-text-muted)]">
+            Seções
+          </p>
+          <nav className="space-y-0.5">
             {data.sections.map((section) => (
               <Link
                 className={cn(
-                  "block rounded-3xl border px-4 py-4 transition",
+                  "flex items-center gap-2.5 rounded-2xl px-3 py-2.5 text-sm font-medium transition",
                   section.key === activeSection
-                    ? "border-[var(--color-primary)] bg-[rgba(15,76,92,0.06)]"
-                    : "border-[var(--color-border)] bg-white hover:bg-[rgba(15,76,92,0.03)]"
+                    ? "bg-[var(--color-primary)] text-white"
+                    : "text-[var(--color-text)] hover:bg-[rgba(15,76,92,0.07)]"
                 )}
                 href={section.href}
                 key={section.key}
               >
-                <div className="flex items-center gap-3">
-                  <SectionIcon section={section.key} />
-                  <div>
-                    <p className="font-semibold">{section.title}</p>
-                    <p className="mt-1 text-sm leading-6 text-[var(--color-text-muted)]">
-                      {section.description}
-                    </p>
-                  </div>
-                </div>
+                <SectionIcon active={section.key === activeSection} section={section.key} />
+                {section.title}
               </Link>
             ))}
-          </CardContent>
-        </Card>
+          </nav>
+        </div>
 
         <div className="space-y-4">
           {activeSection === "profile" ? (
@@ -782,12 +772,13 @@ function InfoBlock({
   );
 }
 
-function SectionIcon({ section }: { section: SettingsSectionKey }) {
-  if (section === "profile") return <UserRound className="h-4 w-4 text-[var(--color-primary)]" />;
-  if (section === "practice") return <Building2 className="h-4 w-4 text-[var(--color-primary)]" />;
-  if (section === "security") return <ShieldCheck className="h-4 w-4 text-[var(--color-primary)]" />;
-  if (section === "policies") return <LockKeyhole className="h-4 w-4 text-[var(--color-primary)]" />;
-  return <Bell className="h-4 w-4 text-[var(--color-primary)]" />;
+function SectionIcon({ active, section }: { active: boolean; section: SettingsSectionKey }) {
+  const cls = cn("h-4 w-4 shrink-0", active ? "text-white" : "text-[var(--color-primary)]");
+  if (section === "profile") return <UserRound className={cls} />;
+  if (section === "practice") return <Building2 className={cls} />;
+  if (section === "security") return <ShieldCheck className={cls} />;
+  if (section === "policies") return <LockKeyhole className={cls} />;
+  return <Bell className={cls} />;
 }
 
 function getSavePayload(
