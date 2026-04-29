@@ -54,7 +54,7 @@ function InternalSimpleTable({
             <div style={{ minWidth: "640px" }}>
               <div
                 className="grid gap-4 border-b border-[rgba(255,255,255,0.08)] px-6 py-4 text-xs font-semibold uppercase tracking-[0.14em] text-[rgba(255,255,255,0.5)]"
-                style={{ gridTemplateColumns }}
+                style={{ gridTemplateColumns: gridTemplate }}
               >
                 {columns.map((column) => (
                   <span key={column}>{column}</span>
@@ -64,7 +64,7 @@ function InternalSimpleTable({
                 <div
                   key={index}
                   className="grid items-center gap-4 border-b border-[rgba(255,255,255,0.08)] px-6 py-5 text-sm text-[rgba(255,255,255,0.72)]"
-                  style={{ gridTemplateColumns }}
+                  style={{ gridTemplateColumns: gridTemplate }}
                 >
                   {row.map((cell, cellIndex) => (
                     <div key={cellIndex}>{cell}</div>
