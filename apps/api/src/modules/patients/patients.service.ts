@@ -11,6 +11,7 @@ import type {
 } from "@terapia/contracts";
 import { patientCreateRequestSchema } from "@terapia/contracts";
 
+import { buildMockPatientDetail, buildMockPatientList, isMockEmail } from "@/modules/mock";
 import type { PatientWithMeta } from "./patients.repository";
 import { PatientsRepository } from "./patients.repository";
 
@@ -28,6 +29,8 @@ export class PatientsService {
     session: AuthSession,
     query: Record<string, string>
   ): Promise<PatientListResponse> {
+    if (isMockEmail(session.therapist.email)) return buildMockPatientList(query);
+
     const page = Math.max(Number(query.page ?? "1") || 1, 1);
     const pageSize = [25, 50, 100].includes(Number(query.pageSize))
       ? Number(query.pageSize)
@@ -63,6 +66,12 @@ export class PatientsService {
   // ---------------------------------------------------------------------------
 
   async getPatientDetail(session: AuthSession, patientId: string): Promise<PatientDetail> {
+    if (isMockEmail(session.therapist.email)) {
+      const mock = buildMockPatientDetail(patientId);
+      if (mock) return mock;
+      throw new NotFoundException("Paciente não encontrado.");
+    }
+
     const p = await this.repo.findById(session.therapist.id, patientId);
 
     if (!p) throw new NotFoundException("Paciente não encontrado.");

@@ -15,6 +15,7 @@ import type {
 } from "@terapia/contracts";
 import { documentCreateRequestSchema } from "@terapia/contracts";
 
+import { buildMockDocumentDetail, buildMockDocumentsList, isMockEmail } from "@/modules/mock";
 import type { DocumentEventRow, DocumentWithPatient } from "./documents.repository";
 import { DocumentsRepository } from "./documents.repository";
 
@@ -257,6 +258,8 @@ export class DocumentsService {
     session: AuthSession,
     query: Partial<Record<string, string>>
   ): Promise<DocumentsListResponse> {
+    if (isMockEmail(session.therapist.email)) return buildMockDocumentsList(query);
+
     const docs = await this.repo.listWithPatient(session.tenant.id);
     const allEvents = await this.repo.listEventsForDocuments(docs.map((d) => d.id));
 
@@ -314,6 +317,12 @@ export class DocumentsService {
   }
 
   async getDocumentDetail(session: AuthSession, documentId: string): Promise<DocumentDetail> {
+    if (isMockEmail(session.therapist.email)) {
+      const mock = buildMockDocumentDetail(documentId);
+      if (mock) return mock;
+      throw new NotFoundException("Documento não encontrado.");
+    }
+
     const doc = await this.repo.findByIdWithPatient(session.tenant.id, documentId);
     if (!doc) throw new NotFoundException("Documento não encontrado.");
 

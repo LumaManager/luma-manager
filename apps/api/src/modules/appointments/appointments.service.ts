@@ -23,6 +23,7 @@ import {
   scheduleBlockUpdateRequestSchema
 } from "@terapia/contracts";
 
+import { buildMockAgenda, buildMockAppointmentDetail, isMockEmail } from "@/modules/mock";
 import type { AppointmentWithPatient, AvailabilityRuleWithWindows } from "./appointments.repository";
 import { AppointmentsRepository } from "./appointments.repository";
 
@@ -40,6 +41,8 @@ export class AppointmentsService {
   // ---------------------------------------------------------------------------
 
   async listAgenda(session: AuthSession, query: Record<string, string>): Promise<AgendaResponse> {
+    if (isMockEmail(session.therapist.email)) return buildMockAgenda(query);
+
     const view = (query.view === "week" || query.view === "month") ? query.view : "week";
     const targetDate = query.date ?? this.today();
     const { dateFrom, dateTo, dayColumns } = this.buildRange(view, targetDate);
@@ -125,6 +128,12 @@ export class AppointmentsService {
   // ---------------------------------------------------------------------------
 
   async getAppointmentDetail(session: AuthSession, appointmentId: string): Promise<AppointmentDetail> {
+    if (isMockEmail(session.therapist.email)) {
+      const mock = buildMockAppointmentDetail(appointmentId);
+      if (mock) return mock;
+      throw new NotFoundException("Sessão não encontrada.");
+    }
+
     const a = await this.repo.findById(session.therapist.id, appointmentId);
     if (!a) throw new NotFoundException("Sessão não encontrada.");
 

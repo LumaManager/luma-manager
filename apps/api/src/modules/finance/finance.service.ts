@@ -16,6 +16,7 @@ import type {
 } from "@terapia/contracts";
 import { chargeCreateRequestSchema, chargePaymentRequestSchema } from "@terapia/contracts";
 
+import { buildMockChargeDetail, buildMockFinanceList, isMockEmail } from "@/modules/mock";
 import type { ChargeEventRow, ChargeWithPatient } from "./finance.repository";
 import { FinanceRepository } from "./finance.repository";
 
@@ -157,6 +158,8 @@ export class FinanceService {
     session: AuthSession,
     query: Partial<Record<string, string>>
   ): Promise<FinanceListResponse> {
+    if (isMockEmail(session.therapist.email)) return buildMockFinanceList(query);
+
     const [charges, patientOptions, appointmentOptions] = await Promise.all([
       this.repo.listWithPatient(session.tenant.id),
       this.repo.listDistinctPatients(session.tenant.id),
@@ -207,6 +210,12 @@ export class FinanceService {
   }
 
   async getChargeDetail(session: AuthSession, chargeId: string): Promise<ChargeDetail> {
+    if (isMockEmail(session.therapist.email)) {
+      const mock = buildMockChargeDetail(chargeId);
+      if (mock) return mock;
+      throw new NotFoundException("Cobrança não encontrada.");
+    }
+
     const charge = await this.repo.findByIdWithPatient(session.tenant.id, chargeId);
     if (!charge) throw new NotFoundException("Cobrança não encontrada.");
 
