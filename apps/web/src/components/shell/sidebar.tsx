@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 
 import type { AppShellBootstrap } from "@terapia/contracts";
-import { Avatar, Badge, cn } from "@terapia/ui";
+import { Avatar, cn } from "@terapia/ui";
 
 import { getBadgeForItem, primaryNavigation } from "@/lib/navigation";
 
@@ -45,16 +45,8 @@ export function Sidebar({ bootstrap }: SidebarProps) {
   return (
     <aside className="sticky top-0 hidden h-screen overflow-y-auto border-r border-[var(--color-border)] bg-[rgba(255,253,248,0.84)] px-4 py-4 backdrop-blur lg:flex lg:flex-col">
       <div className="rounded-[26px] border border-[var(--color-border)] bg-white p-3.5 shadow-[var(--shadow-panel)]">
-        <div className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--color-text-muted)]">
-          Terapia
-        </div>
-        <div className="mt-2 text-[15px] font-semibold text-[var(--color-text)]">{bootstrap.tenant.name}</div>
-        <div className="mt-3 space-y-2">
-          <Badge tone="info" className="px-2.5">
-            Web-first
-          </Badge>
-          <p className="text-sm font-medium text-[var(--color-text-muted)]">{bootstrap.accountStateLabel}</p>
-        </div>
+        <div className="text-[15px] font-semibold text-[var(--color-text)]">{bootstrap.tenant.name}</div>
+        <p className="mt-2 text-sm font-medium text-[var(--color-text-muted)]">{bootstrap.accountStateLabel}</p>
       </div>
 
       <nav className="mt-6 flex-1 space-y-1.5">
@@ -126,11 +118,11 @@ export function Sidebar({ bootstrap }: SidebarProps) {
             <p className="text-xs text-[var(--color-text-muted)]">{bootstrap.therapistProfile.roleLabel}</p>
           </div>
         </div>
-        <div className="mt-3 text-xs leading-5 text-[var(--color-text-muted)]">
-          {activationMode
-            ? "Conta em ativação. As áreas operacionais continuam visíveis no menu, mas só liberam depois do checklist mínimo."
-            : "MFA ativo e domínio clínico concentrado no backend."}
-        </div>
+        {activationMode && (
+          <div className="mt-3 text-xs leading-5 text-[var(--color-text-muted)]">
+            Áreas operacionais liberam após a ativação da conta.
+          </div>
+        )}
       </div>
     </aside>
   );

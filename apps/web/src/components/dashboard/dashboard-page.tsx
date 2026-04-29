@@ -1,7 +1,5 @@
 import type { TherapistDashboard } from "@terapia/contracts";
 
-import { Badge } from "@terapia/ui";
-
 import { DashboardHeader } from "./dashboard-header";
 import { ActionItemsList, AgendaList, RecentActivityList } from "./operational-list";
 import { QuickActions } from "./quick-actions";
@@ -19,17 +17,6 @@ export function DashboardPage({ data }: DashboardPageProps) {
       <QuickActions actions={data.quickActions} />
 
       <section className="space-y-4">
-        <div className="flex items-end justify-between gap-4 rounded-[28px] border border-[var(--color-border)] bg-[rgba(255,255,255,0.74)] px-5 py-4">
-          <div>
-            <h2 className="text-lg font-semibold">Blocos operacionais</h2>
-            <p className="text-sm text-[var(--color-text-muted)]">
-              O foco visual principal fica em atendimento próximo, backlog clínico, pendências e
-              continuidade de contexto.
-            </p>
-          </div>
-          <Badge tone="neutral">Sem BI decorativo</Badge>
-        </div>
-
         <div className="grid gap-4 2xl:grid-cols-3">
           <SummaryCard state={data.cards.upcomingAppointments}>
             {data.upcomingAppointments.map((item) => (
@@ -108,33 +95,25 @@ export function DashboardPage({ data }: DashboardPageProps) {
             ))}
           </SummaryCard>
 
-          <SummaryCard state={data.cards.accountState}>
-            <div className="rounded-3xl bg-[rgba(63,107,97,0.08)] p-4">
-              <p className="text-sm font-semibold">Direção regulatória atual</p>
-              <p className="mt-2 text-sm leading-6 text-[var(--color-text-muted)]">
-                Produto útil sem áudio, descarte de bruto previsto e processamento Brasil-only
-                mantido como direção da fase.
-              </p>
-            </div>
-          </SummaryCard>
+          <SummaryCard state={data.cards.accountState} />
         </div>
       </section>
 
       <section className="grid gap-4 2xl:grid-cols-[1.2fr_1fr]">
         <AgendaList
-          description="Sessões do dia em ordem cronológica, com CTA objetivo por linha."
+          description="Sessões do dia em ordem cronológica."
           items={data.todayAgenda}
           title="Agenda de hoje"
         />
         <ActionItemsList
-          description="Pendências mais críticas entre revisão, documentos, segurança e financeiro."
+          description="Pendências que precisam da sua atenção agora."
           items={data.actionItems}
           title="Itens que exigem ação"
         />
       </section>
 
       <RecentActivityList
-        description="Mudanças relevantes da conta sem expor conteúdo clínico textual."
+        description="Últimas mudanças relevantes na sua conta."
         items={data.recentActivity}
         title="Atividade recente"
       />

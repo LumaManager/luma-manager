@@ -460,7 +460,7 @@ export function buildDashboard(session: AuthSession): TherapistDashboard {
       },
       clinicalReview: {
         title: "Revisao clinica pendente",
-        eyebrow: "Valor central do produto",
+        eyebrow: "Backlog clinico",
         metric: "4 rascunhos para revisar",
         description:
           "Uma sessao esta atrasada e precisa de fechamento hoje para manter continuidade clinica.",
