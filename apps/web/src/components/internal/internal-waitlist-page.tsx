@@ -11,14 +11,14 @@ export function InternalWaitlistPage({ data }: { data: InternalWaitlistResponse 
 
   return (
     <div className="space-y-6 text-white">
-      <section className="rounded-[32px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.04)] p-7">
+      <section className="rounded-[28px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.04)] p-5 sm:rounded-[32px] sm:p-7">
         <div className="flex flex-wrap items-center gap-3">
           <Badge tone="warning">Waitlist</Badge>
           <Badge tone="neutral" className="bg-[rgba(255,255,255,0.12)] text-white">
             Intenção de mercado
           </Badge>
         </div>
-        <h2 className="mt-4 text-3xl font-semibold tracking-[-0.02em]">
+        <h2 className="mt-4 text-2xl font-semibold tracking-[-0.02em] sm:text-3xl">
           Quem entrou, de onde veio e o que está doendo mais
         </h2>
         <p className="mt-3 max-w-3xl text-sm leading-7 text-[rgba(255,255,255,0.7)]">
@@ -27,7 +27,7 @@ export function InternalWaitlistPage({ data }: { data: InternalWaitlistResponse 
         </p>
       </section>
 
-      <section className="grid gap-4 xl:grid-cols-4">
+      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {stats.map(([title, value, description]) => (
           <Card
             key={title}
@@ -46,7 +46,7 @@ export function InternalWaitlistPage({ data }: { data: InternalWaitlistResponse 
         ))}
       </section>
 
-      <section className="grid gap-4 xl:grid-cols-2">
+      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-2">
         <SummaryNote title="Dor dominante agora" description={data.summary.topPainLabel} />
         <SummaryNote title="Origem mais frequente" description={data.summary.topSourceLabel} />
       </section>
@@ -59,6 +59,8 @@ export function InternalWaitlistPage({ data }: { data: InternalWaitlistResponse 
           </p>
         </CardHeader>
         <CardContent className="overflow-hidden p-0">
+          <div className="overflow-x-auto">
+          <div className="min-w-[700px]">
           <div className="grid grid-cols-[1.5fr_1.1fr_1.3fr_1.2fr_1fr] gap-4 border-b border-[rgba(255,255,255,0.08)] px-6 py-4 text-xs font-semibold uppercase tracking-[0.14em] text-[rgba(255,255,255,0.5)]">
             <span>Contato</span>
             <span>Perfil</span>
@@ -103,6 +105,8 @@ export function InternalWaitlistPage({ data }: { data: InternalWaitlistResponse 
               </div>
             </div>
           ))}
+          </div>
+          </div>
         </CardContent>
       </Card>
     </div>
