@@ -376,21 +376,8 @@ export function FinancePageView({ initialData }: FinancePageProps) {
                     </div>
                     <div className="text-sm text-[var(--color-text-muted)]">{item.dueAtLabel}</div>
                     <div className="font-semibold">{item.amountLabel}</div>
-                    <div className="space-y-3">
+                    <div className="flex items-center">
                       <StatusBadge status={item.status} text={item.statusLabel} />
-                      <div className="flex flex-wrap gap-2">
-                        <Button
-                          onClick={(event) => {
-                            event.preventDefault();
-                            event.stopPropagation();
-                            router.push(item.patientHref);
-                          }}
-                          type="button"
-                          variant="ghost"
-                        >
-                          Paciente
-                        </Button>
-                      </div>
                     </div>
                   </div>
                 ))}
