@@ -518,7 +518,10 @@ export function buildMockFinanceList(query: Partial<Record<string, string>>): Fi
     },
     availablePageSizes: [25, 50, 100],
     patientOptions: PATIENTS.map((p) => ({ value: p.id, label: p.fullName })),
-    appointmentOptions: []
+    appointmentOptions: MOCK_APPTS.map((a) => ({
+      value: a.id,
+      label: `${a.name} · ${a.start}–${a.end}`
+    }))
   };
 }
 
