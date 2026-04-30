@@ -331,6 +331,9 @@ export class DocumentsService {
   }
 
   async createDocument(session: AuthSession, input: DocumentCreateRequest): Promise<DocumentCreateResponse> {
+    if (isMockEmail(session.therapist.email)) {
+      return { documentId: "doc_001", redirectTo: "/app/documents/doc_001" };
+    }
     const payload = documentCreateRequestSchema.parse(input);
     const count = await this.repo.countForTenant(session.tenant.id);
     const code = `DOC-${new Date().getFullYear()}-${String(count + 1).padStart(3, "0")}`;
@@ -388,6 +391,11 @@ export class DocumentsService {
   }
 
   async resendDocument(session: AuthSession, documentId: string): Promise<DocumentDetail> {
+    if (isMockEmail(session.therapist.email)) {
+      const mock = buildMockDocumentDetail(documentId);
+      if (mock) return mock;
+      throw new NotFoundException("Documento não encontrado.");
+    }
     const doc = await this.repo.findByIdWithPatient(session.tenant.id, documentId);
     if (!doc) throw new NotFoundException("Documento não encontrado.");
 
@@ -407,6 +415,11 @@ export class DocumentsService {
   }
 
   async revokeDocument(session: AuthSession, documentId: string): Promise<DocumentDetail> {
+    if (isMockEmail(session.therapist.email)) {
+      const mock = buildMockDocumentDetail(documentId);
+      if (mock) return mock;
+      throw new NotFoundException("Documento não encontrado.");
+    }
     const doc = await this.repo.findByIdWithPatient(session.tenant.id, documentId);
     if (!doc) throw new NotFoundException("Documento não encontrado.");
 

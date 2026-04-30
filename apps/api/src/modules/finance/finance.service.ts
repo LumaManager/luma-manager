@@ -243,6 +243,9 @@ export class FinanceService {
   }
 
   async createCharge(session: AuthSession, input: ChargeCreateRequest): Promise<ChargeCreateResponse> {
+    if (isMockEmail(session.therapist.email)) {
+      return { chargeId: "charge_001", redirectTo: "/app/finance/charges/charge_001" };
+    }
     const payload = chargeCreateRequestSchema.parse(input);
     const count = await this.repo.countForTenant(session.tenant.id);
     const code = `CHG-${new Date().getFullYear()}-${String(count + 1).padStart(3, "0")}`;
@@ -273,6 +276,11 @@ export class FinanceService {
     chargeId: string,
     input: ChargePaymentRequest
   ): Promise<ChargeDetail> {
+    if (isMockEmail(session.therapist.email)) {
+      const mock = buildMockChargeDetail(chargeId);
+      if (mock) return mock;
+      throw new NotFoundException("Cobrança não encontrada.");
+    }
     const payload = chargePaymentRequestSchema.parse(input);
     const charge = await this.repo.findByIdWithPatient(session.tenant.id, chargeId);
     if (!charge) throw new NotFoundException("Cobrança não encontrada.");
@@ -297,6 +305,11 @@ export class FinanceService {
   }
 
   async cancelCharge(session: AuthSession, chargeId: string): Promise<ChargeDetail> {
+    if (isMockEmail(session.therapist.email)) {
+      const mock = buildMockChargeDetail(chargeId);
+      if (mock) return mock;
+      throw new NotFoundException("Cobrança não encontrada.");
+    }
     const charge = await this.repo.findByIdWithPatient(session.tenant.id, chargeId);
     if (!charge) throw new NotFoundException("Cobrança não encontrada.");
 

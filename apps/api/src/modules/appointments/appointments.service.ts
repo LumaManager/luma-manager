@@ -104,6 +104,9 @@ export class AppointmentsService {
     session: AuthSession,
     input: AppointmentCreateRequest
   ): Promise<AppointmentCreateResponse> {
+    if (isMockEmail(session.therapist.email)) {
+      return { id: "appt_1032", href: "/app/appointments/appt_1032" };
+    }
     const payload = appointmentCreateRequestSchema.parse(input);
 
     const created = await this.repo.create({
@@ -208,6 +211,7 @@ export class AppointmentsService {
     appointmentId: string,
     input: AppointmentRescheduleRequest
   ): Promise<{ success: boolean }> {
+    if (isMockEmail(session.therapist.email)) return { success: true };
     const payload = appointmentRescheduleRequestSchema.parse(input);
     const a = await this.repo.findById(session.therapist.id, appointmentId);
     if (!a) throw new NotFoundException("Sessão não encontrada.");
@@ -225,6 +229,7 @@ export class AppointmentsService {
     appointmentId: string,
     input: AppointmentCancelRequest
   ): Promise<{ success: boolean }> {
+    if (isMockEmail(session.therapist.email)) return { success: true };
     const payload = appointmentCancelRequestSchema.parse(input);
     const a = await this.repo.findById(session.therapist.id, appointmentId);
     if (!a) throw new NotFoundException("Sessão não encontrada.");
@@ -238,6 +243,7 @@ export class AppointmentsService {
   // ---------------------------------------------------------------------------
 
   async checkIn(session: AuthSession, appointmentId: string): Promise<{ success: boolean }> {
+    if (isMockEmail(session.therapist.email)) return { success: true };
     const a = await this.repo.findById(session.therapist.id, appointmentId);
     if (!a) throw new NotFoundException("Sessão não encontrada.");
     await this.repo.checkIn(appointmentId);
@@ -245,6 +251,7 @@ export class AppointmentsService {
   }
 
   async endSession(session: AuthSession, appointmentId: string): Promise<{ success: boolean }> {
+    if (isMockEmail(session.therapist.email)) return { success: true };
     const a = await this.repo.findById(session.therapist.id, appointmentId);
     if (!a) throw new NotFoundException("Sessão não encontrada.");
     await this.repo.endSession(appointmentId);
@@ -328,6 +335,7 @@ export class AppointmentsService {
     session: AuthSession,
     input: AgendaAvailabilityUpdateRequest
   ): Promise<{ success: boolean }> {
+    if (isMockEmail(session.therapist.email)) return { success: true };
     const payload = agendaAvailabilityUpdateRequestSchema.parse(input);
     await this.repo.upsertAvailabilityRules(session.therapist.id, payload.rules);
     return { success: true };
@@ -341,6 +349,7 @@ export class AppointmentsService {
     session: AuthSession,
     input: ScheduleBlockCreateRequest
   ): Promise<ScheduleBlockCreateResponse> {
+    if (isMockEmail(session.therapist.email)) return { id: "block_mock_001" };
     const payload = scheduleBlockCreateRequestSchema.parse(input);
     const block = await this.repo.createScheduleBlock({
       therapistId: session.therapist.id,
@@ -354,12 +363,14 @@ export class AppointmentsService {
     blockId: string,
     input: ScheduleBlockUpdateRequest
   ): Promise<{ success: boolean }> {
+    if (isMockEmail(session.therapist.email)) return { success: true };
     const payload = scheduleBlockUpdateRequestSchema.parse(input);
     await this.repo.updateScheduleBlock(blockId, payload);
     return { success: true };
   }
 
   async deleteBlock(session: AuthSession, blockId: string): Promise<{ success: boolean }> {
+    if (isMockEmail(session.therapist.email)) return { success: true };
     await this.repo.deleteScheduleBlock(blockId);
     return { success: true };
   }
