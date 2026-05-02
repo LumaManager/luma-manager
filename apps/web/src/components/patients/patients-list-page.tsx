@@ -5,7 +5,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useMemo, useState, useTransition } from "react";
 import type { PatientCreateRequest, PatientListResponse } from "@terapia/contracts";
 import { Badge, Button, Card, CardContent, CardHeader, cn } from "@terapia/ui";
-import { Plus, Search, SlidersHorizontal, UserRoundPlus, X } from "lucide-react";
+import { Plus, Search, UserRoundPlus, X } from "lucide-react";
 
 import { OperationalHero, ToolbarPanel } from "@/components/shared/operational-surface";
 
@@ -74,7 +74,6 @@ export function PatientsListPage({ initialData }: PatientsListPageProps) {
           }
           badges={
             <>
-              <Badge tone="info">Diretório operacional</Badge>
               <Badge tone={activeChips.length > 0 ? "warning" : "success"}>
                 {activeChips.length > 0 ? `${activeChips.length} filtros ativos` : "Fila limpa para triagem"}
               </Badge>
@@ -179,10 +178,6 @@ export function PatientsListPage({ initialData }: PatientsListPageProps) {
                 {initialData.total} pacientes encontrados · ordenação padrão por nome A-Z.
               </p>
             </div>
-            <Badge tone="neutral">
-              <SlidersHorizontal className="mr-2 inline h-3.5 w-3.5" />
-              Tabela-first
-            </Badge>
           </CardHeader>
           <CardContent className="overflow-hidden p-0">
             <div className="grid grid-cols-[minmax(0,2.1fr)_0.9fr_1fr_1fr_1fr] gap-4 border-b border-[var(--color-border)] px-6 py-4 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--color-text-muted)]">

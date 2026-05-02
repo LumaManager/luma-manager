@@ -5,7 +5,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
 import type { ClinicalReviewQueueResponse } from "@terapia/contracts";
 import { Badge, Button, Card, CardContent, CardHeader, cn } from "@terapia/ui";
-import { ArrowRight, Search, SlidersHorizontal, Sparkles, TriangleAlert } from "lucide-react";
+import { ArrowRight, Search, Sparkles, TriangleAlert } from "lucide-react";
 
 import { OperationalHero, ToolbarPanel } from "@/components/shared/operational-surface";
 
@@ -90,7 +90,6 @@ export function ClinicalReviewQueuePageView({
         }
         badges={
           <>
-            <Badge tone="info">Inbox pós-sessão</Badge>
             <Badge tone={initialData.total > 0 ? "warning" : "success"}>
               {initialData.total > 0 ? `${initialData.total} itens pendentes` : "Fila limpa"}
             </Badge>
@@ -232,10 +231,6 @@ export function ClinicalReviewQueuePageView({
               Ordenação operacional por prioridade atual, não alfabética.
             </p>
           </div>
-          <Badge tone="neutral">
-            <SlidersHorizontal className="mr-2 inline h-3.5 w-3.5" />
-            Lista-first
-          </Badge>
         </CardHeader>
         <CardContent className="overflow-hidden p-0">
           {initialData.items.length === 0 ? (

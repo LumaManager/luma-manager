@@ -446,6 +446,11 @@ export class DocumentsService {
   }
 
   async signDocument(session: AuthSession, documentId: string): Promise<DocumentDetail> {
+    if (isMockEmail(session.therapist.email)) {
+      const mock = buildMockDocumentDetail(documentId);
+      if (mock) return mock;
+      throw new NotFoundException("Documento não encontrado.");
+    }
     const doc = await this.repo.findByIdWithPatient(session.tenant.id, documentId);
     if (!doc) throw new NotFoundException("Documento não encontrado.");
 

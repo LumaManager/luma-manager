@@ -169,7 +169,6 @@ export function FinancePageView({ initialData }: FinancePageProps) {
           }
           badges={
             <>
-              <Badge tone="info">Cobrança-first</Badge>
               {initialData.summary.totalOverdueCents > 0 ? (
                 <Badge tone="critical">Vencidas exigem ataque hoje</Badge>
               ) : (
@@ -298,10 +297,6 @@ export function FinancePageView({ initialData }: FinancePageProps) {
                 {initialData.total} cobrança(s) no filtro atual, ordenadas por urgência operacional.
               </p>
             </div>
-            <Badge tone="neutral">
-              <SlidersHorizontal className="mr-2 inline h-3.5 w-3.5" />
-              Lista-first
-            </Badge>
           </CardHeader>
           <CardContent className="overflow-hidden p-0">
             {initialData.items.length === 0 ? (

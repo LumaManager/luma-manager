@@ -191,7 +191,6 @@ export function DocumentsPageView({ initialData }: DocumentsPageProps) {
           }
           badges={
             <>
-              <Badge tone="info">Compliance documental</Badge>
               {initialData.summary.criticalCount > 0 ? (
                 <Badge tone="critical">{initialData.summary.criticalCount} pendências críticas</Badge>
               ) : (
@@ -327,10 +326,6 @@ export function DocumentsPageView({ initialData }: DocumentsPageProps) {
                 alfabetica.
               </p>
             </div>
-            <Badge tone="neutral">
-              <SlidersHorizontal className="mr-2 inline h-3.5 w-3.5" />
-              Lista-first
-            </Badge>
           </CardHeader>
           <CardContent className="overflow-hidden p-0">
             {items.length === 0 ? (

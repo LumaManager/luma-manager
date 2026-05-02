@@ -211,7 +211,6 @@ export function AgendaPageView({
           }
           badges={
             <>
-              <Badge tone="info">Agenda calendar-first</Badge>
               <Badge tone={readOnly ? "warning" : "success"}>{nextActionLabel}</Badge>
             </>
           }
