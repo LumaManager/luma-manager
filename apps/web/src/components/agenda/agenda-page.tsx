@@ -267,7 +267,7 @@ export function AgendaPageView({
               </Button>
             </div>
 
-            <div className="grid gap-3 xl:grid-cols-[repeat(4,minmax(0,auto))]">
+            <div className="flex flex-wrap items-end gap-3">
               <SegmentedControl
                 label="Visualização"
                 onChange={(value) => updateParam("view", value)}
@@ -302,14 +302,6 @@ export function AgendaPageView({
                 ]}
                 value={initialData.filters.modality}
               />
-              <div className="rounded-2xl border border-[var(--color-border)] bg-[rgba(15,76,92,0.04)] px-4 py-3">
-                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--color-text-muted)]">
-                  Foco operacional
-                </p>
-                <p className="mt-1 text-sm font-semibold">
-                  {appointmentBlocks.length} sessões na grade atual
-                </p>
-              </div>
             </div>
           </div>
         </ToolbarPanel>

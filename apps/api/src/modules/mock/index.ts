@@ -254,8 +254,17 @@ export function buildMockAgenda(query: Record<string, string>): AgendaResponse {
     timeSlots.push(`${String(h).padStart(2, "0")}:30`);
   }
 
-  // Resolve appointment dates relative to monday of the requested week
-  const scheduleBlocks = MOCK_APPTS.map((a) => {
+  const validStatuses = ["all", "scheduled", "confirmed", "in_progress", "completed", "cancelled", "no_show"];
+  const validModalities = ["all", "telehealth", "in_person"];
+  const statusFilter = validStatuses.includes(query.status ?? "") ? (query.status ?? "all") : "all";
+  const modalityFilter = validModalities.includes(query.modality ?? "") ? (query.modality ?? "all") : "all";
+
+  // Resolve appointment dates relative to monday of the requested week, applying filters
+  const filteredAppts = MOCK_APPTS
+    .filter((a) => statusFilter === "all" || a.status === statusFilter)
+    .filter((a) => modalityFilter === "all" || a.modality === modalityFilter);
+
+  const scheduleBlocks = filteredAppts.map((a) => {
     const dayKey = addDays(monday, a.dayOffset);
     const tone = a.status === "confirmed" ? "info" as const : "neutral" as const;
     return {
@@ -286,7 +295,7 @@ export function buildMockAgenda(query: Record<string, string>): AgendaResponse {
           ? [{ id: `rule_${weekday}`, startTime: "09:00", endTime: "18:00" }]
           : []
     })),
-    filters: { status: "all" as any, modality: "all" as any },
+    filters: { status: statusFilter as any, modality: modalityFilter as any },
     quickActions: [
       { id: "new_appt", label: "Nova sessão", href: "/app/agenda?action=new" },
       { id: "view_patients", label: "Ver pacientes", href: "/app/patients" }
