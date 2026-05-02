@@ -2,9 +2,9 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import type { PatientDetail } from "@terapia/contracts";
+import type { PatientDetail, PatientSessionEvolution } from "@terapia/contracts";
 import { Badge, Button, Card, CardContent, CardHeader, cn } from "@terapia/ui";
-import { CalendarPlus2, ChevronRight, FileStack, NotebookTabs, Wallet } from "lucide-react";
+import { ArrowRight, CalendarPlus2, ChevronRight, FileStack, NotebookTabs, Sparkles, Wallet } from "lucide-react";
 
 import { OperationalHero } from "@/components/shared/operational-surface";
 
@@ -122,7 +122,11 @@ export function PatientDetailPageView({ patient }: PatientDetailPageProps) {
       </div>
 
       {activeTab === "summary" ? (
-        <div className="grid gap-4 xl:grid-cols-[1.2fr_1fr]">
+        <div className="space-y-4">
+          {patient.sessionEvolution ? (
+            <SessionEvolutionCard evolution={patient.sessionEvolution} />
+          ) : null}
+          <div className="grid gap-4 xl:grid-cols-[1.2fr_1fr]">
           <Card>
             <CardHeader>
               <p className="text-lg font-semibold">Resumo</p>
@@ -161,6 +165,7 @@ export function PatientDetailPageView({ patient }: PatientDetailPageProps) {
               </Button>
             </CardContent>
           </Card>
+          </div>
         </div>
       ) : null}
 
@@ -220,6 +225,48 @@ export function PatientDetailPageView({ patient }: PatientDetailPageProps) {
         </Card>
       ) : null}
     </div>
+  );
+}
+
+function SessionEvolutionCard({ evolution }: { evolution: PatientSessionEvolution }) {
+  return (
+    <Card className="border-[rgba(15,76,92,0.14)] bg-[rgba(15,76,92,0.025)]">
+      <CardHeader>
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-2">
+            <Sparkles className="h-4 w-4 text-[var(--color-primary)]" />
+            <p className="text-base font-semibold">Evolução do paciente</p>
+          </div>
+          <div className="flex items-center gap-3">
+            <span className="text-xs text-[var(--color-text-muted)]">
+              Última sessão: {evolution.lastSessionDateLabel}
+            </span>
+            <Badge tone="neutral">{evolution.totalSessions} sessões</Badge>
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div>
+          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.12em] text-[var(--color-text-muted)]">
+            Pontos da última sessão
+          </p>
+          <ul className="space-y-2">
+            {evolution.keyPoints.map((point, index) => (
+              <li className="flex items-start gap-2.5 text-sm leading-6 text-[var(--color-text)]" key={index}>
+                <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--color-primary)]" />
+                {point}
+              </li>
+            ))}
+          </ul>
+        </div>
+        <div className="rounded-2xl border border-[rgba(15,76,92,0.12)] bg-white px-4 py-3">
+          <p className="mb-1 text-xs font-semibold uppercase tracking-[0.12em] text-[var(--color-text-muted)]">
+            Direção terapêutica atual
+          </p>
+          <p className="text-sm leading-6 text-[var(--color-text)]">{evolution.therapeuticDirection}</p>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
 

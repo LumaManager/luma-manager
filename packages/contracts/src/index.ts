@@ -978,6 +978,13 @@ export const patientOverviewBlockSchema = z.object({
   description: z.string()
 });
 
+export const patientSessionEvolutionSchema = z.object({
+  lastSessionDateLabel: z.string(),
+  totalSessions: z.number().int().nonnegative(),
+  keyPoints: z.array(z.string()),
+  therapeuticDirection: z.string()
+});
+
 export const patientSessionItemSchema = z.object({
   id: z.string(),
   dateLabel: z.string(),
@@ -1033,7 +1040,8 @@ export const patientDetailSchema = z.object({
   sessions: z.array(patientSessionItemSchema),
   documents: z.array(patientDocumentItemSchema),
   charges: z.array(patientChargeItemSchema),
-  activity: z.array(patientActivityItemSchema)
+  activity: z.array(patientActivityItemSchema),
+  sessionEvolution: patientSessionEvolutionSchema.optional()
 });
 
 export const documentTypeSchema = z.enum([
@@ -2160,6 +2168,7 @@ export type PatientListItem = z.infer<typeof patientListItemSchema>;
 export type PatientListResponse = z.infer<typeof patientListResponseSchema>;
 export type PatientOperationalStatus = z.infer<typeof patientOperationalStatusSchema>;
 export type PatientOverviewBlock = z.infer<typeof patientOverviewBlockSchema>;
+export type PatientSessionEvolution = z.infer<typeof patientSessionEvolutionSchema>;
 export type PatientSessionItem = z.infer<typeof patientSessionItemSchema>;
 export type PatientSummary = z.infer<typeof patientSummarySchema>;
 export type ScheduleBlock = z.infer<typeof scheduleBlockSchema>;

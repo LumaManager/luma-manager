@@ -141,6 +141,39 @@ export function buildMockPatientList(query: Record<string, string>): PatientList
   };
 }
 
+const MOCK_EVOLUTIONS: Record<string, { lastSessionDateLabel: string; totalSessions: number; keyPoints: string[]; therapeuticDirection: string }> = {
+  patient_maria_souza: {
+    lastSessionDateLabel: "28 abr 2026",
+    totalSessions: 14,
+    keyPoints: [
+      "Relatou melhora na qualidade do sono após práticas de higiene do sono discutidas na sessão anterior.",
+      "Episódio de ansiedade antecipatória antes de reunião de trabalho — processado com reestruturação cognitiva.",
+      "Avançou na identificação de padrões de autocrítica excessiva."
+    ],
+    therapeuticDirection: "Consolidar estratégias de regulação emocional e avançar na desconstrução de crenças limitantes relacionadas à performance profissional."
+  },
+  patient_lucas_santos: {
+    lastSessionDateLabel: "28 abr 2026",
+    totalSessions: 7,
+    keyPoints: [
+      "Dificuldade em estabelecer limites com familiares — tema central da sessão.",
+      "Identificou padrão de complacência originado na dinâmica familiar de origem.",
+      "Progresso em nomear as próprias necessidades sem culpa."
+    ],
+    therapeuticDirection: "Trabalhar assertividade e fortalecimento do self, com foco em situações de conflito familiar e relações íntimas."
+  },
+  patient_renata_costa: {
+    lastSessionDateLabel: "24 abr 2026",
+    totalSessions: 3,
+    keyPoints: [
+      "Primeira sessão de teleatendimento após início presencial — adaptação bem tolerada.",
+      "Expressou ambivalência sobre continuidade do processo terapêutico.",
+      "Identificou medo de julgamento como barreira central."
+    ],
+    therapeuticDirection: "Fortalecer aliança terapêutica e criar segurança para aprofundamento. Vínculo ainda em fase inicial de construção."
+  }
+};
+
 export function buildMockPatientDetail(patientId: string): PatientDetail | null {
   const p = PATIENTS.find((x) => x.id === patientId);
   if (!p) return null;
@@ -182,7 +215,8 @@ export function buildMockPatientDetail(patientId: string): PatientDetail | null 
     sessions: [],
     documents: [],
     charges: [],
-    activity: []
+    activity: [],
+    sessionEvolution: MOCK_EVOLUTIONS[patientId]
   };
 }
 
