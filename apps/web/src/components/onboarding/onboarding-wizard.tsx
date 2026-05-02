@@ -393,6 +393,8 @@ function renderStepFields(
         <div className="space-y-3">
           <CheckboxField
             checked={data.draft.contracts.termsAccepted}
+            documentHref="https://lumamanager.com.br/termos-de-uso"
+            documentLabel="Ler termos"
             label="Aceito os termos de uso e o contrato comercial"
             onChange={(checked) =>
               updateDraft("contracts", { ...data.draft.contracts, termsAccepted: checked })
@@ -400,6 +402,8 @@ function renderStepFields(
           />
           <CheckboxField
             checked={data.draft.contracts.dpaAccepted}
+            documentHref="https://lumamanager.com.br/dpa"
+            documentLabel="Ler DPA"
             label="Aceito o DPA e as cláusulas de tratamento de dados"
             onChange={(checked) =>
               updateDraft("contracts", { ...data.draft.contracts, dpaAccepted: checked })
@@ -407,6 +411,8 @@ function renderStepFields(
           />
           <CheckboxField
             checked={data.draft.contracts.privacyAccepted}
+            documentHref="https://lumamanager.com.br/privacidade"
+            documentLabel="Ler política"
             label="Li e aceitei a política de privacidade"
             onChange={(checked) =>
               updateDraft("contracts", { ...data.draft.contracts, privacyAccepted: checked })
@@ -416,19 +422,10 @@ function renderStepFields(
       );
     case "schedule":
       return (
-        <div className="grid gap-4 md:grid-cols-2">
-          <TextField
-            label="Dias da semana"
-            onChange={(value) =>
-              updateDraft("schedule", {
-                ...data.draft.schedule,
-                weekdays: value
-                  .split(",")
-                  .map((item) => item.trim())
-                  .filter(Boolean)
-              })
-            }
-            value={data.draft.schedule.weekdays.join(", ")}
+        <div className="space-y-4">
+          <WeekdayToggle
+            onChange={(weekdays) => updateDraft("schedule", { ...data.draft.schedule, weekdays })}
+            value={data.draft.schedule.weekdays}
           />
           <TextField
             label="Modalidade padrão"
@@ -439,7 +436,8 @@ function renderStepFields(
           />
         </div>
       );
-    case "consents":
+    case "consents": {
+      const policyTemplate = `${data.draft.profile.fullName || "[Nome da psicóloga]"} (CRP ${data.draft.profile.crp || "[CRP]"}), ${data.draft.operations.practiceName || "[Nome do consultório]"}, coleta e trata dados pessoais e de saúde exclusivamente para fins de acompanhamento psicológico, conforme LGPD (Lei 13.709/2018). Os dados são armazenados em ambiente seguro, acessados apenas pela profissional responsável e nunca compartilhados com terceiros sem consentimento. O paciente pode solicitar acesso, correção ou exclusão a qualquer momento pelo e-mail ${data.draft.profile.professionalEmail || "[e-mail profissional]"}.`;
       return (
         <div className="space-y-4">
           <TextField
@@ -449,15 +447,35 @@ function renderStepFields(
             }
             value={data.draft.consents.lgpdTemplateId}
           />
-          <TextAreaField
-            label="Política padrão de coleta"
-            onChange={(value) =>
-              updateDraft("consents", { ...data.draft.consents, defaultCollectionPolicy: value })
-            }
-            value={data.draft.consents.defaultCollectionPolicy}
-          />
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-medium">Política padrão de coleta</span>
+              {!data.draft.consents.defaultCollectionPolicy ? (
+                <button
+                  className="text-xs font-semibold text-[var(--color-primary)] underline underline-offset-2"
+                  onClick={() =>
+                    updateDraft("consents", {
+                      ...data.draft.consents,
+                      defaultCollectionPolicy: policyTemplate
+                    })
+                  }
+                  type="button"
+                >
+                  Usar modelo pré-preenchido
+                </button>
+              ) : null}
+            </div>
+            <TextAreaField
+              label=""
+              onChange={(value) =>
+                updateDraft("consents", { ...data.draft.consents, defaultCollectionPolicy: value })
+              }
+              value={data.draft.consents.defaultCollectionPolicy}
+            />
+          </div>
         </div>
       );
+    }
   }
 }
 
@@ -509,17 +527,87 @@ function TextAreaField({
 
 function CheckboxField({
   checked,
+  documentHref,
+  documentLabel,
   label,
   onChange
 }: {
   checked: boolean;
+  documentHref?: string;
+  documentLabel?: string;
   label: string;
   onChange: (checked: boolean) => void;
 }) {
   return (
-    <label className="flex items-start gap-3 rounded-3xl border border-[var(--color-border)] bg-[rgba(15,76,92,0.03)] px-4 py-4">
-      <input checked={checked} onChange={(event) => onChange(event.target.checked)} type="checkbox" />
-      <span className="text-sm leading-6">{label}</span>
-    </label>
+    <div className="flex items-start gap-3 rounded-3xl border border-[var(--color-border)] bg-[rgba(15,76,92,0.03)] px-4 py-4">
+      <input
+        checked={checked}
+        className="mt-0.5 shrink-0"
+        id={label}
+        onChange={(event) => onChange(event.target.checked)}
+        type="checkbox"
+      />
+      <label className="flex flex-1 items-start justify-between gap-3" htmlFor={label}>
+        <span className="text-sm leading-6">{label}</span>
+        {documentHref ? (
+          <a
+            className="shrink-0 text-xs font-semibold text-[var(--color-primary)] underline underline-offset-2"
+            href={documentHref}
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            {documentLabel ?? "Ler documento"}
+          </a>
+        ) : null}
+      </label>
+    </div>
+  );
+}
+
+const WEEKDAYS = [
+  { label: "Dom", value: "Domingo" },
+  { label: "Seg", value: "Segunda" },
+  { label: "Ter", value: "Terça" },
+  { label: "Qua", value: "Quarta" },
+  { label: "Qui", value: "Quinta" },
+  { label: "Sex", value: "Sexta" },
+  { label: "Sáb", value: "Sábado" }
+];
+
+function WeekdayToggle({
+  onChange,
+  value
+}: {
+  onChange: (weekdays: string[]) => void;
+  value: string[];
+}) {
+  function toggle(day: string) {
+    const next = value.includes(day) ? value.filter((d) => d !== day) : [...value, day];
+    onChange(next);
+  }
+
+  return (
+    <div className="space-y-2">
+      <span className="text-sm font-medium">Dias de atendimento</span>
+      <div className="flex flex-wrap gap-2">
+        {WEEKDAYS.map((day) => {
+          const active = value.includes(day.value);
+          return (
+            <button
+              className={`rounded-2xl border px-4 py-2.5 text-sm font-semibold transition ${
+                active
+                  ? "border-[var(--color-primary)] bg-[var(--color-primary)] text-white"
+                  : "border-[var(--color-border)] bg-white text-[var(--color-text-muted)] hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]"
+              }`}
+              key={day.value}
+              onClick={() => toggle(day.value)}
+              type="button"
+            >
+              {day.label}
+            </button>
+          );
+        })}
+      </div>
+    </div>
   );
 }
