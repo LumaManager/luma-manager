@@ -1,5 +1,6 @@
 import type {
   AgendaResponse,
+  AppointmentCall,
   AppointmentDetail,
   ChargeDetail,
   DocumentDetail,
@@ -821,5 +822,88 @@ export function buildMockDocumentDetail(documentId: string): DocumentDetail | nu
       documentType: d.documentType,
       templateVersion: d.templateVersion
     }
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Call mock
+// ---------------------------------------------------------------------------
+
+export function buildMockCall(appointmentId: string): AppointmentCall {
+  const a = MOCK_APPTS.find((x) => x.id === appointmentId);
+  const monday = weekMonday(todayStr());
+  const dayKey = a ? addDays(monday, a.dayOffset) : todayStr();
+  const label = dateLabel(dayKey);
+  const timeRange = a ? `${a.start}–${a.end}` : "09:00–09:50";
+  const patientName = a?.name ?? "Paciente";
+
+  return {
+    appointment: {
+      id: appointmentId,
+      patientName,
+      dateLabel: label,
+      timeRangeLabel: timeRange,
+      durationLabel: "50 min",
+      detailHref: `/app/appointments/${appointmentId}`
+    },
+    experienceState: "pre_join",
+    experienceLabel: "Pronto para entrar",
+    roomSummary: {
+      state: "provisioned",
+      label: "Sala provisionada",
+      providerLabel: "Luma Meet",
+      joinUrlLabel: "meet.lumamanager.com.br/demo-sala"
+    },
+    joinWindow: {
+      therapistOpensAtLabel: "10 min antes",
+      patientOpensAtLabel: "5 min antes",
+      scheduledStartLabel: timeRange.split("–")[0] ?? "09:00",
+      scheduledEndLabel: timeRange.split("–")[1] ?? "09:50",
+      canJoinNow: true,
+      blockedReason: ""
+    },
+    readiness: {
+      outcome: "ready",
+      items: [
+        { label: "Documentação", state: "ok", description: "Todos os termos assinados e válidos." },
+        { label: "Pagamento", state: "attention", description: "Cobrança gerada, aguardando confirmação." },
+        { label: "Sala virtual", state: "ok", description: "Sala provisionada e link disponível." }
+      ]
+    },
+    transcript: {
+      state: "active",
+      label: "Transcript ativo",
+      description: "Resumo pós-sessão será gerado automaticamente."
+    },
+    devices: {
+      cameraPermission: "granted",
+      microphonePermission: "granted",
+      availableCameras: ["Câmera FaceTime HD", "Câmera externa USB"],
+      availableMicrophones: ["Microfone embutido", "Fone de ouvido"],
+      previewAvailable: true,
+      microphoneLevel: 42
+    },
+    callPermissions: {
+      canProvisionRoom: false,
+      canCheckIn: true,
+      canEndSession: false
+    },
+    connection: {
+      state: "stable",
+      label: "Conexão estável",
+      description: "Rede com baixa latência detectada."
+    },
+    participants: {
+      therapistJoined: false,
+      patientPresence: "waiting_room",
+      patientLabel: `${patientName} · aguardando na sala`
+    },
+    sidePanel: [
+      { label: "Sessões realizadas", value: "12 sessões no histórico." },
+      { label: "Última sessão", value: "28 abr 2026 · foco em regulação emocional." },
+      { label: "Direção atual", value: "Trabalho de exposição gradual e fortalecimento de vínculos." },
+      { label: "Pagamento", value: "R$ 350,00 · pendente de confirmação." }
+    ],
+    notices: []
   };
 }

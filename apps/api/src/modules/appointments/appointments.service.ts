@@ -23,7 +23,7 @@ import {
   scheduleBlockUpdateRequestSchema
 } from "@terapia/contracts";
 
-import { buildMockAgenda, buildMockAppointmentDetail, isMockEmail } from "@/modules/mock";
+import { buildMockAgenda, buildMockAppointmentDetail, buildMockCall, isMockEmail } from "@/modules/mock";
 import type { AppointmentWithPatient, AvailabilityRuleWithWindows } from "./appointments.repository";
 import { AppointmentsRepository } from "./appointments.repository";
 
@@ -262,8 +262,8 @@ export class AppointmentsService {
   // Video call (stub — fora do escopo MVP)
   // ---------------------------------------------------------------------------
 
-  async getAppointmentCall(_session: AuthSession, appointmentId: string): Promise<AppointmentCall> {
-    // Video call is out of MVP scope — return a valid "unavailable" stub
+  async getAppointmentCall(session: AuthSession, appointmentId: string): Promise<AppointmentCall> {
+    if (isMockEmail(session.therapist.email)) return buildMockCall(appointmentId);
     return {
       appointment: {
         id: appointmentId,
