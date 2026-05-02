@@ -326,7 +326,7 @@ export function buildMockAppointmentDetail(appointmentId: string): AppointmentDe
     modalityLabel: a.modality === "telehealth" ? "Teleatendimento" : "Presencial",
     status: a.status as any,
     statusLabel: a.status === "confirmed" ? "Confirmada" : "Agendada",
-    roomStatusLabel: a.modality === "telehealth" ? "Sala pronta" : "Presencial",
+    roomStatusLabel: a.modality === "telehealth" ? "Sala pronta" : "Consultório disponível",
     roomState: "ready" as any,
     canReschedule: true,
     canCancel: true,
@@ -336,19 +336,31 @@ export function buildMockAppointmentDetail(appointmentId: string): AppointmentDe
       { label: "Horário", value: timeRange },
       { label: "Duração", value: "50 min" },
       { label: "Modalidade", value: a.modality === "telehealth" ? "Teleatendimento" : "Presencial" },
-      { label: "Status", value: a.status === "confirmed" ? "Confirmada" : "Agendada" }
+      { label: "Status", value: a.status === "confirmed" ? "Confirmada" : "Agendada" },
+      { label: "Observação operacional", value: "Paciente confirmou presença por WhatsApp." }
     ],
     patientSummary: [
       { label: "Nome", value: a.name },
-      { label: "Pagamento", value: "Particular" }
+      { label: "Pagamento", value: "Particular" },
+      { label: "Contato", value: "(11) 98765-4321" }
     ],
-    consentStates: [],
-    paymentSummary: [],
+    consentStates: [
+      { label: "Termo LGPD", state: "ok" as const, description: "Assinado em 12 abr 2026." },
+      { label: "Termo de teleatendimento", state: a.modality === "telehealth" ? "ok" as const : "ok" as const, description: a.modality === "telehealth" ? "Assinado em 12 abr 2026." : "Não aplicável para atendimento presencial." }
+    ],
+    paymentSummary: [
+      { label: "Valor da sessão", value: "R$ 350,00" },
+      { label: "Status", value: "Pendente" },
+      { label: "Vencimento", value: label }
+    ],
     readinessChecklist: [
-      { label: "Paciente cadastrado", state: "ok", description: "Cadastro ativo no sistema." }
+      { label: "Paciente cadastrado", state: "ok" as const, description: "Cadastro ativo no sistema." },
+      { label: "Documentação", state: "ok" as const, description: "Todos os termos assinados." },
+      { label: "Pagamento", state: "attention" as const, description: "Cobrança gerada, aguardando confirmação." }
     ],
     timeline: [
-      { id: "created", title: "Sessão criada", occurredAtLabel: "15 abr 2026", description: "Agendamento registrado." }
+      { id: "created", title: "Sessão criada", occurredAtLabel: "15 abr 2026", description: "Agendamento registrado pelo terapeuta." },
+      { id: "confirmed", title: "Sessão confirmada", occurredAtLabel: "28 abr 2026", description: "Paciente confirmou presença." }
     ]
   };
 }

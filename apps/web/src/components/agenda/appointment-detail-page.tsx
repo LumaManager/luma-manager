@@ -158,16 +158,6 @@ export function AppointmentDetailPageView({ appointment }: AppointmentDetailPage
           title={appointment.patientName}
         />
 
-        <section className="grid gap-4 md:grid-cols-3">
-          <SummaryRibbon
-            label="Próxima decisão"
-            title={appointment.primaryAction.label}
-            tone={appointment.primaryAction.disabledReason ? "warning" : "info"}
-          />
-          <SummaryRibbon label="Janela da sessão" title={appointment.dateLabel} tone="neutral" />
-          <SummaryRibbon label="Execução" title={appointment.roomStatusLabel} tone="success" />
-        </section>
-
         <div className="grid gap-4 xl:grid-cols-[1.2fr_0.8fr]">
           <div className="space-y-4">
             <DetailCard
@@ -188,13 +178,17 @@ export function AppointmentDetailPageView({ appointment }: AppointmentDetailPage
               items={appointment.sessionData}
               title="Dados da sessão"
             />
-            <ConsentCard items={appointment.consentStates} />
-            <DetailCard
-              description="Visibilidade financeira resumida, sem transformar a tela em financeiro completo."
-              icon={<Wallet className="h-4 w-4" />}
-              items={appointment.paymentSummary}
-              title="Pagamento resumido"
-            />
+            {appointment.consentStates.length > 0 ? (
+              <ConsentCard items={appointment.consentStates} />
+            ) : null}
+            {appointment.paymentSummary.length > 0 ? (
+              <DetailCard
+                description="Visibilidade financeira resumida da sessão."
+                icon={<Wallet className="h-4 w-4" />}
+                items={appointment.paymentSummary}
+                title="Pagamento resumido"
+              />
+            ) : null}
           </div>
 
           <div className="space-y-4">
@@ -323,32 +317,6 @@ export function AppointmentDetailPageView({ appointment }: AppointmentDetailPage
         </ActionPanel>
       ) : null}
     </>
-  );
-}
-
-function SummaryRibbon({
-  label,
-  title,
-  tone
-}: {
-  label: string;
-  title: string;
-  tone: "info" | "neutral" | "success" | "warning";
-}) {
-  const toneMap = {
-    info: "bg-[rgba(15,76,92,0.05)] text-[var(--color-primary)]",
-    neutral: "bg-[rgba(31,41,51,0.04)] text-[var(--color-text)]",
-    success: "bg-[rgba(63,107,97,0.08)] text-[var(--color-success)]",
-    warning: "bg-[rgba(198,122,69,0.10)] text-[var(--color-accent)]"
-  } as const;
-
-  return (
-    <div className="rounded-[28px] border border-[var(--color-border)] bg-white p-5 shadow-[var(--shadow-panel)]">
-      <span className={`inline-flex rounded-full px-3 py-1 text-[11px] font-semibold ${toneMap[tone]}`}>
-        {label}
-      </span>
-      <p className="mt-4 text-lg font-semibold text-[var(--color-text)]">{title}</p>
-    </div>
   );
 }
 
