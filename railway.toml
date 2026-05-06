@@ -1,7 +1,7 @@
 [build]
 builder = "nixpacks"
-buildCommand = "npm install && npm run build --workspace @terapia/api"
-installCommand = "rm -rf node_modules && npm install --legacy-peer-deps"
+buildCommand = "npm install --omit=dev --legacy-peer-deps && npm run build --workspace @terapia/api"
+installCommand = "rm -rf node_modules && npm install --omit=dev --legacy-peer-deps"
 
 [deploy]
 startCommand = "node apps/api/dist/main.js"
