@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "prebuild": "cd ../../packages/contracts && npm run build",
+    "prebuild": "npm run build --workspace @terapia/contracts",
     "build": "tsup",
     "dev": "tsx watch src/main.ts",
     "lint": "eslint \"src/**/*.ts\"",

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import type { PatientDetail, PatientSessionEvolution } from "@terapia/contracts";
 import { Badge, Button, Card, CardContent, CardHeader, cn } from "@terapia/ui";
-import { ArrowRight, CalendarPlus2, ChevronRight, FileStack, NotebookTabs, Sparkles, Wallet } from "lucide-react";
+import { CalendarPlus2, ChevronRight, FileStack, NotebookTabs, Sparkles, Wallet } from "lucide-react";
 
 import { OperationalHero } from "@/components/shared/operational-surface";
 
