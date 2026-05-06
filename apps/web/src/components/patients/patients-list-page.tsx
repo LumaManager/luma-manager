@@ -344,7 +344,20 @@ function StateBadge({
   if (tone === "success") {
     return <span className="text-sm text-[var(--color-text-muted)]">—</span>;
   }
-  return <Badge tone={tone}>{label}</Badge>;
+
+  const colorClass =
+    tone === "critical"
+      ? "text-[var(--color-danger)]"
+      : tone === "warning"
+        ? "text-[#b87333]"
+        : "text-[var(--color-primary)]";
+
+  return (
+    <span className={`flex items-center gap-1.5 text-sm font-medium ${colorClass}`}>
+      <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-current" />
+      {label}
+    </span>
+  );
 }
 
 function PatientCreateDrawer({
