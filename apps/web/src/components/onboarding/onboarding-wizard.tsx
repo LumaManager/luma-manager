@@ -9,8 +9,6 @@ import type {
 } from "@terapia/contracts";
 import { Badge, Button, Card, CardContent, CardHeader } from "@terapia/ui";
 
-import { OperationalHero } from "@/components/shared/operational-surface";
-
 type OnboardingWizardProps = {
   initialData: TherapistOnboardingBootstrap;
 };
@@ -89,157 +87,89 @@ export function OnboardingWizard({ initialData }: OnboardingWizardProps) {
     });
   }
 
+  const completedCount = data.steps.filter((s) => s.status === "completed").length;
+  const totalCount = data.steps.length;
+
   return (
     <div className="space-y-6">
-      <OperationalHero
-        badges={
-          <>
-            <Badge tone={data.accountStatus === "ready_for_operations" ? "success" : "warning"}>
-              {data.accountStatus === "ready_for_operations" ? "Conta pronta" : "Ativação em curso"}
-            </Badge>
-          </>
-        }
-        description="Conclua o mínimo necessário para liberar operação real, sem transformar o onboarding em formulário longo e genérico."
-        stats={[
-          {
-            detail: "Etapas já concluídas no wizard.",
-            label: "Concluídas",
-            tone: "success",
-            value: String(data.steps.filter((step) => step.status === "completed").length)
-          },
-          {
-            detail: "Itens ainda bloqueando a conta.",
-            label: "Bloqueios",
-            tone: data.blockingItems.some((item) => !item.completed) ? "warning" : "success",
-            value: String(data.blockingItems.filter((item) => !item.completed).length)
-          },
-          {
-            detail: currentStepMeta?.description ?? "Etapa atual do onboarding.",
-            label: "Etapa atual",
-            tone: "info",
-            value: currentStepMeta?.title ?? "Em andamento"
-          }
-        ]}
-        title="Deixar a conta pronta para operar"
-      />
-
-      <div className="grid gap-6 xl:grid-cols-[320px_minmax(0,1fr)]">
-        <Card className="h-fit">
-        <CardHeader>
-          <p className="text-lg font-semibold">Etapas da ativação</p>
-          <p className="text-sm leading-6 text-[var(--color-text-muted)]">
-            Um wizard curto, com uma decisão dominante por tela e checklist explícito.
+      {/* Compact header */}
+      <div className="flex items-center justify-between gap-4">
+        <div>
+          <h1 className="text-xl font-semibold text-[var(--color-text)]">Ativação da conta</h1>
+          <p className="mt-0.5 text-sm text-[var(--color-text-muted)]">
+            {completedCount} de {totalCount} etapas concluídas
           </p>
-        </CardHeader>
-        <CardContent className="space-y-3">
+        </div>
+        <Badge tone={data.accountStatus === "ready_for_operations" ? "success" : "warning"}>
+          {data.accountStatus === "ready_for_operations" ? "Conta pronta" : "Em ativação"}
+        </Badge>
+      </div>
+
+      {/* Progress bar */}
+      <div className="h-1.5 w-full overflow-hidden rounded-full bg-[var(--color-border)]">
+        <div
+          className="h-full rounded-full bg-[var(--color-primary)] transition-all duration-500"
+          style={{ width: `${(completedCount / totalCount) * 100}%` }}
+        />
+      </div>
+
+      <div className="grid gap-6 xl:grid-cols-[200px_minmax(0,1fr)]">
+        {/* Compact step list */}
+        <div className="space-y-1">
           {data.steps.map((step, index) => (
             <div
-              className="rounded-3xl border border-[var(--color-border)] px-4 py-4"
+              className={`flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm transition ${
+                step.status === "current"
+                  ? "bg-[rgba(15,76,92,0.07)] font-semibold text-[var(--color-primary)]"
+                  : step.status === "completed"
+                    ? "text-[var(--color-text-muted)]"
+                    : "text-[var(--color-text-muted)] opacity-50"
+              }`}
               key={step.key}
             >
-              <div className="flex items-center justify-between gap-3">
-                <div>
-                  <p className="text-sm font-semibold">
-                    {index + 1}. {step.title}
-                  </p>
-                  <p className="mt-1 text-sm leading-6 text-[var(--color-text-muted)]">
-                    {step.description}
-                  </p>
-                </div>
-                <Badge
-                  tone={
-                    step.status === "completed"
-                      ? "success"
-                      : step.status === "current"
-                        ? "warning"
-                        : "neutral"
-                  }
-                >
-                  {step.status === "completed"
-                    ? "Concluída"
+              <span
+                className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
+                  step.status === "completed"
+                    ? "bg-[var(--color-primary)] text-white"
                     : step.status === "current"
-                      ? "Atual"
-                      : "Pendente"}
-                </Badge>
-              </div>
+                      ? "border-2 border-[var(--color-primary)] text-[var(--color-primary)]"
+                      : "border border-[var(--color-border)] text-[var(--color-text-muted)]"
+                }`}
+              >
+                {step.status === "completed" ? "✓" : index + 1}
+              </span>
+              {step.title}
             </div>
           ))}
-        </CardContent>
-        </Card>
-
-        <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between gap-4">
-                <div>
-                  <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--color-text-muted)]">
-                    Etapa atual
-                  </p>
-                  <h2 className="mt-2 text-2xl font-semibold">{currentStepMeta?.title}</h2>
-                  <p className="mt-2 max-w-3xl text-sm leading-6 text-[var(--color-text-muted)]">
-                    {currentStepMeta?.description}
-                  </p>
-                </div>
-                <Badge tone={data.accountStatus === "ready_for_operations" ? "success" : "warning"}>
-                  {data.accountStatus === "ready_for_operations" ? "Conta pronta" : "Em ativação"}
-                </Badge>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {renderStepFields(data, updateDraft)}
-
-              {error ? (
-                <p className="rounded-2xl bg-[rgba(178,74,58,0.12)] px-4 py-3 text-sm text-[var(--color-danger)]">
-                  {error}
-                </p>
-              ) : null}
-
-              <div className="flex items-center justify-between gap-4">
-                <p className="text-sm text-[var(--color-text-muted)]">
-                  {currentStep === "welcome"
-                    ? "Explique o valor da ativação antes de pedir dados."
-                    : "Salvar esta etapa destrava a próxima decisão operacional do onboarding."}
-                </p>
-                <Button disabled={isPending} onClick={submitCurrentStep} type="button">
-                  {isPending
-                    ? "Salvando..."
-                    : currentStep === "welcome"
-                      ? "Começar ativação"
-                      : currentStep === "consents"
-                        ? "Concluir ativação"
-                        : "Salvar e continuar"}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <p className="text-lg font-semibold">Checklist bloqueante</p>
-              <p className="text-sm text-[var(--color-text-muted)]">
-                Todos precisam estar concluídos para liberar a operação completa.
-              </p>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {data.blockingItems.map((item) => (
-                <div
-                  className="flex items-start justify-between gap-4 rounded-3xl border border-[var(--color-border)] bg-[rgba(15,76,92,0.03)] px-4 py-4"
-                  key={item.id}
-                >
-                  <div>
-                    <p className="font-semibold">{item.label}</p>
-                    <p className="mt-1 text-sm leading-6 text-[var(--color-text-muted)]">
-                      {item.description}
-                    </p>
-                  </div>
-                  <Badge tone={item.completed ? "success" : "warning"}>
-                    {item.completed ? "Ok" : "Falta"}
-                  </Badge>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
         </div>
+
+        {/* Step form */}
+        <Card>
+          <CardHeader>
+            <h2 className="text-lg font-semibold">{currentStepMeta?.title}</h2>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {renderStepFields(data, updateDraft)}
+
+            {error ? (
+              <p className="rounded-2xl bg-[rgba(178,74,58,0.12)] px-4 py-3 text-sm text-[var(--color-danger)]">
+                {error}
+              </p>
+            ) : null}
+
+            <div className="flex justify-end">
+              <Button disabled={isPending} onClick={submitCurrentStep} type="button">
+                {isPending
+                  ? "Salvando..."
+                  : currentStep === "welcome"
+                    ? "Começar"
+                    : currentStep === "consents"
+                      ? "Concluir ativação"
+                      : "Salvar e continuar"}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
