@@ -141,7 +141,7 @@ export function DocumentDetailPageView({ initialData }: DocumentDetailPageProps)
               Bloqueia: {detail.blockedFlowLabels.join(" · ")}
             </p>
           </div>
-          <Button asChild size="sm" variant="ghost">
+          <Button asChild variant="ghost" className="h-8 px-3 text-xs">
             <Link href="/app/documents">Ver fila de pendências</Link>
           </Button>
         </div>
