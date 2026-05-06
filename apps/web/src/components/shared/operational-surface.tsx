@@ -16,7 +16,7 @@ type OperationalHeroProps = {
   aside?: ReactNode;
   badges?: ReactNode;
   className?: string;
-  description: string;
+  description?: string;
   supportingText?: string;
   stats?: HeroStat[];
   title: string;
@@ -56,7 +56,7 @@ export function OperationalHero({
           <h1 className="mt-4 text-3xl font-semibold tracking-[-0.03em] text-[var(--color-text)] xl:text-4xl">
             {title}
           </h1>
-          <p className="mt-3 max-w-3xl text-base leading-7 text-[var(--color-text-muted)]">{description}</p>
+          {description ? <p className="mt-3 max-w-3xl text-base leading-7 text-[var(--color-text-muted)]">{description}</p> : null}
           {supportingText ? (
             <p className="mt-3 max-w-3xl text-sm leading-6 text-[var(--color-text-muted)]">{supportingText}</p>
           ) : null}
