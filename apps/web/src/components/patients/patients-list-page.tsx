@@ -7,7 +7,7 @@ import type { PatientCreateRequest, PatientListResponse } from "@terapia/contrac
 import { Badge, Button, Card, CardContent, CardHeader, cn } from "@terapia/ui";
 import { Plus, Search, UserRoundPlus, X } from "lucide-react";
 
-import { OperationalHero, ToolbarPanel } from "@/components/shared/operational-surface";
+import { OperationalHero } from "@/components/shared/operational-surface";
 
 type PatientsListPageProps = {
   initialData: PatientListResponse;
@@ -18,6 +18,7 @@ export function PatientsListPage({ initialData }: PatientsListPageProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [, startTransition] = useTransition();
   const [query, setQuery] = useState(initialData.filters.query);
   const [status, setStatus] = useState(initialData.filters.status);
@@ -72,36 +73,28 @@ export function PatientsListPage({ initialData }: PatientsListPageProps) {
               Novo paciente
             </Button>
           }
-          badges={
-            <>
-              <Badge tone={activeChips.length > 0 ? "warning" : "success"}>
-                {activeChips.length > 0 ? `${activeChips.length} filtros ativos` : "Fila limpa para triagem"}
-              </Badge>
-            </>
-          }
-          description="Localize pacientes, veja sinais de operação e entre rápido no fluxo certo sem transformar a tela em dashboard paralelo."
           stats={[
             {
-              detail: "Pacientes no recorte atual.",
-              label: "Em foco",
-              tone: "info",
+              detail: "Total de pacientes cadastrados.",
+              label: "Pacientes",
+              tone: "neutral",
               value: String(initialData.total)
             },
             {
-              detail: "Exigem atenção de consentimento ou assinatura.",
-              label: "Documentos",
+              detail: "Precisam de atenção em documentos.",
+              label: "Docs. pendentes",
               tone: documentsAttentionCount > 0 ? "warning" : "success",
               value: String(documentsAttentionCount)
             },
             {
-              detail: "Com cobrança em aberto ou vencida.",
-              label: "Financeiro",
+              detail: "Com cobranças em aberto ou vencidas.",
+              label: "Cobranças pendentes",
               tone: financialAttentionCount > 0 ? "warning" : "success",
               value: String(financialAttentionCount)
             },
             {
-              detail: "Pacientes com próxima sessão já visível.",
-              label: "Continuidade",
+              detail: "Com sessão agendada.",
+              label: "Com sessão",
               tone: "neutral",
               value: String(upcomingCount)
             }
@@ -109,66 +102,70 @@ export function PatientsListPage({ initialData }: PatientsListPageProps) {
           title="Pacientes"
         />
 
-        <ToolbarPanel
-          actions={
-            <>
-              <Button onClick={applyFilters} type="button" variant="secondary">
-                Aplicar
-              </Button>
-              <Button onClick={clearFilters} type="button" variant="ghost">
-                Limpar filtros
-              </Button>
-            </>
-          }
-          description="Combine busca, estado do paciente, documentos e financeiro sem esconder os recortes mais usados."
-          footer={
-            <div className="flex flex-wrap gap-3">
-              <ChipToggle checked={upcomingOnly} label="Próxima sessão em 7 dias" onToggle={setUpcomingOnly} />
-              <ChipToggle checked={legalGuardianOnly} label="Com responsável legal" onToggle={setLegalGuardianOnly} />
-              {activeChips.map((chip) => (
-                <Badge key={chip} tone="neutral">
-                  {chip}
-                </Badge>
-              ))}
-            </div>
-          }
-          title="Localizar e filtrar"
-        >
-          <div className="grid gap-4 2xl:grid-cols-[minmax(0,1.7fr)_repeat(3,minmax(0,0.92fr))]">
-            <label className="space-y-2">
-              <span className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--color-text-muted)]">
-                Busca
-              </span>
-              <span className="flex h-12 items-center gap-3 rounded-2xl border border-[var(--color-border-strong)] bg-white px-4">
-                <Search className="h-4 w-4 text-[var(--color-text-muted)]" />
-                <input
-                  className="w-full bg-transparent outline-none"
-                  onChange={(event) => setQuery(event.target.value)}
-                  placeholder="Buscar por nome, código, e-mail ou telefone"
-                  value={query}
-                />
-              </span>
-            </label>
-            <SelectField
-              label="Status"
-              onChange={(value) => setStatus(value as typeof status)}
-              value={status}
-              options={statusOptions}
-            />
-            <SelectField
-              label="Documentos"
-              onChange={(value) => setDocuments(value as typeof documents)}
-              value={documents}
-              options={documentOptions}
-            />
-            <SelectField
-              label="Financeiro"
-              onChange={(value) => setFinancial(value as typeof financial)}
-              value={financial}
-              options={financialOptions}
-            />
+        {/* Search + filter bar */}
+        <div className="space-y-3">
+          <div className="flex gap-3">
+            <span className="flex h-11 flex-1 items-center gap-3 rounded-2xl border border-[var(--color-border-strong)] bg-white px-4">
+              <Search className="h-4 w-4 shrink-0 text-[var(--color-text-muted)]" />
+              <input
+                className="w-full bg-transparent text-sm outline-none"
+                onChange={(event) => { setQuery(event.target.value); }}
+                onKeyDown={(e) => { if (e.key === "Enter") applyFilters(); }}
+                placeholder="Buscar por nome, e-mail ou telefone"
+                value={query}
+              />
+            </span>
+            <Button
+              className={activeChips.length > 0 ? "border-[var(--color-primary)] text-[var(--color-primary)]" : ""}
+              onClick={() => setIsFilterOpen((v) => !v)}
+              type="button"
+              variant="secondary"
+            >
+              Filtros {activeChips.length > 0 ? `(${activeChips.length})` : ""}
+            </Button>
+            <Button onClick={applyFilters} type="button">
+              Buscar
+            </Button>
           </div>
-        </ToolbarPanel>
+
+          {isFilterOpen ? (
+            <div className="rounded-2xl border border-[var(--color-border)] bg-white p-4">
+              <div className="grid gap-4 sm:grid-cols-3">
+                <SelectField
+                  label="Status"
+                  onChange={(value) => setStatus(value as typeof status)}
+                  value={status}
+                  options={statusOptions}
+                />
+                <SelectField
+                  label="Documentos"
+                  onChange={(value) => setDocuments(value as typeof documents)}
+                  value={documents}
+                  options={documentOptions}
+                />
+                <SelectField
+                  label="Financeiro"
+                  onChange={(value) => setFinancial(value as typeof financial)}
+                  value={financial}
+                  options={financialOptions}
+                />
+              </div>
+              <div className="mt-3 flex flex-wrap items-center gap-3">
+                <ChipToggle checked={upcomingOnly} label="Sessão nos próximos 7 dias" onToggle={setUpcomingOnly} />
+                <ChipToggle checked={legalGuardianOnly} label="Com responsável legal" onToggle={setLegalGuardianOnly} />
+                {activeChips.length > 0 ? (
+                  <button
+                    className="text-xs text-[var(--color-text-muted)] underline underline-offset-2"
+                    onClick={clearFilters}
+                    type="button"
+                  >
+                    Limpar filtros
+                  </button>
+                ) : null}
+              </div>
+            </div>
+          ) : null}
+        </div>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between gap-4">
@@ -344,6 +341,9 @@ function StateBadge({
   label: string;
   tone: "critical" | "warning" | "info" | "success";
 }) {
+  if (tone === "success") {
+    return <span className="text-sm text-[var(--color-text-muted)]">—</span>;
+  }
   return <Badge tone={tone}>{label}</Badge>;
 }
 
@@ -376,11 +376,7 @@ function PatientCreateDrawer({
       <div className="flex h-full w-full max-w-xl flex-col overflow-hidden border-l border-[var(--color-border)] bg-[var(--color-surface-contrast)] px-6 py-6 shadow-2xl">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <Badge tone="info">Criação rápida</Badge>
-            <h2 className="mt-4 text-2xl font-semibold">Novo paciente</h2>
-            <p className="mt-2 text-sm leading-6 text-[var(--color-text-muted)]">
-              Cadastro inicial curto, com contato mínimo e decisão explícita sobre convite imediato.
-            </p>
+            <h2 className="text-xl font-semibold">Novo paciente</h2>
           </div>
           <button className="rounded-2xl border border-[var(--color-border)] p-2" onClick={onClose} type="button">
             <X className="h-4 w-4" />
