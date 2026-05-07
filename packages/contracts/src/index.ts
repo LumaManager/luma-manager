@@ -7,7 +7,7 @@ export const therapistAccountStatusSchema = z.enum([
   "restricted"
 ]);
 
-export const alertToneSchema = z.enum(["critical", "warning", "info", "success"]);
+export const alertToneSchema = z.enum(["critical", "warning", "info", "success", "neutral"]);
 
 export const navKeySchema = z.enum([
   "dashboard",

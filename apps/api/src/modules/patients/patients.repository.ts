@@ -46,6 +46,7 @@ export type PatientWithMeta = PatientRow & {
   openChargesCents: number;
   pendingDocumentsCount: number;
   criticalDocumentsCount: number;
+  completedSessionsCount: number;
 };
 
 @Injectable()
@@ -278,6 +279,19 @@ export class PatientsRepository {
     const pendingDocumentsCount = docRows.length;
     const criticalDocumentsCount = docRows.filter((d) => d.criticality === "critical").length;
 
+    // Completed sessions count
+    const [completedRow] = await this.db
+      .select({ count: count() })
+      .from(appointments)
+      .where(
+        and(
+          eq(appointments.patientId, patient.id),
+          eq(appointments.status, "completed")
+        )
+      );
+
+    const completedSessionsCount = Number(completedRow?.count ?? 0);
+
     return {
       ...patient,
       nextSessionDate: nextAppt[0]?.date ?? null,
@@ -286,7 +300,8 @@ export class PatientsRepository {
       overdueChargesCount,
       openChargesCents,
       pendingDocumentsCount,
-      criticalDocumentsCount
+      criticalDocumentsCount,
+      completedSessionsCount
     };
   }
 }
