@@ -15,7 +15,6 @@ import {
   CalendarClock,
   CalendarRange,
   ChevronRight,
-  ClipboardCheck,
   DoorOpen,
   ShieldCheck,
   Wallet,
@@ -411,41 +410,6 @@ function ConsentCard({
   );
 }
 
-function ChecklistCard({
-  items
-}: {
-  items: AppointmentDetail["readinessChecklist"];
-}) {
-  const overallState = items.some((item) => item.state === "blocked")
-    ? "Bloqueado"
-    : items.some((item) => item.state === "attention")
-      ? "Atenção necessária"
-      : "Pronto para iniciar";
-
-  return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center gap-2">
-          <ClipboardCheck className="h-4 w-4" />
-          <p className="text-lg font-semibold">Checklist pré-sessão</p>
-        </div>
-        <p className="text-sm text-[var(--color-text-muted)]">{overallState}</p>
-      </CardHeader>
-      <CardContent className="space-y-3">
-        {items.map((item) => (
-          <div className="rounded-3xl border border-[var(--color-border)] bg-[rgba(15,76,92,0.03)] p-4" key={item.label}>
-            <div className="flex items-center justify-between gap-3">
-              <p className="font-semibold">{item.label}</p>
-              <Badge tone={checklistToneMap[item.state]}>{checklistLabelMap[item.state]}</Badge>
-            </div>
-            <p className="mt-2 text-sm leading-6 text-[var(--color-text-muted)]">{item.description}</p>
-          </div>
-        ))}
-      </CardContent>
-    </Card>
-  );
-}
-
 function VirtualRoomCard({ appointment }: { appointment: AppointmentDetail }) {
   return (
     <Card>
@@ -608,14 +572,3 @@ const consentLabelMap = {
   critical: "Crítico"
 } as const;
 
-const checklistToneMap = {
-  ok: "success",
-  attention: "warning",
-  blocked: "critical"
-} as const;
-
-const checklistLabelMap = {
-  ok: "OK",
-  attention: "Atenção",
-  blocked: "Bloqueado"
-} as const;
