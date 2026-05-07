@@ -45,8 +45,8 @@ export function Sidebar({ bootstrap }: SidebarProps) {
   return (
     <aside className="sticky top-0 hidden h-screen overflow-y-auto border-r border-[var(--color-border)] bg-[rgba(255,253,248,0.84)] px-4 py-4 backdrop-blur lg:flex lg:flex-col">
       <div className="rounded-[26px] border border-[var(--color-border)] bg-white p-3.5 shadow-[var(--shadow-panel)]">
-        <div className="text-[15px] font-semibold text-[var(--color-text)]">{bootstrap.tenant.name}</div>
-        <p className="mt-2 text-sm font-medium text-[var(--color-text-muted)]">{bootstrap.accountStateLabel}</p>
+        <div className="text-[15px] font-semibold text-[var(--color-text)]">{bootstrap.therapistProfile.fullName}</div>
+        <p className="mt-1.5 text-xs font-medium text-[var(--color-text-muted)]">CRP {bootstrap.therapistProfile.crp}</p>
       </div>
 
       <nav className="mt-6 flex-1 space-y-1.5">
