@@ -41,13 +41,16 @@ export function DashboardPage({ data }: DashboardPageProps) {
           <SummaryCard state={data.cards.clinicalReview}>
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="rounded-3xl bg-[rgba(178,74,58,0.08)] p-4">
-                <p className="text-sm font-semibold">Atrasados</p>
+                <p className="text-sm font-semibold text-[var(--color-danger)]">Atrasados</p>
                 <p className="mt-2 text-2xl font-semibold text-[var(--color-danger)]">
                   {data.clinicalReviewSummary.overdueCount}
                 </p>
+                <p className="mt-1 text-xs text-[var(--color-text-muted)]">
+                  de {data.clinicalReviewSummary.totalPending} pendentes
+                </p>
               </div>
               <div className="rounded-3xl bg-[rgba(15,76,92,0.05)] p-4">
-                <p className="text-sm font-semibold">Mais antigo</p>
+                <p className="text-sm font-semibold">Sem revisão há mais tempo</p>
                 <p className="mt-2 text-sm leading-6 text-[var(--color-text-muted)]">
                   {data.clinicalReviewSummary.oldestPendingLabel}
                 </p>

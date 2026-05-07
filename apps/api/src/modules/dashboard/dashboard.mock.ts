@@ -278,7 +278,7 @@ export function buildDashboard(session: AuthSession): TherapistDashboard {
     clinicalReviewSummary: {
       totalPending: 4,
       overdueCount: 1,
-      oldestPendingLabel: "Sessao de Julia Prado aguardando ha 18h",
+      oldestPendingLabel: "Julia Prado — sem revisão há 18 horas",
       nextItemHref: "/app/clinical-review",
       queueHref: "/app/clinical-review"
     },
@@ -459,11 +459,11 @@ export function buildDashboard(session: AuthSession): TherapistDashboard {
         ctaLabel: "Abrir agenda"
       },
       clinicalReview: {
-        title: "Revisao clinica pendente",
-        eyebrow: "Backlog clinico",
-        metric: "4 rascunhos para revisar",
+        title: "Prontuários pendentes de revisão",
+        eyebrow: "Revisão clínica",
+        metric: "4 prontuários para revisar",
         description:
-          "Uma sessao esta atrasada e precisa de fechamento hoje para manter continuidade clinica.",
+          "Uma sessão está atrasada e precisa de fechamento hoje.",
         tone: "critical",
         href: "/app/clinical-review",
         ctaLabel: "Revisar agora"
