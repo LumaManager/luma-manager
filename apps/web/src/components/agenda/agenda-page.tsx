@@ -183,7 +183,7 @@ export function AgendaPageView({
                 Nova sessão
               </Button>
               <Button onClick={() => setIsAvailabilityDrawerOpen(true)} type="button" variant="secondary">
-                Editar disponibilidade
+                Horários de atendimento
               </Button>
               <Button
                 disabled={readOnly}
@@ -539,11 +539,36 @@ function TimeGridView({
           ))}
         </div>
 
-        {data.dayColumns.map((day) => (
+        {data.dayColumns.map((day) => {
+          const weekday = new Date(day.key + "T12:00:00Z").getUTCDay();
+          const rule = data.availabilityRules.find((r) => r.weekday === weekday);
+          const hasAvailability = rule?.enabled && rule.windows.length > 0;
+
+          const availabilityBlocks: ScheduleBlock[] = hasAvailability
+            ? rule!.windows.map((w) => ({
+                id: `avail-${day.key}-${w.startTime}`,
+                type: "availability" as const,
+                title: "",
+                subtitle: "",
+                startsAt: `${day.key}T${w.startTime}:00`,
+                endsAt: `${day.key}T${w.endTime}:00`,
+                dayKey: day.key,
+                tone: "success" as const,
+                href: undefined
+              }))
+            : [];
+
+          const allDayBlocks = [
+            ...availabilityBlocks,
+            ...data.scheduleBlocks.filter((block) => block.dayKey === day.key)
+          ].sort((left, right) => blockOrder[left.type] - blockOrder[right.type]);
+
+          return (
           <div
             className={cn(
               "relative grid border-r border-[var(--color-border)]",
-              day.isToday ? "bg-[rgba(15,76,92,0.02)]" : "bg-white"
+              day.isToday ? "bg-[rgba(15,76,92,0.02)]" : "bg-white",
+              !hasAvailability && "bg-[repeating-linear-gradient(135deg,transparent,transparent_8px,rgba(15,76,92,0.025)_8px,rgba(15,76,92,0.025)_9px)]"
             )}
             key={day.key}
             style={{
@@ -577,23 +602,21 @@ function TimeGridView({
                 ))}
               </div>
             ) : null}
-            {data.scheduleBlocks
-              .filter((block) => block.dayKey === day.key)
-              .sort((left, right) => blockOrder[left.type] - blockOrder[right.type])
-              .map((block) => (
-                <CalendarBlock
-                  active={
-                    (block.type === "appointment" && block.id === activeAppointmentId) ||
-                    (block.type === "block" && block.id === activeBlockId)
-                  }
-                  dimmed={moveModeAppointment?.id === block.id}
-                  block={block}
-                  key={block.id}
-                  slotMinutes={slotMinutes}
-                />
-              ))}
+            {allDayBlocks.map((block) => (
+              <CalendarBlock
+                active={
+                  (block.type === "appointment" && block.id === activeAppointmentId) ||
+                  (block.type === "block" && block.id === activeBlockId)
+                }
+                dimmed={moveModeAppointment?.id === block.id}
+                block={block}
+                key={block.id}
+                slotMinutes={slotMinutes}
+              />
+            ))}
           </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
@@ -721,11 +744,20 @@ function CalendarBlock({
   slotMinutes: number;
 }) {
   const style = getBlockGridStyle(block, slotMinutes);
+
+  // Availability windows render as silent background zones
+  if (block.type === "availability") {
+    return (
+      <div
+        className="absolute inset-x-1 z-0 rounded-xl border border-dashed border-[rgba(63,107,97,0.3)] bg-[rgba(63,107,97,0.07)]"
+        style={style}
+      />
+    );
+  }
+
   const className = cn(
     "relative z-10 mx-1.5 my-1 min-h-[48px] overflow-hidden rounded-2xl border px-2.5 py-2 text-left shadow-sm transition",
-    block.type === "availability"
-      ? "border-dashed border-[rgba(63,107,97,0.24)] bg-[rgba(63,107,97,0.08)] text-[var(--color-success)]"
-      : toneClasses[block.tone],
+    toneClasses[block.tone],
     active && "ring-2 ring-[rgba(15,76,92,0.22)] shadow-[0_10px_24px_rgba(15,76,92,0.18)]",
     dimmed && "opacity-45"
   );
@@ -1234,10 +1266,9 @@ function AvailabilityDrawer({
               </Badge>
               <CalendarDays className="h-4 w-4 text-[var(--color-primary)]" />
             </div>
-            <h2 className="mt-4 text-2xl font-semibold">Editar disponibilidade</h2>
+            <h2 className="mt-4 text-2xl font-semibold">Horários de atendimento</h2>
             <p className="mt-2 text-sm leading-6 text-[var(--color-text-muted)]">
-              Ajuste a base recorrente da agenda sem sair da semana. A intenção é reduzir conflito e
-              deixar claro quando existe janela para nova sessão.
+              Defina os dias e horários em que você atende. Isso se repete toda semana e aparece na agenda.
             </p>
           </div>
           <Button onClick={onClose} type="button" variant="ghost">
