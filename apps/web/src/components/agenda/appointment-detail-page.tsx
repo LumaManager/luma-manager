@@ -192,7 +192,6 @@ export function AppointmentDetailPageView({ appointment }: AppointmentDetailPage
           </div>
 
           <div className="space-y-4">
-            <ChecklistCard items={appointment.readinessChecklist} />
             <VirtualRoomCard appointment={appointment} />
             <TimelineCard items={appointment.timeline} />
           </div>
