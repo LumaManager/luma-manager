@@ -405,9 +405,46 @@ export class AppointmentsService {
           key,
           label: DAY_LABELS[day.getUTCDay()]!,
           dateLabel: `${DAY_LABELS[day.getUTCDay()]} ${day.getUTCDate()}`,
-          isToday: key === today
+          isToday: key === today,
+          isCurrentMonth: true
         };
       });
+
+      return { dateFrom, dateTo, dayColumns };
+    }
+
+    if (view === "month") {
+      const year = d.getUTCFullYear();
+      const month = d.getUTCMonth();
+      const firstOfMonth = new Date(Date.UTC(year, month, 1));
+      const lastOfMonth = new Date(Date.UTC(year, month + 1, 0));
+
+      // Start from Monday on or before the 1st
+      const startDow = firstOfMonth.getUTCDay(); // 0=Sun,1=Mon,...
+      const gridStart = new Date(firstOfMonth);
+      gridStart.setUTCDate(firstOfMonth.getUTCDate() - ((startDow + 6) % 7));
+
+      // End at Sunday on or after the last day
+      const endDow = lastOfMonth.getUTCDay();
+      const gridEnd = new Date(lastOfMonth);
+      gridEnd.setUTCDate(lastOfMonth.getUTCDate() + ((7 - endDow) % 7));
+
+      const dateFrom = gridStart.toISOString().slice(0, 10);
+      const dateTo = gridEnd.toISOString().slice(0, 10);
+
+      const dayColumns: Array<{ key: string; label: string; dateLabel: string; isToday: boolean; isCurrentMonth: boolean }> = [];
+      const cur = new Date(gridStart);
+      while (cur <= gridEnd) {
+        const key = cur.toISOString().slice(0, 10);
+        dayColumns.push({
+          key,
+          label: DAY_LABELS[cur.getUTCDay()]!,
+          dateLabel: `${cur.getUTCDate()}`,
+          isToday: key === today,
+          isCurrentMonth: cur.getUTCMonth() === month
+        });
+        cur.setUTCDate(cur.getUTCDate() + 1);
+      }
 
       return { dateFrom, dateTo, dayColumns };
     }
@@ -420,7 +457,8 @@ export class AppointmentsService {
         key: targetDate,
         label: DAY_LABELS[d.getUTCDay()]!,
         dateLabel: `${DAY_LABELS[d.getUTCDay()]} ${d.getUTCDate()}`,
-        isToday: targetDate === today
+        isToday: targetDate === today,
+        isCurrentMonth: true
       }]
     };
   }
@@ -439,6 +477,11 @@ export class AppointmentsService {
       const from = new Date(dateFrom + "T12:00:00Z");
       const to = new Date(dateTo + "T12:00:00Z");
       return `${from.getUTCDate()} – ${to.getUTCDate()} de ${MONTH_LABELS[to.getUTCMonth()]}, ${to.getUTCFullYear()}`;
+    }
+    if (view === "month") {
+      const d = new Date(dateFrom + "T12:00:00Z");
+      const PT_MONTHS_FULL = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
+      return `${PT_MONTHS_FULL[d.getUTCMonth()] ?? ""} de ${d.getUTCFullYear()}`;
     }
     const d = new Date(dateFrom + "T12:00:00Z");
     return `${d.getUTCDate()} de ${MONTH_LABELS[d.getUTCMonth()]}, ${d.getUTCFullYear()}`;

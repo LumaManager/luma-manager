@@ -600,49 +600,105 @@ function MonthView({
   data: AgendaResponse;
   onOpenDay: (dayKey: string) => void;
 }) {
-  return (
-    <div className="grid grid-cols-7 gap-px bg-[var(--color-border)]">
-      {data.dayColumns.map((day) => {
-        const items = data.scheduleBlocks.filter(
-          (block) => block.dayKey === day.key && block.type === "appointment"
-        );
-        const blocks = data.scheduleBlocks.filter(
-          (block) => block.dayKey === day.key && block.type === "block"
-        );
+  const WEEK_HEADERS = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"];
 
-        return (
-          <button
-            className={cn(
-              "min-h-[160px] bg-white p-4 text-left transition hover:bg-[rgba(15,76,92,0.03)]",
-              day.isToday ? "bg-[rgba(15,76,92,0.06)]" : ""
-            )}
-            key={day.key}
-            onClick={() => onOpenDay(day.key)}
-            type="button"
+  return (
+    <div className="overflow-hidden">
+      {/* Weekday headers */}
+      <div className="grid grid-cols-7 border-b border-[var(--color-border)] bg-[rgba(15,76,92,0.025)]">
+        {WEEK_HEADERS.map((label) => (
+          <div
+            className="py-3 text-center text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--color-text-muted)]"
+            key={label}
           >
-            <div className="flex items-center justify-between">
-              <p className="text-sm font-semibold">{day.dateLabel}</p>
-              {day.isToday ? <Badge tone="info">Hoje</Badge> : null}
-            </div>
-            <p className="mt-3 text-sm text-[var(--color-text-muted)]">
-              {items.length} sessões · {blocks.length} bloqueios
-            </p>
-            <div className="mt-4 space-y-2">
-              {items.slice(0, 3).map((item) => (
-                <div
+            {label}
+          </div>
+        ))}
+      </div>
+
+      {/* Day cells grid */}
+      <div className="grid grid-cols-7 divide-x divide-y divide-[var(--color-border)]">
+        {data.dayColumns.map((day) => {
+          const appts = data.scheduleBlocks.filter(
+            (b) => b.dayKey === day.key && b.type === "appointment"
+          );
+          const schedBlocks = data.scheduleBlocks.filter(
+            (b) => b.dayKey === day.key && b.type === "block"
+          );
+          const visibleAppts = appts.slice(0, 2);
+          const overflowCount = appts.length - visibleAppts.length + (schedBlocks.length > 0 && appts.length < 2 ? 0 : schedBlocks.length);
+
+          return (
+            <button
+              className={cn(
+                "group relative min-h-[108px] p-3 text-left transition-colors duration-150",
+                day.isCurrentMonth
+                  ? "bg-white hover:bg-[rgba(15,76,92,0.025)]"
+                  : "bg-[rgba(255,253,248,0.7)] hover:bg-[rgba(255,253,248,0.9)]"
+              )}
+              key={day.key}
+              onClick={() => onOpenDay(day.key)}
+              type="button"
+            >
+              {/* Date number */}
+              <div className="mb-2 flex items-start justify-between">
+                <span
                   className={cn(
-                    "rounded-2xl px-3 py-2 text-xs font-medium",
-                    toneClasses[item.tone]
+                    "inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-sm font-semibold transition-colors",
+                    day.isToday
+                      ? "bg-[var(--color-primary)] text-white shadow-[0_3px_10px_rgba(15,76,92,0.30)]"
+                      : day.isCurrentMonth
+                        ? "text-[var(--color-text)] group-hover:bg-[rgba(15,76,92,0.07)]"
+                        : "text-[var(--color-text-muted)] opacity-35"
                   )}
-                  key={item.id}
                 >
-                  {item.title} · {item.startsAt.slice(11, 16)}
+                  {day.dateLabel}
+                </span>
+                {appts.length > 0 && day.isCurrentMonth ? (
+                  <span className="mt-1 flex gap-0.5">
+                    {Array.from({ length: Math.min(appts.length, 3) }).map((_, i) => (
+                      <span
+                        className="h-1 w-1 rounded-full bg-[var(--color-primary)] opacity-30"
+                        key={i}
+                      />
+                    ))}
+                  </span>
+                ) : null}
+              </div>
+
+              {/* Appointment pills */}
+              {day.isCurrentMonth ? (
+                <div className="space-y-1">
+                  {visibleAppts.map((item) => (
+                    <div
+                      className={cn(
+                        "flex items-center gap-1.5 truncate rounded-lg px-2 py-[3px] text-[11px] font-medium leading-none",
+                        toneClasses[item.tone]
+                      )}
+                      key={item.id}
+                    >
+                      <span className="truncate">{item.title}</span>
+                      <span className="shrink-0 tabular-nums opacity-60">
+                        {item.startsAt.slice(11, 16)}
+                      </span>
+                    </div>
+                  ))}
+                  {schedBlocks.length > 0 && visibleAppts.length < 2 ? (
+                    <div className="flex items-center gap-1.5 truncate rounded-lg bg-[rgba(198,122,69,0.09)] px-2 py-[3px] text-[11px] font-medium leading-none text-[var(--color-accent)]">
+                      <span className="truncate">{schedBlocks[0]!.title}</span>
+                    </div>
+                  ) : null}
+                  {overflowCount > 0 ? (
+                    <p className="pl-1 text-[11px] font-semibold text-[var(--color-text-muted)]">
+                      +{overflowCount} mais
+                    </p>
+                  ) : null}
                 </div>
-              ))}
-            </div>
-          </button>
-        );
-      })}
+              ) : null}
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }
@@ -1738,12 +1794,15 @@ const toneClasses = {
     "border-[rgba(198,122,69,0.2)] bg-[rgba(198,122,69,0.14)] text-[var(--color-accent)]",
   info: "border-[rgba(15,76,92,0.18)] bg-[rgba(15,76,92,0.12)] text-[var(--color-primary)]",
   success:
-    "border-[rgba(63,107,97,0.2)] bg-[rgba(63,107,97,0.14)] text-[var(--color-success)]"
+    "border-[rgba(63,107,97,0.2)] bg-[rgba(63,107,97,0.14)] text-[var(--color-success)]",
+  neutral:
+    "border-[rgba(15,76,92,0.12)] bg-[rgba(15,76,92,0.06)] text-[var(--color-text-muted)]"
 } as const;
 
 const dotToneClasses = {
   critical: "bg-[var(--color-danger)]",
   warning: "bg-[var(--color-accent)]",
   info: "bg-[var(--color-primary)]",
-  success: "bg-[var(--color-success)]"
+  success: "bg-[var(--color-success)]",
+  neutral: "bg-[var(--color-text-muted)]"
 } as const;

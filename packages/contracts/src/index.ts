@@ -429,7 +429,8 @@ export const agendaDayColumnSchema = z.object({
   key: z.string(),
   label: z.string(),
   dateLabel: z.string(),
-  isToday: z.boolean()
+  isToday: z.boolean(),
+  isCurrentMonth: z.boolean().optional()
 });
 
 export const agendaAvailabilityWindowSchema = z.object({

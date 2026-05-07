@@ -265,25 +265,71 @@ const MOCK_APPTS = [
 export function buildMockAgenda(query: Record<string, string>): AgendaResponse {
   const today = todayStr();
   const targetDate = query.date ?? today;
-  const view = query.view === "week" || query.view === "month" ? query.view : "week";
+  const view = (query.view === "week" || query.view === "month" || query.view === "day") ? query.view : "week";
 
   const monday = weekMonday(targetDate);
-  const dayColumns = Array.from({ length: 7 }, (_, i) => {
-    const key = addDays(monday, i);
-    const d = new Date(key + "T12:00:00Z");
-    return {
-      key,
+  let dayColumns: Array<{ key: string; label: string; dateLabel: string; isToday: boolean; isCurrentMonth: boolean }>;
+  let visibleRangeLabel: string;
+
+  if (view === "month") {
+    const ref = new Date(targetDate + "T12:00:00Z");
+    const year = ref.getUTCFullYear();
+    const month = ref.getUTCMonth();
+    const firstOfMonth = new Date(Date.UTC(year, month, 1));
+    const lastOfMonth = new Date(Date.UTC(year, month + 1, 0));
+    const startDow = firstOfMonth.getUTCDay();
+    const gridStart = new Date(firstOfMonth);
+    gridStart.setUTCDate(firstOfMonth.getUTCDate() - ((startDow + 6) % 7));
+    const endDow = lastOfMonth.getUTCDay();
+    const gridEnd = new Date(lastOfMonth);
+    gridEnd.setUTCDate(lastOfMonth.getUTCDate() + ((7 - endDow) % 7));
+
+    dayColumns = [];
+    const cur = new Date(gridStart);
+    while (cur <= gridEnd) {
+      const key = cur.toISOString().slice(0, 10);
+      dayColumns.push({
+        key,
+        label: DAY_LABELS[cur.getUTCDay()]!,
+        dateLabel: `${cur.getUTCDate()}`,
+        isToday: key === today,
+        isCurrentMonth: cur.getUTCMonth() === month
+      });
+      cur.setUTCDate(cur.getUTCDate() + 1);
+    }
+
+    const PT_MONTHS_FULL = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
+    visibleRangeLabel = `${PT_MONTHS_FULL[month] ?? ""} de ${year}`;
+  } else if (view === "day") {
+    const d = new Date(targetDate + "T12:00:00Z");
+    dayColumns = [{
+      key: targetDate,
       label: DAY_LABELS[d.getUTCDay()]!,
       dateLabel: `${DAY_LABELS[d.getUTCDay()]} ${d.getUTCDate()}`,
-      isToday: key === today
-    };
-  });
+      isToday: targetDate === today,
+      isCurrentMonth: true
+    }];
+    visibleRangeLabel = `${d.getUTCDate()} de ${MONTH_LABELS[d.getUTCMonth()]}, ${d.getUTCFullYear()}`;
+  } else {
+    dayColumns = Array.from({ length: 7 }, (_, i) => {
+      const key = addDays(monday, i);
+      const d = new Date(key + "T12:00:00Z");
+      return {
+        key,
+        label: DAY_LABELS[d.getUTCDay()]!,
+        dateLabel: `${DAY_LABELS[d.getUTCDay()]} ${d.getUTCDate()}`,
+        isToday: key === today,
+        isCurrentMonth: true
+      };
+    });
+
+    const fromD = new Date(dayColumns[0]!.key + "T12:00:00Z");
+    const toD = new Date(dayColumns[6]!.key + "T12:00:00Z");
+    visibleRangeLabel = `${fromD.getUTCDate()} – ${toD.getUTCDate()} de ${MONTH_LABELS[toD.getUTCMonth()]}, ${toD.getUTCFullYear()}`;
+  }
 
   const dateFrom = dayColumns[0]!.key;
-  const dateTo = dayColumns[6]!.key;
-  const fromD = new Date(dateFrom + "T12:00:00Z");
-  const toD = new Date(dateTo + "T12:00:00Z");
-  const visibleRangeLabel = `${fromD.getUTCDate()} – ${toD.getUTCDate()} de ${MONTH_LABELS[toD.getUTCMonth()]}, ${toD.getUTCFullYear()}`;
+  const dateTo = dayColumns[dayColumns.length - 1]!.key;
 
   const timeSlots: string[] = [];
   for (let h = 6; h <= 22; h++) {
