@@ -8,7 +8,7 @@ import type {
   AppointmentDetail,
   AppointmentRescheduleRequest
 } from "@terapia/contracts";
-import { Badge, Button, Card, CardContent, CardHeader } from "@terapia/ui";
+import { Badge, Button, Card, CardContent, CardHeader, cn } from "@terapia/ui";
 import {
   AlertTriangle,
   Ban,
