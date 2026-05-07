@@ -60,7 +60,6 @@ export function AgendaPageView({
   const readOnly = initialData.accountStatus !== "ready_for_operations";
   const appointmentBlocks = initialData.scheduleBlocks.filter((block) => block.type === "appointment");
   const blockCount = initialData.scheduleBlocks.filter((block) => block.type === "block").length;
-  const availabilityDayCount = initialData.availabilityRules.filter((rule) => rule.enabled).length;
   const nextActionLabel = readOnly ? "Leitura preservada" : "Nova sessão liberada";
   const focusDayKey =
     initialData.dayColumns.find((day) => day.isToday)?.key ?? initialData.dayColumns[0]?.key ?? "2026-03-30";
