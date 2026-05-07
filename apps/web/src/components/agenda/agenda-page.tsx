@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState, useTransition, type ReactNode } from "react";
+import { useEffect, useState, useTransition } from "react";
 import type {
   AgendaAvailabilityRule,
   AgendaAvailabilityUpdateRequest,
@@ -23,15 +23,12 @@ import {
   CalendarClock,
   ChevronLeft,
   ChevronRight,
-  Clock3,
   DoorOpen,
-  Filter,
   LockKeyhole,
-  ShieldCheck,
-  Sparkles
+  ShieldCheck
 } from "lucide-react";
 
-import { OperationalHero, ToolbarPanel } from "@/components/shared/operational-surface";
+import { OperationalHero } from "@/components/shared/operational-surface";
 
 type AgendaPageViewProps = {
   initialData: AgendaResponse;
@@ -193,22 +190,6 @@ export function AgendaPageView({
               </Button>
             </>
           }
-          aside={
-            <div className="space-y-3">
-              <Badge tone="neutral">Foco do dia</Badge>
-              <p className="text-lg font-semibold tracking-[-0.02em]">{focusDayLabel}</p>
-              <p className="text-sm leading-6 text-[var(--color-text-muted)]">
-                {focusDayAppointments.length} sessão(ões) e {focusDayBlocks.length} bloqueio(s) no
-                dia em destaque.
-              </p>
-              {readOnly ? (
-                <div className="rounded-2xl border border-[rgba(198,122,69,0.22)] bg-[rgba(198,122,69,0.08)] p-3 text-sm leading-6 text-[var(--color-accent)]">
-                  Conta em modo de leitura. Criação e alteração ficam bloqueadas até voltar para
-                  `ready_for_operations`.
-                </div>
-              ) : null}
-            </div>
-          }
           badges={
             <>
               <Badge tone={readOnly ? "warning" : "success"}>{nextActionLabel}</Badge>
@@ -217,94 +198,106 @@ export function AgendaPageView({
           description="Gerencie disponibilidade, sessões e conflitos do consultório sem transformar a tela em lista solta. A semana continua como visão principal."
           stats={[
             {
-              detail: "Sessões visíveis no período atual.",
+              detail: "Esta semana.",
               label: "Sessões",
               tone: appointmentBlocks.length > 0 ? "info" : "neutral",
               value: String(appointmentBlocks.length)
             },
             {
-              detail: "Bloqueios operacionais e intervalos já marcados.",
+              detail: "Horários bloqueados.",
               label: "Bloqueios",
               tone: blockCount > 0 ? "warning" : "neutral",
               value: String(blockCount)
-            },
-            {
-              detail: "Dias com disponibilidade recorrente ativa.",
-              label: "Disponibilidade",
-              tone: availabilityDayCount > 0 ? "success" : "warning",
-              value: String(availabilityDayCount)
             }
           ]}
           title="Agenda"
         />
 
-        <ToolbarPanel description="Troque visão, período e filtros sem perder o contexto da grade atual." title="Controlar a grade">
-          <div className="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
-            <div className="flex flex-wrap items-center gap-3">
-              <Button onClick={() => shiftDate("prev")} type="button" variant="ghost">
-                <ChevronLeft className="h-4 w-4" />
-                Período anterior
-              </Button>
-              <div className="rounded-2xl border border-[var(--color-border)] bg-[rgba(15,76,92,0.04)] px-4 py-3">
-                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--color-text-muted)]">
-                  Período visível
-                </p>
-                <p className="mt-1 text-base font-semibold">{initialData.visibleRangeLabel}</p>
-              </div>
-              <Button
-                onClick={() => {
-                  updateParam("date", "2026-03-30");
-                  updateParam("view", "week");
-                }}
-                type="button"
-                variant="secondary"
-              >
-                Hoje
-              </Button>
-              <Button onClick={() => shiftDate("next")} type="button" variant="ghost">
-                Próximo período
-                <ChevronRight className="h-4 w-4" />
-              </Button>
-            </div>
-
-            <div className="flex flex-wrap items-end gap-3">
-              <SegmentedControl
-                label="Visualização"
-                onChange={(value) => updateParam("view", value)}
-                options={[
+        <div className="flex flex-wrap items-center justify-between gap-4 rounded-[28px] border border-[var(--color-border)] bg-white px-5 py-3 shadow-[var(--shadow-panel)]">
+          <div className="flex flex-wrap items-center gap-1.5">
+            <button
+              className="rounded-full p-2 text-[var(--color-text-muted)] transition hover:bg-[rgba(15,76,92,0.06)] hover:text-[var(--color-text)]"
+              onClick={() => shiftDate("prev")}
+              type="button"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </button>
+            <span className="min-w-[180px] text-center text-sm font-semibold text-[var(--color-text)]">
+              {initialData.visibleRangeLabel}
+            </span>
+            <button
+              className="rounded-full p-2 text-[var(--color-text-muted)] transition hover:bg-[rgba(15,76,92,0.06)] hover:text-[var(--color-text)]"
+              onClick={() => shiftDate("next")}
+              type="button"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </button>
+            <button
+              className="ml-1 rounded-full border border-[var(--color-border)] px-3 py-1.5 text-sm font-semibold text-[var(--color-text-muted)] transition hover:bg-[rgba(15,76,92,0.04)]"
+              onClick={() => {
+                updateParam("date", "2026-03-30");
+                updateParam("view", "week");
+              }}
+              type="button"
+            >
+              Hoje
+            </button>
+          </div>
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="inline-flex rounded-[14px] border border-[var(--color-border)] bg-[rgba(15,76,92,0.04)] p-1">
+              {(
+                [
                   { label: "Dia", value: "day" },
                   { label: "Semana", value: "week" },
                   { label: "Mês", value: "month" }
-                ]}
-                value={initialData.currentView}
-              />
-              <SelectField
-                label="Status"
-                onChange={(value) => updateParam("status", value === "all" ? "" : value)}
-                options={[
-                  { label: "Todos", value: "all" },
-                  { label: "Agendada", value: "scheduled" },
-                  { label: "Confirmada", value: "confirmed" },
-                  { label: "Em andamento", value: "in_progress" },
-                  { label: "Concluída", value: "completed" },
-                  { label: "Cancelada", value: "cancelled" },
-                  { label: "No-show", value: "no_show" }
-                ]}
-                value={initialData.filters.status}
-              />
-              <SelectField
-                label="Modalidade"
-                onChange={(value) => updateParam("modality", value === "all" ? "" : value)}
-                options={[
-                  { label: "Todas", value: "all" },
-                  { label: "Teleatendimento", value: "telehealth" },
-                  { label: "Presencial", value: "in_person" }
-                ]}
-                value={initialData.filters.modality}
-              />
+                ] as const
+              ).map((option) => (
+                <button
+                  className={cn(
+                    "rounded-[11px] px-3 py-1.5 text-sm font-semibold transition",
+                    initialData.currentView === option.value
+                      ? "bg-[var(--color-primary)] text-white"
+                      : "text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
+                  )}
+                  key={option.value}
+                  onClick={() => updateParam("view", option.value)}
+                  type="button"
+                >
+                  {option.label}
+                </button>
+              ))}
             </div>
+            <select
+              className="h-9 rounded-[14px] border border-[var(--color-border)] bg-white px-3 text-sm text-[var(--color-text)] outline-none"
+              onChange={(event) => updateParam("status", event.target.value === "all" ? "" : event.target.value)}
+              value={initialData.filters.status}
+            >
+              <option value="all">Todos os status</option>
+              <option value="scheduled">Agendada</option>
+              <option value="confirmed">Confirmada</option>
+              <option value="in_progress">Em andamento</option>
+              <option value="completed">Concluída</option>
+              <option value="cancelled">Cancelada</option>
+              <option value="no_show">No-show</option>
+            </select>
+            <select
+              className="h-9 rounded-[14px] border border-[var(--color-border)] bg-white px-3 text-sm text-[var(--color-text)] outline-none"
+              onChange={(event) => updateParam("modality", event.target.value === "all" ? "" : event.target.value)}
+              value={initialData.filters.modality}
+            >
+              <option value="all">Toda modalidade</option>
+              <option value="telehealth">Teleatendimento</option>
+              <option value="in_person">Presencial</option>
+            </select>
           </div>
-        </ToolbarPanel>
+        </div>
+
+        {readOnly ? (
+          <div className="rounded-[28px] border border-[rgba(198,122,69,0.22)] bg-[rgba(198,122,69,0.08)] px-5 py-4">
+            <p className="text-sm font-semibold text-[var(--color-accent)]">Conta em modo de leitura</p>
+            <p className="mt-1 text-sm text-[var(--color-text-muted)]">Criação e alteração de sessões ficam bloqueadas até a ativação ser concluída.</p>
+          </div>
+        ) : null}
 
         {gridMoveMode && selectedAppointment ? (
           <section className="rounded-[28px] border border-[rgba(15,76,92,0.18)] bg-[rgba(15,76,92,0.08)] px-5 py-4 shadow-[var(--shadow-panel)]">
@@ -369,109 +362,91 @@ export function AgendaPageView({
           </Card>
 
           <div className="space-y-4">
+            {/* Foco do dia — mini-stats + sessões */}
             <Card>
               <CardHeader>
-                <p className="text-lg font-semibold">Foco do dia</p>
-                <p className="text-sm text-[var(--color-text-muted)]">
-                  A leitura lateral resume a coluna em destaque sem tirar você da grade.
-                </p>
+                <div className="flex items-center justify-between gap-2">
+                  <p className="text-base font-semibold">{focusDayLabel}</p>
+                  <span className="text-xs text-[var(--color-text-muted)]">hoje</span>
+                </div>
               </CardHeader>
               <CardContent className="space-y-3">
-                <div className="rounded-3xl border border-[var(--color-border)] bg-[rgba(15,76,92,0.03)] p-4">
-                  <p className="text-sm font-semibold">{focusDayLabel}</p>
-                  <p className="mt-1 text-sm leading-6 text-[var(--color-text-muted)]">
-                    {focusDayAppointments.length} sessões e {focusDayBlocks.length} bloqueios no foco atual.
-                  </p>
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="rounded-[20px] border border-[rgba(15,76,92,0.14)] bg-[rgba(15,76,92,0.05)] p-3">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-[var(--color-text-muted)]">Sessões</p>
+                    <p className="mt-1.5 text-xl font-semibold text-[var(--color-text)]">{focusDayAppointments.length}</p>
+                  </div>
+                  <div className={cn(
+                    "rounded-[20px] border p-3",
+                    focusDayBlocks.length > 0
+                      ? "border-[rgba(198,122,69,0.18)] bg-[rgba(198,122,69,0.07)]"
+                      : "border-[var(--color-border)] bg-[rgba(15,76,92,0.02)]"
+                  )}>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-[var(--color-text-muted)]">Bloqueios</p>
+                    <p className="mt-1.5 text-xl font-semibold text-[var(--color-text)]">{focusDayBlocks.length}</p>
+                  </div>
                 </div>
                 {focusDayAppointments.slice(0, 3).map((block) => (
                   <Link
-                    className="block rounded-3xl border border-[var(--color-border)] px-4 py-4 transition hover:bg-[rgba(15,76,92,0.03)]"
+                    className="block rounded-3xl border border-[var(--color-border)] px-4 py-3 transition hover:bg-[rgba(15,76,92,0.03)]"
                     href={block.href ?? "/app/agenda"}
                     key={block.id}
                   >
                     <p className="text-sm font-semibold">{block.title}</p>
-                    <p className="mt-1 text-sm leading-6 text-[var(--color-text-muted)]">
-                      {block.subtitle}
-                    </p>
+                    <p className="mt-0.5 text-xs leading-5 text-[var(--color-text-muted)]">{block.subtitle}</p>
                   </Link>
                 ))}
                 {focusDayBlocks.slice(0, 2).map((block) => (
                   <Link
-                    className="block rounded-3xl border border-[var(--color-border)] bg-[rgba(198,122,69,0.07)] px-4 py-4 transition hover:bg-[rgba(198,122,69,0.12)]"
+                    className="block rounded-3xl border border-[rgba(198,122,69,0.2)] bg-[rgba(198,122,69,0.06)] px-4 py-3 transition hover:bg-[rgba(198,122,69,0.1)]"
                     href={block.href ?? `/app/agenda?date=${block.dayKey}&view=${initialData.currentView}&block=${block.id}`}
                     key={block.id}
                   >
                     <p className="text-sm font-semibold">{block.title}</p>
-                    <p className="mt-1 text-sm leading-6 text-[var(--color-text-muted)]">
-                      {block.subtitle}
-                    </p>
+                    <p className="mt-0.5 text-xs leading-5 text-[var(--color-text-muted)]">{block.subtitle}</p>
                   </Link>
                 ))}
+                {focusDayAppointments.length === 0 && focusDayBlocks.length === 0 ? (
+                  <div className="rounded-3xl border border-dashed border-[var(--color-border)] p-4 text-center text-sm text-[var(--color-text-muted)]">
+                    Sem sessões ou bloqueios hoje.
+                  </div>
+                ) : null}
               </CardContent>
             </Card>
 
-            <Card>
-              <CardHeader>
-                <p className="text-lg font-semibold">Mesa de ação</p>
-                <p className="text-sm text-[var(--color-text-muted)]">
-                  O resumo lateral filtra o que exige movimento agora.
-                </p>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <QuickMetric
-                  icon={<Clock3 className="h-4 w-4" />}
-                  label="Próximas sessões"
-                  value={`${focusDayAppointments.length} no foco atual`}
-                />
-                <QuickMetric
-                  icon={<Filter className="h-4 w-4" />}
-                  label="Bloqueios"
-                  value={`${initialData.scheduleBlocks.filter((block) => block.type === "block").length} na faixa visível`}
-                />
-                <QuickMetric
-                  icon={<Sparkles className="h-4 w-4" />}
-                  label="Disponibilidade"
-                  value={`${initialData.scheduleBlocks.filter((block) => block.type === "availability").length} janelas recorrentes`}
-                />
-              </CardContent>
-            </Card>
+            {/* Atalhos — grid 2×N de tiles */}
+            {initialData.quickActions.length > 0 ? (
+              <Card>
+                <CardHeader>
+                  <p className="text-base font-semibold">Atalhos</p>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 gap-2">
+                    {initialData.quickActions.map((action) => (
+                      <Link
+                        className="group flex flex-col gap-3 rounded-[22px] border border-[var(--color-border)] bg-[rgba(15,76,92,0.02)] p-4 transition hover:border-[rgba(15,76,92,0.18)] hover:bg-[rgba(15,76,92,0.06)]"
+                        href={action.href}
+                        key={action.id}
+                      >
+                        <ChevronRight className="h-3.5 w-3.5 text-[var(--color-primary)] opacity-50 transition group-hover:opacity-100" />
+                        <p className="text-sm font-semibold leading-tight">{action.label}</p>
+                      </Link>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            ) : null}
 
+            {/* Legenda — copy simplificado */}
             <Card>
               <CardHeader>
-                <p className="text-lg font-semibold">Ações rápidas</p>
+                <p className="text-base font-semibold">Legenda</p>
               </CardHeader>
-              <CardContent className="space-y-3">
-                {initialData.quickActions.map((action) => (
-                  <Link
-                    className="flex items-center justify-between gap-4 rounded-3xl border border-[var(--color-border)] px-4 py-4 transition hover:bg-[rgba(15,76,92,0.03)]"
-                    href={action.href}
-                    key={action.id}
-                  >
-                    <div>
-                      <p className="font-semibold">{action.label}</p>
-                      <p className="mt-1 text-sm text-[var(--color-text-muted)]">
-                        Navegação curta para o próximo passo operacional.
-                      </p>
-                    </div>
-                    <ChevronRight className="h-4 w-4 text-[var(--color-text-muted)]" />
-                  </Link>
-                ))}
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <p className="text-lg font-semibold">Legenda operacional</p>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <LegendItem tone="success" label="Disponível ou concluída sem bloqueio" />
-                <LegendItem tone="info" label="Sessão ativa, confirmada ou pronta para atenção" />
-                <LegendItem tone="warning" label="Pendência ou bloqueio não definitivo" />
-                <LegendItem tone="critical" label="Cancelamento ou bloqueio forte" />
-                <div className="rounded-3xl bg-[rgba(15,76,92,0.04)] p-4 text-sm leading-6 text-[var(--color-text-muted)]">
-                  O fluxo de pós-sessão continua útil com texto ou ditado. Áudio segue capability
-                  condicional, não requisito da agenda.
-                </div>
+              <CardContent className="space-y-2">
+                <LegendItem tone="success" label="Concluída / disponível" />
+                <LegendItem tone="info" label="Agendada / confirmada" />
+                <LegendItem tone="warning" label="Pendente / bloqueio" />
+                <LegendItem tone="critical" label="Cancelada / bloqueio forte" />
               </CardContent>
             </Card>
           </div>
@@ -748,91 +723,6 @@ function CalendarBlock({
   );
 }
 
-function SegmentedControl({
-  label,
-  onChange,
-  options,
-  value
-}: {
-  label: string;
-  onChange: (value: string) => void;
-  options: Array<{ label: string; value: string }>;
-  value: string;
-}) {
-  return (
-    <div className="space-y-2">
-      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--color-text-muted)]">
-        {label}
-      </p>
-      <div className="inline-flex rounded-2xl border border-[var(--color-border)] bg-[rgba(15,76,92,0.04)] p-1">
-        {options.map((option) => (
-          <button
-            className={cn(
-              "rounded-xl px-3 py-2 text-sm font-semibold transition",
-              value === option.value
-                ? "bg-[var(--color-primary)] text-white"
-                : "text-[var(--color-text-muted)]"
-            )}
-            key={option.value}
-            onClick={() => onChange(option.value)}
-            type="button"
-          >
-            {option.label}
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function SelectField({
-  label,
-  onChange,
-  options,
-  value
-}: {
-  label: string;
-  onChange: (value: string) => void;
-  options: Array<{ label: string; value: string }>;
-  value: string;
-}) {
-  return (
-    <label className="space-y-2">
-      <span className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--color-text-muted)]">
-        {label}
-      </span>
-      <select
-        className="h-12 min-w-[150px] rounded-2xl border border-[var(--color-border-strong)] bg-white px-4 outline-none"
-        onChange={(event) => onChange(event.target.value)}
-        value={value}
-      >
-        {options.map((option) => (
-          <option key={option.value} value={option.value}>
-            {option.label}
-          </option>
-        ))}
-      </select>
-    </label>
-  );
-}
-
-function QuickMetric({
-  icon,
-  label,
-  value
-}: {
-  icon: ReactNode;
-  label: string;
-  value: string;
-}) {
-  return (
-    <div className="rounded-3xl border border-[var(--color-border)] bg-[rgba(15,76,92,0.03)] p-4">
-      <div className="flex items-center gap-2 text-[var(--color-primary)]">{icon}</div>
-      <p className="mt-3 text-sm font-semibold">{label}</p>
-      <p className="mt-1 text-sm leading-6 text-[var(--color-text-muted)]">{value}</p>
-    </div>
-  );
-}
 
 function LegendItem({
   label,

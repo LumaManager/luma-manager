@@ -53,9 +53,8 @@ export function PatientDetailPageView({ patient }: PatientDetailPageProps) {
         badges={
           <>
             <Badge tone={statusToneMap[patient.status]}>{statusLabelMap[patient.status]}</Badge>
-            <StateBadge label={patient.documentsState} type="documents" />
-            <StateBadge label={patient.financialState} type="financial" />
-            <Badge tone="neutral">{patient.clinicalReviewLabel}</Badge>
+            {patient.documentsState !== "ok" ? <StateBadge label={patient.documentsState} type="documents" /> : null}
+            {patient.financialState !== "ok" ? <StateBadge label={patient.financialState} type="financial" /> : null}
           </>
         }
         description={`${patient.ageLabel} · ${patient.primaryContact} · ${patient.legalGuardianLabel}`}
@@ -99,7 +98,6 @@ export function PatientDetailPageView({ patient }: PatientDetailPageProps) {
                   : "OK"
           }
         ]}
-        supportingText={patient.createdAtLabel}
         title={patient.fullName}
       />
 
@@ -130,9 +128,6 @@ export function PatientDetailPageView({ patient }: PatientDetailPageProps) {
           <Card>
             <CardHeader>
               <p className="text-lg font-semibold">Resumo</p>
-              <p className="text-sm text-[var(--color-text-muted)]">
-                Contexto operacional e atalhos sem expor texto clínico detalhado.
-              </p>
             </CardHeader>
             <CardContent className="grid gap-4 md:grid-cols-3">
               {patient.overviewBlocks.map((block) => (
@@ -141,7 +136,7 @@ export function PatientDetailPageView({ patient }: PatientDetailPageProps) {
                   key={block.title}
                 >
                   <p className="text-sm font-semibold">{block.title}</p>
-                  <p className="mt-3 text-lg font-semibold">{block.value}</p>
+                  <p className="mt-3 text-base font-semibold leading-snug">{block.value}</p>
                   <p className="mt-2 text-sm leading-6 text-[var(--color-text-muted)]">
                     {block.description}
                   </p>
@@ -155,9 +150,9 @@ export function PatientDetailPageView({ patient }: PatientDetailPageProps) {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="rounded-3xl bg-[rgba(15,76,92,0.03)] p-4">
-                <p className="text-sm font-semibold">Metadata clínica mínima</p>
+                <p className="text-sm font-semibold">Situação clínica</p>
                 <p className="mt-2 text-sm leading-6 text-[var(--color-text-muted)]">
-                  {patient.clinicalReviewLabel}. O texto clínico completo continua fora desta tela.
+                  {patient.clinicalReviewLabel}
                 </p>
               </div>
               <Button asChild variant="secondary">

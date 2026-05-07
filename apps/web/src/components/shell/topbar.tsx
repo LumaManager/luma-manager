@@ -1,17 +1,52 @@
 "use client";
 
-import { useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { LogOut } from "lucide-react";
 
 import type { AppShellBootstrap } from "@terapia/contracts";
-import { Badge } from "@terapia/ui";
 
 import { getBreadcrumbs } from "@/lib/navigation";
 
 type TopbarProps = {
   bootstrap: AppShellBootstrap;
 };
+
+const DAY_NAMES = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
+const MONTH_NAMES = ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"];
+
+function LiveClock() {
+  const [now, setNow] = useState<Date | null>(null);
+
+  useEffect(() => {
+    setNow(new Date());
+    const timer = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  if (!now) {
+    return <div className="h-10 w-48 rounded-2xl border border-[var(--color-border)] bg-white" />;
+  }
+
+  const day = DAY_NAMES[now.getDay()];
+  const date = now.getDate();
+  const month = MONTH_NAMES[now.getMonth()];
+  const hh = String(now.getHours()).padStart(2, "0");
+  const mm = String(now.getMinutes()).padStart(2, "0");
+  const ss = String(now.getSeconds()).padStart(2, "0");
+
+  return (
+    <div className="flex items-center gap-2.5 rounded-2xl border border-[var(--color-border)] bg-white px-4 py-2.5">
+      <span className="text-sm font-semibold text-[var(--color-text)]">
+        {day}, {date} de {month}
+      </span>
+      <span className="h-3.5 w-px bg-[var(--color-border-strong)]" />
+      <span className="font-mono text-sm font-semibold tabular-nums text-[var(--color-primary)]">
+        {hh}:{mm}:{ss}
+      </span>
+    </div>
+  );
+}
 
 export function Topbar({ bootstrap }: TopbarProps) {
   const pathname = usePathname();
@@ -39,14 +74,9 @@ export function Topbar({ bootstrap }: TopbarProps) {
       </div>
 
       <div className="flex flex-wrap items-center justify-end gap-2">
-        <Badge
-          tone={bootstrap.tenant.status === "ready_for_operations" ? "success" : "warning"}
-          className="gap-1.5 px-2.5"
-        >
-          {bootstrap.accountStateLabel}
-        </Badge>
+        <LiveClock />
         <button
-          className="inline-flex h-11 items-center gap-2 rounded-2xl border border-[var(--color-border)] bg-white px-4 text-sm font-semibold text-[var(--color-text)] transition hover:border-[var(--color-border-strong)]"
+          className="inline-flex h-10 items-center gap-2 rounded-2xl border border-[var(--color-border)] bg-white px-4 text-sm font-semibold text-[var(--color-text)] transition hover:border-[var(--color-border-strong)]"
           disabled={isPending}
           onClick={() =>
             startTransition(async () => {
