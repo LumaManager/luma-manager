@@ -178,6 +178,7 @@ export class AppointmentsService {
       ],
       consentStates: [],
       paymentSummary: [],
+      paymentContext: { model: "per_session", chargeLinked: false, note: "Nenhuma cobrança vinculada a esta sessão ainda." },
       readinessChecklist: [
         {
           label: "Paciente cadastrado",

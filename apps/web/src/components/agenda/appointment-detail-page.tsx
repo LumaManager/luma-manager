@@ -180,14 +180,10 @@ export function AppointmentDetailPageView({ appointment }: AppointmentDetailPage
             {appointment.consentStates.length > 0 ? (
               <ConsentCard items={appointment.consentStates} />
             ) : null}
-            {appointment.paymentSummary.length > 0 ? (
-              <DetailCard
-                description="Visibilidade financeira resumida da sessão."
-                icon={<Wallet className="h-4 w-4" />}
-                items={appointment.paymentSummary}
-                title="Pagamento resumido"
-              />
-            ) : null}
+            <PaymentCard
+              context={appointment.paymentContext}
+              summary={appointment.paymentSummary}
+            />
           </div>
 
           <div className="space-y-4">
@@ -364,6 +360,67 @@ function DetailCard({
           </div>
           );
         })}
+      </CardContent>
+    </Card>
+  );
+}
+
+function PaymentCard({
+  context,
+  summary
+}: {
+  context: AppointmentDetail["paymentContext"];
+  summary: AppointmentDetail["paymentSummary"];
+}) {
+  // Batch or monthly billing — no per-session charge, show informational row
+  if (context && !context.chargeLinked) {
+    const icon = context.model === "monthly"
+      ? <CalendarClock className="h-4 w-4 shrink-0 text-[var(--color-primary)]" />
+      : <Wallet className="h-4 w-4 shrink-0 text-[var(--color-primary)]" />;
+    const title = context.model === "monthly" ? "Faturamento mensal" : "Faturamento em lote";
+
+    return (
+      <div className="flex items-start gap-3 rounded-[28px] border border-[rgba(15,76,92,0.14)] bg-[rgba(15,76,92,0.03)] px-5 py-4">
+        {icon}
+        <div>
+          <p className="text-sm font-semibold text-[var(--color-text)]">{title}</p>
+          <p className="mt-1 text-sm leading-6 text-[var(--color-text-muted)]">{context.note}</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Per-session with no charge generated yet
+  if (summary.length === 0) {
+    return (
+      <div className="flex items-center gap-3 rounded-[28px] border border-[var(--color-border)] bg-white px-5 py-3.5">
+        <Wallet className="h-4 w-4 shrink-0 text-[var(--color-text-muted)]" />
+        <p className="text-sm text-[var(--color-text-muted)]">Sem cobrança vinculada a esta sessão.</p>
+      </div>
+    );
+  }
+
+  // Per-session with charge — compact horizontal grid
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex items-center gap-2">
+          <Wallet className="h-4 w-4" />
+          <p className="text-base font-semibold">Pagamento</p>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <div className="grid grid-cols-3 gap-3">
+          {summary.map((item) => (
+            <div
+              className="rounded-2xl border border-[var(--color-border)] bg-[rgba(15,76,92,0.03)] px-4 py-3"
+              key={item.label}
+            >
+              <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[var(--color-text-muted)]">{item.label}</p>
+              <p className="mt-1.5 text-sm font-semibold text-[var(--color-text)]">{item.value}</p>
+            </div>
+          ))}
+        </div>
       </CardContent>
     </Card>
   );

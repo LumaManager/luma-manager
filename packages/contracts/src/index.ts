@@ -572,6 +572,11 @@ export const appointmentDetailSchema = z.object({
       value: z.string()
     })
   ),
+  paymentContext: z.object({
+    model: z.enum(["per_session", "monthly", "batch"]),
+    chargeLinked: z.boolean(),
+    note: z.string()
+  }).optional(),
   readinessChecklist: z.array(
     z.object({
       label: z.string(),

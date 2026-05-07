@@ -436,6 +436,11 @@ export function buildMockAppointmentDetail(appointmentId: string): AppointmentDe
       { label: "Status", value: "Pendente" },
       { label: "Vencimento", value: label }
     ],
+    paymentContext: appointmentId === "appt_1035"
+      ? { model: "monthly" as const, chargeLinked: false, note: "Sessões acumuladas para fechamento no fim do mês. Nenhuma cobrança individual por sessão." }
+      : appointmentId === "appt_1040"
+      ? { model: "batch" as const, chargeLinked: false, note: "Faturamento a cada 10 sessões — esta é a sessão 7. Próxima cobrança na sessão 10." }
+      : { model: "per_session" as const, chargeLinked: true, note: "Cobrança individual gerada para esta sessão." },
     readinessChecklist: [
       { label: "Paciente cadastrado", state: "ok" as const, description: "Cadastro ativo no sistema." },
       { label: "Documentação", state: "ok" as const, description: "Todos os termos assinados." },
