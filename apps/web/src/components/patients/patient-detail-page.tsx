@@ -60,10 +60,10 @@ export function PatientDetailPageView({ patient }: PatientDetailPageProps) {
         description={`${patient.ageLabel} · ${patient.primaryContact} · ${patient.legalGuardianLabel}`}
         stats={[
           {
-            detail: patient.createdAtLabel,
-            label: "Vínculo",
+            detail: patient.totalSessionsLabel,
+            label: "Início das sessões",
             tone: "neutral",
-            value: patient.nextSessionLabel
+            value: patient.sessionStartLabel
           },
           {
             detail: "Sinal documental atual do vínculo.",

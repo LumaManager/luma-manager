@@ -185,6 +185,8 @@ export function buildMockPatientDetail(patientId: string): PatientDetail | null 
     primaryContact: `${p.email} · ${p.phone}`,
     legalGuardianLabel: "Não se aplica",
     nextSessionLabel: p.nextSession,
+    sessionStartLabel: "15 de janeiro de 2026",
+    totalSessionsLabel: "12 sessões realizadas",
     documentsState: p.docs,
     financialState: p.fin,
     clinicalReviewLabel: "Sem pendência clínica urgente",

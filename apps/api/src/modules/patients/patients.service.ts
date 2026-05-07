@@ -87,6 +87,8 @@ export class PatientsService {
       primaryContact: [p.email, p.phone].filter(Boolean).join(" · ") || "Sem contato",
       legalGuardianLabel: "Não se aplica",
       nextSessionLabel: this.nextSessionLabel(p),
+      sessionStartLabel: this.formatDateLong(p.createdAt.toISOString()),
+      totalSessionsLabel: `${p.completedSessionsCount ?? 0} sessões realizadas`,
       documentsState: docsState,
       financialState,
       clinicalReviewLabel: "Sem pendência",
@@ -235,6 +237,11 @@ export class PatientsService {
   private formatDate(isoDate: string): string {
     const d = new Date(isoDate);
     return d.toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" });
+  }
+
+  private formatDateLong(isoDate: string): string {
+    const d = new Date(isoDate);
+    return d.toLocaleDateString("pt-BR", { day: "numeric", month: "long", year: "numeric" });
   }
 
   private formatCents(cents: number): string {

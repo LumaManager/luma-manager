@@ -1023,6 +1023,8 @@ export const patientDetailSchema = z.object({
   primaryContact: z.string(),
   legalGuardianLabel: z.string(),
   nextSessionLabel: z.string(),
+  sessionStartLabel: z.string(),
+  totalSessionsLabel: z.string(),
   documentsState: patientDocumentsStateSchema,
   financialState: patientFinancialStateSchema,
   clinicalReviewLabel: z.string(),
