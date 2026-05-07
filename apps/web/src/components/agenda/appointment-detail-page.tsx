@@ -467,22 +467,33 @@ function ConsentCard({
   );
 }
 
+const roomStateDot: Record<string, string> = {
+  ready: "bg-[var(--color-success)]",
+  open: "bg-[var(--color-success)]",
+  not_provisioned: "bg-[var(--color-text-muted)]",
+  closed: "bg-[var(--color-text-muted)]",
+  failed: "bg-[var(--color-danger)]"
+};
+
 function VirtualRoomCard({ appointment }: { appointment: AppointmentDetail }) {
+  if (appointment.modality === "in_person") return null;
+
+  const dotClass = roomStateDot[appointment.roomState] ?? "bg-[var(--color-text-muted)]";
+
   return (
     <Card>
       <CardHeader>
         <div className="flex items-center gap-2">
           <DoorOpen className="h-4 w-4" />
-          <p className="text-lg font-semibold">Sala virtual</p>
+          <p className="text-base font-semibold">Sala virtual</p>
         </div>
-        <p className="text-sm text-[var(--color-text-muted)]">
-          A videochamada não fica embutida aqui. O detalhe controla prontidão e encaminhamento.
-        </p>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="rounded-3xl border border-[var(--color-border)] bg-[rgba(15,76,92,0.03)] p-4">
-          <p className="text-sm font-semibold">Estado atual</p>
-          <p className="mt-2 text-sm leading-6 text-[var(--color-text-muted)]">{appointment.roomStatusLabel}</p>
+        <div className="flex items-center justify-between rounded-3xl border border-[var(--color-border)] bg-[rgba(15,76,92,0.03)] px-4 py-3.5">
+          <div className="flex items-center gap-2.5">
+            <span className={cn("h-2 w-2 shrink-0 rounded-full", dotClass)} />
+            <p className="text-sm font-semibold">{appointment.roomStatusLabel}</p>
+          </div>
         </div>
         <Button asChild className="w-full">
           <Link href={appointment.primaryAction.href}>{appointment.primaryAction.label}</Link>
