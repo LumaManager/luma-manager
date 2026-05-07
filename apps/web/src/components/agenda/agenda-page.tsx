@@ -360,18 +360,18 @@ export function AgendaPageView({
                 </div>
               </CardHeader>
               <CardContent className="space-y-3">
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="rounded-[20px] border border-[rgba(15,76,92,0.14)] bg-[rgba(15,76,92,0.05)] p-3">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-[var(--color-text-muted)]">Sessões</p>
+                <div className="flex gap-2">
+                  <div className="w-fit rounded-[20px] border border-[rgba(15,76,92,0.14)] bg-[rgba(15,76,92,0.05)] px-4 py-3">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-[var(--color-text-muted)]">Sess.</p>
                     <p className="mt-1.5 text-xl font-semibold text-[var(--color-text)]">{focusDayAppointments.length}</p>
                   </div>
                   <div className={cn(
-                    "rounded-[20px] border p-3",
+                    "w-fit rounded-[20px] border px-4 py-3",
                     focusDayBlocks.length > 0
                       ? "border-[rgba(198,122,69,0.18)] bg-[rgba(198,122,69,0.07)]"
                       : "border-[var(--color-border)] bg-[rgba(15,76,92,0.02)]"
                   )}>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-[var(--color-text-muted)]">Bloqueios</p>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-[var(--color-text-muted)]">Bloq.</p>
                     <p className="mt-1.5 text-xl font-semibold text-[var(--color-text)]">{focusDayBlocks.length}</p>
                   </div>
                 </div>
