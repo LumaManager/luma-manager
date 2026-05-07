@@ -326,11 +326,7 @@ export function AgendaPageView({
             <CardHeader className="border-b border-[var(--color-border)]">
               <div className="flex items-center justify-between gap-4">
                 <div>
-                  <p className="text-lg font-semibold">Grade operacional</p>
-                  <p className="text-sm text-[var(--color-text-muted)]">
-                    Sessões e bloqueios ficam acima da disponibilidade. O objetivo aqui é escanear
-                    e agir, não analisar BI.
-                  </p>
+                  <p className="text-lg font-semibold">Agenda</p>
                 </div>
                 <Badge tone="neutral">
                   <CalendarDays className="mr-2 inline h-3.5 w-3.5" />
