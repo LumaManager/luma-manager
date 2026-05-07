@@ -43,6 +43,17 @@ type AgendaPageViewProps = {
 const DAY_GRID_HEIGHT = 720;
 const DAY_GRID_START = 8 * 60;
 
+const FULL_DAY_NAMES = ["Domingo", "Segunda-Feira", "Terça-Feira", "Quarta-Feira", "Quinta-Feira", "Sexta-Feira", "Sábado"];
+const FULL_MONTH_NAMES = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+
+function formatFocusDayLabel(dateKey: string): string {
+  const d = new Date(dateKey + "T12:00:00Z");
+  const dayName = FULL_DAY_NAMES[d.getUTCDay()]!;
+  const day = String(d.getUTCDate()).padStart(2, "0");
+  const month = FULL_MONTH_NAMES[d.getUTCMonth()]!;
+  return `${dayName}, ${day} de ${month}`;
+}
+
 export function AgendaPageView({
   initialData,
   initialSelectedAppointment,
@@ -63,8 +74,7 @@ export function AgendaPageView({
   const nextActionLabel = readOnly ? "Leitura preservada" : "Nova sessão liberada";
   const focusDayKey =
     initialData.dayColumns.find((day) => day.isToday)?.key ?? initialData.dayColumns[0]?.key ?? "2026-03-30";
-  const focusDayLabel =
-    initialData.dayColumns.find((day) => day.key === focusDayKey)?.dateLabel ?? focusDayKey;
+  const focusDayLabel = formatFocusDayLabel(focusDayKey);
   const focusDayAppointments = appointmentBlocks.filter((block) => block.dayKey === focusDayKey);
   const focusDayBlocks = initialData.scheduleBlocks.filter(
     (block) => block.type === "block" && block.dayKey === focusDayKey
