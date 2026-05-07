@@ -43,7 +43,7 @@ export class AppointmentsService {
   async listAgenda(session: AuthSession, query: Record<string, string>): Promise<AgendaResponse> {
     if (isMockEmail(session.therapist.email)) return buildMockAgenda(query);
 
-    const view = (query.view === "week" || query.view === "month") ? query.view : "week";
+    const view = (query.view === "week" || query.view === "month" || query.view === "day") ? query.view : "week";
     const targetDate = query.date ?? this.today();
     const { dateFrom, dateTo, dayColumns } = this.buildRange(view, targetDate);
 
