@@ -403,29 +403,6 @@ export function AgendaPageView({
               </CardContent>
             </Card>
 
-            {/* Atalhos — grid 2×N de tiles */}
-            {initialData.quickActions.length > 0 ? (
-              <Card>
-                <CardHeader>
-                  <p className="text-base font-semibold">Atalhos</p>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-2 gap-2">
-                    {initialData.quickActions.map((action) => (
-                      <Link
-                        className="group flex flex-col gap-3 rounded-[22px] border border-[var(--color-border)] bg-[rgba(15,76,92,0.02)] p-4 transition hover:border-[rgba(15,76,92,0.18)] hover:bg-[rgba(15,76,92,0.06)]"
-                        href={action.href}
-                        key={action.id}
-                      >
-                        <ChevronRight className="h-3.5 w-3.5 text-[var(--color-primary)] opacity-50 transition group-hover:opacity-100" />
-                        <p className="text-sm font-semibold leading-tight">{action.label}</p>
-                      </Link>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            ) : null}
-
             {/* Legenda — copy simplificado */}
             <Card>
               <CardHeader>
