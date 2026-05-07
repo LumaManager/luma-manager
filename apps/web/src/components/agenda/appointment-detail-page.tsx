@@ -375,19 +375,29 @@ function ConsentCard({
 }: {
   items: AppointmentDetail["consentStates"];
 }) {
+  const allOk = items.every((item) => item.state === "ok");
+  const problemItems = items.filter((item) => item.state !== "ok");
+
+  if (allOk) {
+    return (
+      <div className="flex items-center gap-3 rounded-[28px] border border-[rgba(63,107,97,0.2)] bg-[rgba(63,107,97,0.05)] px-5 py-3.5">
+        <ShieldCheck className="h-4 w-4 shrink-0 text-[var(--color-success)]" />
+        <p className="text-sm font-medium text-[var(--color-text)]">Documentação OK</p>
+        <span className="ml-auto text-xs text-[var(--color-text-muted)]">{items.length} documento(s)</span>
+      </div>
+    );
+  }
+
   return (
     <Card>
       <CardHeader>
         <div className="flex items-center gap-2">
-          <AlertTriangle className="h-4 w-4" />
-          <p className="text-lg font-semibold">Consentimentos e documentos</p>
+          <AlertTriangle className="h-4 w-4 text-[var(--color-accent)]" />
+          <p className="text-base font-semibold">Documentação pendente</p>
         </div>
-        <p className="text-sm text-[var(--color-text-muted)]">
-          Apenas o que impacta a realização segura da sessão aparece aqui.
-        </p>
       </CardHeader>
       <CardContent className="space-y-3">
-        {items.map((item) => (
+        {problemItems.map((item) => (
           <div className="rounded-3xl border border-[var(--color-border)] bg-white p-4" key={item.label}>
             <div className="flex items-center justify-between gap-3">
               <p className="font-semibold">{item.label}</p>
