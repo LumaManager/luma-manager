@@ -135,10 +135,6 @@ export class ClinicalRecordsService {
       this.repo.findPendingReview(therapistId, patientId)
     ]);
 
-    if (drafts.length === 0 && !pendingReview) {
-      throw new NotFoundException("Prontuário longitudinal não encontrado para este paciente.");
-    }
-
     // Load versions for all drafts in parallel
     const versionsByDraft = await Promise.all(
       drafts.map((d) => this.repo.listVersionsForDraft(d.id))

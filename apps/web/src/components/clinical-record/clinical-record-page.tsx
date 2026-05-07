@@ -96,6 +96,11 @@ export function ClinicalRecordPageView({ initialRecord }: ClinicalRecordPageProp
             </p>
           </CardHeader>
           <CardContent className="space-y-3">
+            {initialRecord.timeline.length === 0 ? (
+              <div className="rounded-3xl border border-dashed border-[var(--color-border)] p-4 text-sm text-[var(--color-text-muted)]">
+                Nenhum registro aprovado ainda. Após a conclusão e aprovação da primeira sessão, o prontuário longitudinal será iniciado aqui.
+              </div>
+            ) : null}
             {initialRecord.timeline.map((entry) => (
               <button
                 className={cn(
