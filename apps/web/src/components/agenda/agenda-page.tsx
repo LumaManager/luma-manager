@@ -231,16 +231,6 @@ export function AgendaPageView({
             >
               <ChevronRight className="h-4 w-4" />
             </button>
-            <button
-              className="ml-1 rounded-full border border-[var(--color-border)] px-3 py-1.5 text-sm font-semibold text-[var(--color-text-muted)] transition hover:bg-[rgba(15,76,92,0.04)]"
-              onClick={() => {
-                updateParam("date", "2026-03-30");
-                updateParam("view", "week");
-              }}
-              type="button"
-            >
-              Hoje
-            </button>
           </div>
           <div className="flex flex-wrap items-center gap-3">
             <div className="inline-flex rounded-[14px] border border-[var(--color-border)] bg-[rgba(15,76,92,0.04)] p-1">
