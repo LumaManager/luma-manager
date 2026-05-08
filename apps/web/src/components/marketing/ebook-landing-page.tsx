@@ -138,10 +138,15 @@ export function EbookLandingPage() {
               <div className="ebook-mockup">
                 <div className="ebook-cover">
                   <div className="ebook-cover-dot" />
-                  <div className="ebook-cover-lines">
-                    <div className="ebook-cover-line long" />
-                    <div className="ebook-cover-line medium" />
-                    <div className="ebook-cover-line short" />
+                  <div className="ebook-cover-label">Guia Digital</div>
+                  <div className="ebook-cover-title">
+                    A Resolução
+                    <br />
+                    do CFP que
+                    <br />
+                    Todo Psicólogo
+                    <br />
+                    Ignora
                   </div>
                 </div>
                 <div className="ebook-meta">
@@ -512,13 +517,14 @@ const styles = `
   }
 
   .ebook-cover {
-    width: 72px; flex-shrink: 0;
+    width: 96px; flex-shrink: 0;
     border-radius: 6px;
     background: linear-gradient(145deg, #2F4A3F 0%, #1a3530 100%);
     border: 1px solid rgba(255,255,255,0.12);
     aspect-ratio: 3/4;
     display: flex; flex-direction: column;
     align-items: flex-start; justify-content: flex-end;
+    gap: 4px;
     padding: 8px;
     box-shadow: 6px 6px 20px rgba(0,0,0,0.4);
     position: relative; overflow: hidden;
@@ -538,17 +544,16 @@ const styles = `
     background: #C8634D;
   }
 
-  .ebook-cover-lines {
-    display: flex; flex-direction: column; gap: 5px; width: 100%;
+  .ebook-cover-label {
+    font-size: 7.5px; font-weight: 800; letter-spacing: 0.08em;
+    color: #B89968;
+    text-transform: uppercase; align-self: flex-start;
   }
 
-  .ebook-cover-line {
-    height: 3px; border-radius: 2px; background: rgba(250,246,238,0.35);
+  .ebook-cover-title {
+    font-size: 8.5px; font-weight: 700; line-height: 1.45;
+    color: #FAF6EE; align-self: flex-start;
   }
-
-  .ebook-cover-line.long   { width: 90%; }
-  .ebook-cover-line.medium { width: 65%; }
-  .ebook-cover-line.short  { width: 42%; background: rgba(184,153,104,0.6); }
 
   .ebook-meta { flex: 1; }
 
