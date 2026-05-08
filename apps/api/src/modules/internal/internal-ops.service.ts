@@ -4,6 +4,7 @@ import type {
   InternalAuditResponse,
   InternalBillingResponse,
   InternalBootstrap,
+  InternalEbookLeadsResponse,
   InternalIncidentsResponse,
   InternalRole,
   InternalSupportQueueResponse,
@@ -13,6 +14,7 @@ import type {
   TherapistProfile
 } from "@terapia/contracts";
 
+import { EbookLeadsService } from "@/modules/ebook-leads/ebook-leads.service";
 import { WaitlistService } from "@/modules/marketing/waitlist.service";
 
 type InternalOperatorRecord = {
@@ -300,7 +302,8 @@ const incidentsQueue: InternalIncidentsResponse = {
 @Injectable()
 export class InternalOpsService {
   constructor(
-    @Inject(WaitlistService) private readonly waitlistService: WaitlistService
+    @Inject(WaitlistService) private readonly waitlistService: WaitlistService,
+    @Inject(EbookLeadsService) private readonly ebookLeadsService: EbookLeadsService
   ) {}
 
   isInternalEmail(email: string) {
@@ -354,6 +357,7 @@ export class InternalOpsService {
       navigation: [
         { key: "overview", label: "Visao geral", href: "/internal" },
         { key: "waitlist", label: "Waitlist", href: "/internal/waitlist" },
+        { key: "ebook-leads", label: "Ebook Leads", href: "/internal/ebook-leads" },
         { key: "tenants", label: "Tenants", href: "/internal/tenants" },
         { key: "support", label: "Suporte", href: "/internal/support" },
         { key: "billing", label: "Billing", href: "/internal/billing" },
@@ -442,6 +446,11 @@ export class InternalOpsService {
   async getWaitlist(session: AuthSession): Promise<InternalWaitlistResponse> {
     this.assertInternalSession(session);
     return this.waitlistService.getInternalView();
+  }
+
+  async getEbookLeads(session: AuthSession): Promise<InternalEbookLeadsResponse> {
+    this.assertInternalSession(session);
+    return this.ebookLeadsService.getInternalView();
   }
 
   getBilling(session: AuthSession): InternalBillingResponse {

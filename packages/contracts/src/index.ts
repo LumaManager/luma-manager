@@ -1530,6 +1530,7 @@ export const internalRoleSchema = z.enum([
 export const internalNavKeySchema = z.enum([
   "overview",
   "waitlist",
+  "ebook-leads",
   "tenants",
   "support",
   "billing",
@@ -2184,4 +2185,49 @@ export type TherapistOnboardingBootstrap = z.infer<typeof therapistOnboardingBoo
 export type TherapistOnboardingDraft = z.infer<typeof therapistOnboardingDraftSchema>;
 export type TherapistDashboard = z.infer<typeof therapistDashboardSchema>;
 export type TherapistAccountStatus = z.infer<typeof therapistAccountStatusSchema>;
+
+// ── EBOOK LEADS ──────────────────────────────────────────────────────────────
+
+export const ebookLeadPerfilSchema = z.enum(["clinico", "organizacional", "escolar", "outro"]);
+
+export const ebookLeadRequestSchema = z.object({
+  fullName: z.string().min(1),
+  email: z.string().email(),
+  whatsapp: z.string().min(8),
+  perfil: ebookLeadPerfilSchema.optional(),
+  sourcePath: z.string().optional(),
+  referrerHost: z.string().optional(),
+  utmSource: z.string().optional(),
+  utmMedium: z.string().optional(),
+  utmCampaign: z.string().optional()
+});
+
+export const ebookLeadResponseSchema = z.object({
+  success: z.boolean(),
+  alreadyRegistered: z.boolean(),
+  downloadToken: z.string()
+});
+
+export const internalEbookLeadEntrySchema = z.object({
+  id: z.string(),
+  fullName: z.string(),
+  email: z.string(),
+  whatsapp: z.string(),
+  perfilLabel: z.string(),
+  sourcePath: z.string(),
+  utmLabel: z.string(),
+  referrerLabel: z.string(),
+  createdAtLabel: z.string()
+});
+
+export const internalEbookLeadsResponseSchema = z.object({
+  totalEntries: z.number(),
+  items: z.array(internalEbookLeadEntrySchema)
+});
+
+export type EbookLeadPerfil = z.infer<typeof ebookLeadPerfilSchema>;
+export type EbookLeadRequest = z.infer<typeof ebookLeadRequestSchema>;
+export type EbookLeadResponse = z.infer<typeof ebookLeadResponseSchema>;
+export type InternalEbookLeadEntry = z.infer<typeof internalEbookLeadEntrySchema>;
+export type InternalEbookLeadsResponse = z.infer<typeof internalEbookLeadsResponseSchema>;
 export type TherapistProfile = z.infer<typeof therapistProfileSchema>;

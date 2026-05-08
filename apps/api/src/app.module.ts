@@ -32,6 +32,8 @@ import { ChargesController } from "@/modules/finance/charges.controller";
 import { FinanceController } from "@/modules/finance/finance.controller";
 import { FinanceRepository } from "@/modules/finance/finance.repository";
 import { FinanceService } from "@/modules/finance/finance.service";
+import { EbookLeadsController } from "@/modules/ebook-leads/ebook-leads.controller";
+import { EbookLeadsService } from "@/modules/ebook-leads/ebook-leads.service";
 import { InternalController } from "@/modules/internal/internal.controller";
 import { InternalOpsService } from "@/modules/internal/internal-ops.service";
 import { LinkedinLeadsController } from "@/modules/linkedin-leads/linkedin-leads.controller";
@@ -64,6 +66,7 @@ import { OnboardingService } from "@/modules/onboarding/onboarding.service";
     FinanceController,
     ChargesController,
     SettingsController,
+    EbookLeadsController,
     InternalController,
     LinkedinLeadsController,
     PatientsController,
@@ -111,6 +114,7 @@ import { OnboardingService } from "@/modules/onboarding/onboarding.service";
     DocumentsService,
     FinanceRepository,
     FinanceService,
+    EbookLeadsService,
     InternalOpsService,
     LinkedinLeadsService,
     PatientsRepository,

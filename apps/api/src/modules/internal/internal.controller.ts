@@ -70,4 +70,10 @@ export class InternalController {
     const session = await this.authService.getSessionFromAuthorizationHeader(authorization);
     return this.internalOpsService.getIncidents(session);
   }
+
+  @Get("ebook-leads")
+  async ebookLeads(@Headers("authorization") authorization: string | undefined) {
+    const session = await this.authService.getSessionFromAuthorizationHeader(authorization);
+    return this.internalOpsService.getEbookLeads(session);
+  }
 }

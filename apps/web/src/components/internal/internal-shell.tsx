@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 import type { InternalBootstrap } from "@terapia/contracts";
 import { Badge, Button } from "@terapia/ui";
-import { Building2, LifeBuoy, SearchCheck, Shield, Siren, UserRoundPlus, Wallet } from "lucide-react";
+import { BookOpen, Building2, LifeBuoy, SearchCheck, Shield, Siren, UserRoundPlus, Wallet } from "lucide-react";
 
 export function InternalShell({
   bootstrap,
@@ -104,6 +104,7 @@ export function InternalShell({
 function NavIcon({ navKey }: { navKey: InternalBootstrap["navigation"][number]["key"] }) {
   if (navKey === "overview") return <SearchCheck className="h-4 w-4" />;
   if (navKey === "waitlist") return <UserRoundPlus className="h-4 w-4" />;
+  if (navKey === "ebook-leads") return <BookOpen className="h-4 w-4" />;
   if (navKey === "tenants") return <Building2 className="h-4 w-4" />;
   if (navKey === "support") return <LifeBuoy className="h-4 w-4" />;
   if (navKey === "billing") return <Wallet className="h-4 w-4" />;
