@@ -138,9 +138,10 @@ export function EbookLandingPage() {
               <div className="ebook-mockup">
                 <div className="ebook-cover">
                   <div className="ebook-cover-dot" />
-                  <div className="ebook-cover-label">Luma Manager</div>
-                  <div className="ebook-cover-title">
-                    A Resolução do CFP que Todo Psicólogo Ignora
+                  <div className="ebook-cover-lines">
+                    <div className="ebook-cover-line long" />
+                    <div className="ebook-cover-line medium" />
+                    <div className="ebook-cover-line short" />
                   </div>
                 </div>
                 <div className="ebook-meta">
@@ -537,16 +538,17 @@ const styles = `
     background: #C8634D;
   }
 
-  .ebook-cover-label {
-    font-size: 6.5px; font-weight: 800; letter-spacing: 0.06em;
-    color: #B89968; margin-bottom: 3px;
-    text-transform: uppercase;
+  .ebook-cover-lines {
+    display: flex; flex-direction: column; gap: 5px; width: 100%;
   }
 
-  .ebook-cover-title {
-    font-size: 7px; font-weight: 700; line-height: 1.3;
-    color: #FAF6EE;
+  .ebook-cover-line {
+    height: 3px; border-radius: 2px; background: rgba(250,246,238,0.35);
   }
+
+  .ebook-cover-line.long   { width: 90%; }
+  .ebook-cover-line.medium { width: 65%; }
+  .ebook-cover-line.short  { width: 42%; background: rgba(184,153,104,0.6); }
 
   .ebook-meta { flex: 1; }
 
