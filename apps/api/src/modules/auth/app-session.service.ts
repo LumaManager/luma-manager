@@ -8,11 +8,12 @@ import { EnvService } from "@/common/config/env.service";
 
 type SessionPayload = {
   accountStatus: AuthSession["accountStatus"];
-  capabilities: AuthSession["capabilities"];
-  expiresAt: string;
-  mfaVerified: boolean;
-  therapist: AuthSession["therapist"];
-  tenant: AuthSession["tenant"];
+  capabilities:  AuthSession["capabilities"];
+  emailVerified: boolean;
+  expiresAt:     string;
+  mfaVerified:   boolean;
+  therapist:     AuthSession["therapist"];
+  tenant:        AuthSession["tenant"];
 };
 
 @Injectable()
@@ -31,6 +32,7 @@ export class AppSessionService {
       tenant: session.tenant,
       accountStatus: session.accountStatus,
       capabilities: session.capabilities,
+      emailVerified: session.emailVerified,
       mfaVerified: session.mfaVerified,
       expiresAt: session.expiresAt
     } satisfies SessionPayload)
@@ -49,6 +51,7 @@ export class AppSessionService {
         accessToken: token,
         accountStatus: sessionPayload.accountStatus,
         capabilities: sessionPayload.capabilities,
+        emailVerified: sessionPayload.emailVerified ?? false,
         expiresAt: sessionPayload.expiresAt,
         mfaVerified: sessionPayload.mfaVerified,
         therapist: sessionPayload.therapist,

@@ -36,6 +36,7 @@ const envSchema = z.object({
     .default("false")
     .transform((value) => value === "true"),
   RESEND_API_KEY: z.string().optional(),
+  APP_PUBLIC_URL: z.string().url().default("https://lumamanager.com.br"),
   LUMA_ENV: z.string().default("production") // deploy trigger
 });
 
