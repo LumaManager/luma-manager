@@ -109,4 +109,94 @@ export class EmailService {
       this.logger.error("Failed to send waitlist confirmation email", error);
     }
   }
+
+  async sendEmailVerification(to: string, fullName: string, verifyUrl: string): Promise<void> {
+    if (!this.resend) {
+      this.logger.warn("RESEND_API_KEY not configured — skipping verification email");
+      return;
+    }
+
+    const firstName = fullName.trim().split(" ")[0] ?? fullName;
+
+    const { error } = await this.resend.emails.send({
+      from: "Luma Manager <noreply@lumamanager.com.br>",
+      to,
+      subject: "Confirme seu e-mail — Luma Manager",
+      html: `
+        <!DOCTYPE html>
+        <html lang="pt-BR">
+        <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <meta name="color-scheme" content="light">
+        </head>
+        <body style="margin:0;padding:0;background:#f0f4f5;font-family:Arial,Helvetica,sans-serif;">
+          <table width="100%" cellpadding="0" cellspacing="0" style="background:#f0f4f5;padding:48px 16px;">
+            <tr><td align="center">
+              <table width="560" cellpadding="0" cellspacing="0" style="max-width:560px;width:100%;">
+
+                <tr>
+                  <td style="background:#0f4c5c;padding:28px 40px;border-radius:10px 10px 0 0;">
+                    <table width="100%" cellpadding="0" cellspacing="0">
+                      <tr>
+                        <td><p style="margin:0;color:#ffffff;font-size:13px;font-weight:600;letter-spacing:0.12em;font-family:Arial,Helvetica,sans-serif;text-transform:uppercase;">Luma Manager</p></td>
+                        <td align="right"><p style="margin:0;color:rgba(255,255,255,0.4);font-size:12px;font-family:Arial,Helvetica,sans-serif;">lumamanager.com.br</p></td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+
+                <tr><td style="background:#c9a96e;height:3px;font-size:0;line-height:0;">&nbsp;</td></tr>
+
+                <tr>
+                  <td style="background:#ffffff;padding:44px 40px 36px;">
+                    <p style="margin:0 0 28px;color:#0f4c5c;font-size:26px;font-weight:700;line-height:1.2;font-family:Arial,Helvetica,sans-serif;letter-spacing:-0.5px;">Olá, ${firstName}.<br>Confirme seu e-mail.</p>
+
+                    <table width="40" cellpadding="0" cellspacing="0" style="margin:0 0 28px;">
+                      <tr><td style="background:#c9a96e;height:2px;font-size:0;line-height:0;">&nbsp;</td></tr>
+                    </table>
+
+                    <p style="margin:0 0 32px;color:#3d4a52;font-size:15px;line-height:1.75;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+                      Clique no botão abaixo para confirmar seu endereço de e-mail e ativar sua conta no Luma Manager.
+                    </p>
+
+                    <table cellpadding="0" cellspacing="0" style="margin:0 0 32px;">
+                      <tr>
+                        <td style="background:#0f4c5c;border-radius:8px;padding:14px 28px;">
+                          <a href="${verifyUrl}" style="color:#ffffff;font-size:15px;font-weight:600;text-decoration:none;font-family:Arial,Helvetica,sans-serif;">Confirmar e-mail</a>
+                        </td>
+                      </tr>
+                    </table>
+
+                    <p style="margin:0 0 8px;color:#7a8c94;font-size:13px;line-height:1.6;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+                      Se o botão não funcionar, copie e cole este link no navegador:
+                    </p>
+                    <p style="margin:0 0 28px;color:#0f4c5c;font-size:12px;word-break:break-all;font-family:monospace;">${verifyUrl}</p>
+
+                    <p style="margin:0;color:#7a8c94;font-size:13px;line-height:1.6;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+                      Este link expira em 48 horas. Se não foi você quem criou a conta, pode ignorar este e-mail.
+                    </p>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td style="background:#f5f8f9;padding:20px 40px;border-top:1px solid #e2eaec;border-radius:0 0 10px 10px;">
+                    <p style="margin:0;color:#a89f93;font-size:11px;line-height:1.6;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+                      Você recebeu este e-mail porque se cadastrou em <a href="https://lumamanager.com.br" style="color:#0f4c5c;text-decoration:none;">lumamanager.com.br</a>.
+                    </p>
+                  </td>
+                </tr>
+
+              </table>
+            </td></tr>
+          </table>
+        </body>
+        </html>
+      `
+    });
+
+    if (error) {
+      this.logger.error("Failed to send email verification", error);
+    }
+  }
 }
