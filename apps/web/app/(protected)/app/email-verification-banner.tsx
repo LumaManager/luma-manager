@@ -15,12 +15,12 @@ export function EmailVerificationBanner({ email }: { email: string }) {
 
   async function handleResend() {
     try {
-      await fetch(`${getApiBaseUrl()}/v1/auth/resend-verification`, {
+      const response = await fetch(`${getApiBaseUrl()}/v1/auth/resend-verification`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email })
       });
-      setSent(true);
+      if (response.ok) setSent(true);
     } catch {
       // silently fail — user can navigate to /verificar-email to retry
     }
