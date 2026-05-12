@@ -109,10 +109,28 @@ export const authMfaVerifyRequestSchema = z.object({
   code: z.string().min(6).max(8)
 });
 
+// --- Register ---
+export const registerRequestSchema = z.object({
+  fullName:     z.string().min(2),
+  email:        z.string().email(),
+  practiceName: z.string().min(2),
+  password:     z.string().min(8)
+});
+export type RegisterRequest  = z.infer<typeof registerRequestSchema>;
+export type RegisterResponse = { emailSent: true; email: string };
+
+// --- Verify email ---
+export type VerifyEmailResponse = { verified: true };
+
+// --- Resend verification ---
+export type ResendVerificationRequest  = { email: string };
+export type ResendVerificationResponse = { sent: true };
+
 export const authSessionSchema = z.object({
   accessToken: z.string(),
   expiresAt: z.string(),
   mfaVerified: z.boolean(),
+  emailVerified: z.boolean(),
   therapist: therapistProfileSchema,
   tenant: z.object({
     id: z.string(),
