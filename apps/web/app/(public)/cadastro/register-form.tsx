@@ -48,6 +48,10 @@ export function RegisterForm() {
       });
 
       if (!response.ok) {
+        if (response.status === 409) {
+          setEmailError("Este e-mail já está cadastrado.");
+          return;
+        }
         const payload = (await response.json().catch(() => null)) as { message?: string } | null;
         throw new Error(payload?.message ?? "Erro ao criar conta.");
       }
