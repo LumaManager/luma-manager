@@ -1,11 +1,13 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
   Headers,
   HttpCode,
   Inject,
-  Post
+  Post,
+  Query
 } from "@nestjs/common";
 import type { AuthLoginRequest, AuthMfaVerifyRequest } from "@terapia/contracts";
 
@@ -41,5 +43,17 @@ export class AuthController {
   @HttpCode(200)
   logout() {
     return this.authService.logout();
+  }
+
+  @Get("verify-email")
+  async verifyEmail(@Query("token") token: string) {
+    if (!token) throw new BadRequestException("Token ausente.");
+    return this.authService.verifyEmail(token);
+  }
+
+  @Post("resend-verification")
+  @HttpCode(200)
+  async resendVerification(@Body() body: { email: string }) {
+    return this.authService.resendVerification(body.email ?? "");
   }
 }
