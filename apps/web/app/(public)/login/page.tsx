@@ -112,8 +112,8 @@ export default async function LoginPage({
                   <LoginForm nextPath={params.next ?? "/app/dashboard"} />
                   <p className="mt-7 text-center text-sm text-[var(--color-text-muted)]">
                     Ainda não tem conta?{" "}
-                    <Link href="/" className="font-medium text-[var(--color-primary)] hover:underline">
-                      Entre na lista de espera
+                    <Link href="/cadastro" className="font-medium text-[var(--color-primary)] hover:underline">
+                      Criar conta
                     </Link>
                   </p>
                 </CardContent>
