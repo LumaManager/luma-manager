@@ -42,13 +42,14 @@ export class TherapistRepository {
   async findByIdWithTenant(id: string) {
     const rows = await this.db
       .select({
-        id: therapists.id,
-        email: therapists.email,
-        fullName: therapists.fullName,
-        role: therapists.role,
-        status: therapists.status,
-        tenantId: therapists.tenantId,
-        practiceName: tenants.name
+        id:              therapists.id,
+        email:           therapists.email,
+        fullName:        therapists.fullName,
+        role:            therapists.role,
+        status:          therapists.status,
+        tenantId:        therapists.tenantId,
+        practiceName:    tenants.name,
+        emailVerifiedAt: therapists.emailVerifiedAt
       })
       .from(therapists)
       .innerJoin(tenants, eq(tenants.id, therapists.tenantId))
@@ -56,6 +57,13 @@ export class TherapistRepository {
       .limit(1);
 
     return rows[0] ?? null;
+  }
+
+  async setEmailVerified(therapistId: string) {
+    await this.db
+      .update(therapists)
+      .set({ emailVerifiedAt: new Date() })
+      .where(eq(therapists.id, therapistId));
   }
 
   async create(input: CreateTherapistInput) {

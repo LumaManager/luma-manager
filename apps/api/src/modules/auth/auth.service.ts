@@ -1,14 +1,17 @@
 // apps/api/src/modules/auth/auth.service.ts
 import { randomUUID } from "node:crypto";
 
-import { ConflictException, Inject, Injectable, UnauthorizedException } from "@nestjs/common";
+import { BadRequestException, ConflictException, Inject, Injectable, UnauthorizedException } from "@nestjs/common";
 import type { OnModuleInit } from "@nestjs/common";
 import {
   authLoginRequestSchema,
   authMfaVerifyRequestSchema,
   type AuthLoginRequest,
   type AuthLoginResponse,
-  type AuthSession
+  type AuthSession,
+  type RegisterRequest,
+  type RegisterResponse,
+  type VerifyEmailResponse
 } from "@terapia/contracts";
 
 import { EnvService } from "@/common/config/env.service";
@@ -17,18 +20,13 @@ import { PasswordService } from "./password.service";
 import { TherapistRepository } from "./therapist.repository";
 import { AppSessionService } from "./app-session.service";
 import { OnboardingService } from "@/modules/onboarding/onboarding.service";
+import { EmailVerificationRepository } from "./email-verification.repository";
+import { EmailService } from "@/modules/platform/email/email.service";
 
 type PendingChallenge = {
   therapistId: string;
   email: string;
   expiresAt: number;
-};
-
-type RegisterInput = {
-  email: string;
-  password: string;
-  fullName: string;
-  practiceName: string;
 };
 
 @Injectable()
@@ -46,21 +44,17 @@ export class AuthService implements OnModuleInit {
   }
 
   constructor(
-    @Inject(EnvService) private readonly env: EnvService,
-    @Inject(AppSessionService) private readonly appSessionService: AppSessionService,
-    @Inject(TherapistRepository) private readonly therapistRepository: TherapistRepository,
-    @Inject(PasswordService) private readonly passwordService: PasswordService,
-    @Inject(MfaService) private readonly mfaService: MfaService,
-    @Inject(OnboardingService) private readonly onboardingService: OnboardingService
+    @Inject(EnvService)                  private readonly env: EnvService,
+    @Inject(AppSessionService)           private readonly appSessionService: AppSessionService,
+    @Inject(TherapistRepository)         private readonly therapistRepository: TherapistRepository,
+    @Inject(PasswordService)             private readonly passwordService: PasswordService,
+    @Inject(MfaService)                  private readonly mfaService: MfaService,
+    @Inject(OnboardingService)           private readonly onboardingService: OnboardingService,
+    @Inject(EmailService)                private readonly emailService: EmailService,
+    @Inject(EmailVerificationRepository) private readonly emailVerifRepo: EmailVerificationRepository
   ) {}
 
-  async register(input: RegisterInput): Promise<{
-    therapistId: string;
-    mfaSecret?: string;
-    otpAuthUrl?: string;
-    recoveryCodes?: string[];
-    mfaSkipped: boolean;
-  }> {
+  async register(input: RegisterRequest): Promise<RegisterResponse> {
     const existing = await this.therapistRepository.findByEmail(input.email);
     if (existing) {
       throw new ConflictException("Este e-mail já está cadastrado.");
@@ -74,21 +68,48 @@ export class AuthService implements OnModuleInit {
       practiceName: input.practiceName
     });
 
-    if (!therapist) {
-      throw new Error("Failed to create therapist account.");
-    }
+    if (!therapist) throw new Error("Failed to create therapist account.");
 
     await this.onboardingService.initForTherapist(therapist.id);
 
-    // Quando REQUIRE_MFA=false, pula o setup de TOTP no cadastro
-    if (!this.env.values.REQUIRE_MFA) {
-      return { therapistId: therapist.id, mfaSkipped: true };
-    }
+    const expiresAt = new Date(Date.now() + 48 * 60 * 60 * 1000);
+    const token = await this.emailVerifRepo.create(therapist.id, expiresAt);
+    const appUrl = this.env.get("APP_PUBLIC_URL");
+    const verifyUrl = `${appUrl}/confirmar-email?token=${token}`;
 
-    const { secret, recoveryCodes } = await this.mfaService.setupForTherapist(therapist.id);
-    const otpAuthUrl = this.mfaService.getOtpAuthUrl(input.email, secret);
+    await this.emailService.sendEmailVerification(therapist.email, therapist.fullName, verifyUrl);
 
-    return { therapistId: therapist.id, mfaSecret: secret, otpAuthUrl, recoveryCodes, mfaSkipped: false };
+    return { emailSent: true, email: therapist.email };
+  }
+
+  async verifyEmail(token: string): Promise<VerifyEmailResponse> {
+    const record = await this.emailVerifRepo.findByToken(token);
+
+    if (!record)                       throw new BadRequestException("Token inválido.");
+    if (record.usedAt)                 throw new BadRequestException("Este link já foi utilizado.");
+    if (record.expiresAt < new Date()) throw new BadRequestException("Link expirado. Solicite um novo.");
+
+    await this.emailVerifRepo.markUsed(record.id);
+    await this.therapistRepository.setEmailVerified(record.therapistId);
+
+    return { verified: true };
+  }
+
+  async resendVerification(email: string): Promise<{ sent: true }> {
+    const therapist = await this.therapistRepository.findByEmail(email);
+
+    if (!therapist || therapist.emailVerifiedAt) return { sent: true };
+
+    await this.emailVerifRepo.invalidatePreviousTokens(therapist.id);
+
+    const expiresAt = new Date(Date.now() + 48 * 60 * 60 * 1000);
+    const token = await this.emailVerifRepo.create(therapist.id, expiresAt);
+    const appUrl = this.env.get("APP_PUBLIC_URL");
+    const verifyUrl = `${appUrl}/confirmar-email?token=${token}`;
+
+    await this.emailService.sendEmailVerification(therapist.email, therapist.fullName, verifyUrl);
+
+    return { sent: true };
   }
 
   async login(input: AuthLoginRequest): Promise<AuthLoginResponse & { accessToken?: string }> {
@@ -193,6 +214,7 @@ export class AuthService implements OnModuleInit {
     const isInternal = this.isInternalEmail(therapist.email);
 
     return {
+      emailVerified: therapist.emailVerifiedAt != null,
       tenant: {
         id: therapist.tenantId,
         name: therapist.practiceName,
