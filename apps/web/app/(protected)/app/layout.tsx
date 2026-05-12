@@ -7,6 +7,8 @@ import { apiFetch } from "@/lib/api/client";
 import { getSessionToken } from "@/lib/auth/session";
 import { isInternalOperatorSession } from "@/lib/auth/session-destination";
 
+import { EmailVerificationBanner } from "./email-verification-banner";
+
 export default async function ProtectedLayout({
   children
 }: Readonly<{
@@ -30,5 +32,12 @@ export default async function ProtectedLayout({
     token: sessionToken
   });
 
-  return <AppShell bootstrap={bootstrap}>{children}</AppShell>;
+  return (
+    <>
+      {!session.emailVerified && (
+        <EmailVerificationBanner email={session.therapist.email} />
+      )}
+      <AppShell bootstrap={bootstrap}>{children}</AppShell>
+    </>
+  );
 }
