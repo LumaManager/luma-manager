@@ -74,10 +74,10 @@ export function RegisterForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
-      <label className="block space-y-2">
-        <span className="text-sm font-medium">Nome completo</span>
-        <input name="fullName" type="text" placeholder="Dra. Ana Souza" required autoComplete="name" className={inputClass} />
-      </label>
+      <div className="block space-y-2">
+        <label htmlFor="fullName" className="text-sm font-medium">Nome completo</label>
+        <input id="fullName" name="fullName" type="text" placeholder="Dra. Ana Souza" required autoComplete="name" className={inputClass} />
+      </div>
 
       <div className="block space-y-2">
         <label htmlFor="email" className="text-sm font-medium">E-mail</label>
@@ -86,10 +86,10 @@ export function RegisterForm() {
         {emailError && <p className="text-xs text-red-500">{emailError}</p>}
       </div>
 
-      <label className="block space-y-2">
-        <span className="text-sm font-medium">Nome do consultório</span>
-        <input name="practiceName" type="text" placeholder="Pode ser seu próprio nome" required className={inputClass} />
-      </label>
+      <div className="block space-y-2">
+        <label htmlFor="practiceName" className="text-sm font-medium">Nome do consultório</label>
+        <input id="practiceName" name="practiceName" type="text" placeholder="Pode ser seu próprio nome" required className={inputClass} />
+      </div>
 
       <label className="block space-y-2">
         <span className="text-sm font-medium">Senha</span>
@@ -97,6 +97,7 @@ export function RegisterForm() {
           <input name="password" type={showPassword ? "text" : "password"} placeholder="Mínimo 8 caracteres"
             required autoComplete="new-password" className={`${inputClass} pr-12`} />
           <button type="button" onClick={() => setShowPassword(v => !v)}
+            aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
             className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] hover:text-[var(--color-text)]">
             {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
           </button>

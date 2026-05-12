@@ -46,7 +46,7 @@ export default async function CadastroPage() {
                     Agenda, prontuários e cobranças num só lugar. Sem configuração complicada.
                   </p>
 
-                  <ul className="mt-7 grid gap-3">
+                  <ul role="list" className="mt-7 grid gap-3">
                     <Bullet text="Veja sua agenda do dia e o histórico de cada paciente antes de entrar na sessão." />
                     <Bullet text="Registre a nota clínica logo depois — sem acumular para o fim do dia." />
                     <Bullet text="Acompanhe cobranças, pagamentos e pendências num painel só." />
