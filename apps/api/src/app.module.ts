@@ -7,6 +7,7 @@ import type { DrizzleClient } from "@/db/client";
 import { MfaRepository } from "@/modules/auth/mfa.repository";
 import { MfaService } from "@/modules/auth/mfa.service";
 import { PasswordService } from "@/modules/auth/password.service";
+import { EmailVerificationRepository } from "@/modules/auth/email-verification.repository";
 import { TherapistRepository } from "@/modules/auth/therapist.repository";
 import { AccountController } from "@/modules/account/account.controller";
 import { AppointmentsController } from "@/modules/appointments/appointments.controller";
@@ -97,6 +98,7 @@ import { OnboardingService } from "@/modules/onboarding/onboarding.service";
       }
     },
     TherapistRepository,
+    EmailVerificationRepository,
     PasswordService,
     {
       provide: MfaRepository,
