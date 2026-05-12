@@ -28,7 +28,8 @@ export const therapists = pgTable("therapists", {
   role: text("role").notNull().default("owner"), // owner | member
   status: text("status").notNull().default("pending_onboarding"), // pending_onboarding | active | suspended
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow()
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  emailVerifiedAt: timestamp("email_verified_at", { withTimezone: true })
 });
 
 // ---------------------------------------------------------------------------
@@ -414,4 +415,16 @@ export const waitlist = pgTable("waitlist", {
   tenantId: text("tenant_id").notNull().default(""), // filled when converted → therapist account
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow()
+});
+
+// ---------------------------------------------------------------------------
+// EMAIL VERIFICATION TOKENS
+// ---------------------------------------------------------------------------
+
+export const emailVerificationTokens = pgTable("email_verification_tokens", {
+  id:           text("id").primaryKey(),
+  therapistId:  text("therapist_id").notNull().references(() => therapists.id),
+  token:        text("token").notNull().unique(),
+  expiresAt:    timestamp("expires_at", { withTimezone: true }).notNull(),
+  usedAt:       timestamp("used_at", { withTimezone: true })
 });
