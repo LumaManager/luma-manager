@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Loader2 } from "lucide-react";
 
 import { Button } from "@terapia/ui";
@@ -12,6 +12,13 @@ function getApiBaseUrl() {
 export function ResendButton({ email }: { email: string }) {
   const [status, setStatus]       = useState<"idle" | "loading" | "sent" | "error">("idle");
   const [countdown, setCountdown] = useState(0);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+  }, []);
 
   async function handleResend() {
     if (countdown > 0 || status === "loading") return;
@@ -28,10 +35,11 @@ export function ResendButton({ email }: { email: string }) {
 
       setStatus("sent");
       setCountdown(60);
-      const interval = setInterval(() => {
+      intervalRef.current = setInterval(() => {
         setCountdown(c => {
           if (c <= 1) {
-            clearInterval(interval);
+            clearInterval(intervalRef.current!);
+            intervalRef.current = null;
             return 0;
           }
           return c - 1;
@@ -50,7 +58,7 @@ export function ResendButton({ email }: { email: string }) {
         disabled={status === "loading" || countdown > 0}
         className="w-full"
       >
-        {status === "loading" && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+        {status === "loading" && <Loader2 aria-hidden="true" className="mr-2 h-4 w-4 animate-spin" />}
         {countdown > 0
           ? `Reenviar em ${countdown}s`
           : status === "loading"
