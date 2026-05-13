@@ -13,3 +13,4 @@ yarn-debug.log*
 yarn-error.log*
 .DS_Store
 TICKET_ESTADO_ATUAL.md
+package-lock.json
