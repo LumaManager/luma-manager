@@ -1002,6 +1002,7 @@ export class WorkspaceStateService {
         accessToken: "",
         accountStatus: record.status,
         capabilities: record.capabilities,
+        emailVerified: true,
         expiresAt: "",
         mfaVerified: true,
         therapist: record.therapist,

@@ -2,13 +2,18 @@ import {
   BadRequestException,
   Body,
   Controller,
+  Delete,
   Get,
   Headers,
   HttpCode,
   Inject,
   Post,
-  Query
+  Query,
+  Req,
+  UseGuards
 } from "@nestjs/common";
+import { ThrottlerGuard } from "@nestjs/throttler";
+import type { FastifyRequest } from "fastify";
 import type { AuthLoginRequest, AuthMfaVerifyRequest } from "@terapia/contracts";
 
 import { AuthService } from "./auth.service";
@@ -19,6 +24,7 @@ export class AuthController {
 
   @Post("login")
   @HttpCode(200)
+  @UseGuards(ThrottlerGuard)
   login(@Body() body: AuthLoginRequest) {
     return this.authService.login(body);
   }
@@ -30,8 +36,12 @@ export class AuthController {
 
   @Post("mfa/verify")
   @HttpCode(200)
-  verifyMfa(@Body() body: AuthMfaVerifyRequest) {
-    return this.authService.verifyMfa(body);
+  @UseGuards(ThrottlerGuard)
+  verifyMfa(@Body() body: AuthMfaVerifyRequest, @Req() req: FastifyRequest) {
+    return this.authService.verifyMfa(body, {
+      ip:        req.ip ?? "",
+      userAgent: req.headers["user-agent"] ?? ""
+    });
   }
 
   @Get("me")
@@ -53,7 +63,14 @@ export class AuthController {
 
   @Post("resend-verification")
   @HttpCode(200)
+  @UseGuards(ThrottlerGuard)
   async resendVerification(@Body() body: { email: string }) {
     return this.authService.resendVerification(body.email ?? "");
+  }
+
+  @Delete("account")
+  async deleteAccount(@Headers("authorization") authorization: string) {
+    const session = await this.authService.getSessionFromAuthorizationHeader(authorization);
+    return this.authService.requestAccountDeletion(session);
   }
 }

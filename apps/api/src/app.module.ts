@@ -1,6 +1,9 @@
 import { Module } from "@nestjs/common";
+import { ThrottlerModule } from "@nestjs/throttler";
 
 import { EnvService } from "@/common/config/env.service";
+import { EncryptionService } from "@/common/services/encryption.service";
+import { AuditModule } from "@/modules/audit/audit.module";
 import { DATABASE_CLIENT } from "@/common/tokens";
 import { createDatabaseClient } from "@/db/client";
 import type { DrizzleClient } from "@/db/client";
@@ -54,6 +57,16 @@ import { OnboardingRepository } from "@/modules/onboarding/onboarding.repository
 import { OnboardingService } from "@/modules/onboarding/onboarding.service";
 
 @Module({
+  imports: [
+    ThrottlerModule.forRoot([
+      {
+        name:  "short",
+        ttl:   60_000,
+        limit: 10
+      }
+    ]),
+    AuditModule
+  ],
   controllers: [
     HealthController,
     AuthController,
@@ -77,6 +90,7 @@ import { OnboardingService } from "@/modules/onboarding/onboarding.service";
   ],
   providers: [
     EnvService,
+    EncryptionService,
     WorkspaceStateService,
     SupabaseService,
     AppSessionService,

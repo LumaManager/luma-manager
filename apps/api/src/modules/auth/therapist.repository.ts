@@ -66,6 +66,13 @@ export class TherapistRepository {
       .where(eq(therapists.id, therapistId));
   }
 
+  async markPendingDeletion(therapistId: string): Promise<void> {
+    await this.db
+      .update(therapists)
+      .set({ status: "pending_deletion" })
+      .where(eq(therapists.id, therapistId));
+  }
+
   async create(input: CreateTherapistInput) {
     const tenantId = randomUUID();
     const therapistId = randomUUID();

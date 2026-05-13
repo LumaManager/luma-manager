@@ -22,6 +22,7 @@ import { AppSessionService } from "./app-session.service";
 import { OnboardingService } from "@/modules/onboarding/onboarding.service";
 import { EmailVerificationRepository } from "./email-verification.repository";
 import { EmailService } from "@/modules/platform/email/email.service";
+import { AuditService } from "@/modules/audit/audit.service";
 
 type PendingChallenge = {
   therapistId: string;
@@ -51,7 +52,8 @@ export class AuthService implements OnModuleInit {
     @Inject(MfaService)                  private readonly mfaService: MfaService,
     @Inject(OnboardingService)           private readonly onboardingService: OnboardingService,
     @Inject(EmailService)                private readonly emailService: EmailService,
-    @Inject(EmailVerificationRepository) private readonly emailVerifRepo: EmailVerificationRepository
+    @Inject(EmailVerificationRepository) private readonly emailVerifRepo: EmailVerificationRepository,
+    @Inject(AuditService)                private readonly auditService: AuditService
   ) {}
 
   async register(input: RegisterRequest): Promise<RegisterResponse> {
@@ -138,7 +140,8 @@ export class AuthService implements OnModuleInit {
         mfaMethod: "totp",
         expiresInSeconds: 300,
         hint: "MFA desativado. Digite qualquer código de 6 dígitos para continuar.",
-      };
+        accessToken: ""
+      } as AuthLoginResponse & { accessToken?: string };
     }
 
     // --- REQUIRE_MFA=true (padrão): fluxo normal com desafio TOTP ---
@@ -158,7 +161,7 @@ export class AuthService implements OnModuleInit {
     };
   }
 
-  async verifyMfa(input: unknown): Promise<AuthSession> {
+  async verifyMfa(input: unknown, context?: { ip?: string; userAgent?: string }): Promise<AuthSession> {
     const payload = authMfaVerifyRequestSchema.parse(input);
     const challenge = this.pendingChallenges.get(payload.challengeId);
 
@@ -179,6 +182,16 @@ export class AuthService implements OnModuleInit {
 
     const session = await this.buildSession(challenge.therapistId);
     const accessToken = await this.appSessionService.sign(session);
+
+    this.auditService.log({
+      therapistId: session.therapist.id,
+      tenantId:    session.tenant.id,
+      action:      "login",
+      resource:    "auth",
+      ipAddress:   context?.ip,
+      userAgent:   context?.userAgent
+    });
+
     return { ...session, accessToken };
   }
 
@@ -192,6 +205,23 @@ export class AuthService implements OnModuleInit {
 
   async logout() {
     return { success: true };
+  }
+
+  async requestAccountDeletion(session: AuthSession): Promise<{ requested: true; message: string }> {
+    await this.therapistRepository.markPendingDeletion(session.therapist.id);
+
+    this.auditService.log({
+      therapistId: session.therapist.id,
+      tenantId:    session.tenant.id,
+      action:      "delete",
+      resource:    "auth",
+      metadata:    { reason: "account_deletion_requested" }
+    });
+
+    return {
+      requested: true,
+      message:   "Sua solicitação foi registrada. A conta será removida em até 30 dias."
+    };
   }
 
   // ---------------------------------------------------------------------------

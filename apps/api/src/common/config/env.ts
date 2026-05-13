@@ -5,6 +5,7 @@ const envSchema = z.object({
   WEB_ORIGIN: z.string().url().default("http://localhost:3000"),
   APP_SESSION_SECRET: z.string().min(12),
   MFA_ENCRYPTION_KEY: z.string().regex(/^[0-9a-fA-F]{64}$/, "MFA_ENCRYPTION_KEY must be 64 hex characters").transform(v => v.toLowerCase()).optional(),
+  DATA_ENCRYPTION_KEY: z.string().regex(/^[0-9a-fA-F]{64}$/, "DATA_ENCRYPTION_KEY must be 64 hex chars (32 bytes)").transform(v => v.toLowerCase()).optional(),
   AUTH_PROVIDER: z.enum(["real", "mock"]).default("real"),
   // Quando false: login completa direto após email+senha, sem TOTP.
   // Use false em dev/staging para testar sem autenticador.

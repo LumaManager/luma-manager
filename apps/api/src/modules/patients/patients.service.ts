@@ -14,11 +14,13 @@ import { patientCreateRequestSchema } from "@terapia/contracts";
 import { buildMockPatientDetail, buildMockPatientList, isMockEmail } from "@/modules/mock";
 import type { PatientWithMeta } from "./patients.repository";
 import { PatientsRepository } from "./patients.repository";
+import { AuditService } from "@/modules/audit/audit.service";
 
 @Injectable()
 export class PatientsService {
   constructor(
-    @Inject(PatientsRepository) private readonly repo: PatientsRepository
+    @Inject(PatientsRepository) private readonly repo: PatientsRepository,
+    @Inject(AuditService)       private readonly auditService: AuditService
   ) {}
 
   // ---------------------------------------------------------------------------
@@ -141,6 +143,15 @@ export class PatientsService {
       phone: payload.phone ?? "",
       birthDate: payload.birthDate,
       paymentOrigin: payload.paymentOrigin
+    });
+
+    this.auditService.log({
+      therapistId: session.therapist.id,
+      tenantId:    session.tenant.id,
+      action:      "create",
+      resource:    "patient",
+      resourceId:  created.id,
+      patientId:   created.id
     });
 
     // TODO: if sendInviteNow, dispara email via Resend (próximo sprint)

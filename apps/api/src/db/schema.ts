@@ -428,3 +428,21 @@ export const emailVerificationTokens = pgTable("email_verification_tokens", {
   expiresAt:    timestamp("expires_at", { withTimezone: true }).notNull(),
   usedAt:       timestamp("used_at", { withTimezone: true })
 });
+
+// ---------------------------------------------------------------------------
+// AUDIT LOGS (LGPD — rastreabilidade de acesso a dados de saúde)
+// ---------------------------------------------------------------------------
+
+export const auditLogs = pgTable("audit_logs", {
+  id:          text("id").primaryKey(),
+  therapistId: text("therapist_id").notNull(),
+  tenantId:    text("tenant_id").notNull(),
+  action:      text("action").notNull(),      // "login" | "logout" | "read" | "create" | "update" | "delete"
+  resource:    text("resource").notNull(),    // "patient" | "clinical_record" | "document" | "appointment" | "billing" | "auth"
+  resourceId:  text("resource_id"),
+  patientId:   text("patient_id"),
+  ipAddress:   text("ip_address").notNull().default(""),
+  userAgent:   text("user_agent").notNull().default(""),
+  metadata:    text("metadata"),              // JSON serializado
+  createdAt:   timestamp("created_at", { withTimezone: true }).notNull().defaultNow()
+});

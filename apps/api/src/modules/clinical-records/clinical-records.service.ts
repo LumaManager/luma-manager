@@ -8,6 +8,7 @@ import type {
 
 import type { ApprovedDraftWithContext, ClinicalDraftVersionRow } from "./clinical-records.repository";
 import { ClinicalRecordsRepository } from "./clinical-records.repository";
+import { AuditService } from "@/modules/audit/audit.service";
 
 // ---------------------------------------------------------------------------
 // Date / label helpers
@@ -122,8 +123,8 @@ function mapDraftToEntry(
 @Injectable()
 export class ClinicalRecordsService {
   constructor(
-    @Inject(ClinicalRecordsRepository)
-    private readonly repo: ClinicalRecordsRepository
+    @Inject(ClinicalRecordsRepository) private readonly repo: ClinicalRecordsRepository,
+    @Inject(AuditService)              private readonly auditService: AuditService
   ) {}
 
   async getPatientClinicalRecord(

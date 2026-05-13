@@ -5,6 +5,7 @@ import { resolve } from "node:path";
 
 import { NestFactory } from "@nestjs/core";
 import { FastifyAdapter, type NestFastifyApplication } from "@nestjs/platform-fastify";
+import fastifyHelmet from "@fastify/helmet";
 
 import { AppModule } from "./app.module";
 import { readEnv } from "./common/config/env";
@@ -61,6 +62,22 @@ function formatBootstrapError(error: unknown) {
 async function bootstrap() {
   loadLocalEnv();
   const env = readEnv();
+
+  if (env.LUMA_ENV === "production") {
+    if (!env.REQUIRE_MFA) {
+      throw new Error(
+        "SECURITY BOOT FAILURE: REQUIRE_MFA must be true in production. " +
+        "Set REQUIRE_MFA=true in Railway environment variables."
+      );
+    }
+    if (!env.DATA_ENCRYPTION_KEY) {
+      throw new Error(
+        "SECURITY BOOT FAILURE: DATA_ENCRYPTION_KEY is required in production. " +
+        "Generate with: openssl rand -hex 32"
+      );
+    }
+  }
+
   const app = await NestFactory.create<NestFastifyApplication>(
     AppModule,
     new FastifyAdapter({
@@ -72,6 +89,31 @@ async function bootstrap() {
   app.enableCors({
     origin: [env.WEB_ORIGIN],
     credentials: true
+  });
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  await (app as any).register(fastifyHelmet, {
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc:  ["'self'"],
+        styleSrc:   ["'self'", "'unsafe-inline'"],
+        imgSrc:     ["'self'", "data:"],
+        connectSrc: ["'self'"],
+        fontSrc:    ["'self'"],
+        objectSrc:  ["'none'"],
+        frameSrc:   ["'none'"],
+        upgradeInsecureRequests: []
+      }
+    },
+    hsts: {
+      maxAge:            63072000,
+      includeSubDomains: true,
+      preload:           true
+    },
+    frameguard:     { action: "deny" },
+    noSniff:        true,
+    referrerPolicy: { policy: "strict-origin-when-cross-origin" }
   });
 
   const port = Number(process.env.PORT) || env.API_PORT;
