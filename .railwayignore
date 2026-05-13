@@ -1,0 +1,14 @@
+node_modules
+apps/web/.next
+apps/api/dist
+apps/web/node_modules
+apps/api/node_modules
+packages/*/node_modules
+.git
+docs
+ebook
+mareting
+planejamento
+licitude-brasil
+arquitetura
+preview
