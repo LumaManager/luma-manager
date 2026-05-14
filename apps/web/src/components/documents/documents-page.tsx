@@ -634,51 +634,6 @@ function StatusBadge({
   return <Badge tone={tone}>{text}</Badge>;
 }
 
-function labelForType(value: string) {
-  const map = {
-    lgpd: "LGPD",
-    telehealth: "Teleatendimento",
-    transcript_ai: "Transcript e IA",
-    therapy_contract: "Contrato terapeutico",
-    operational: "Operacional"
-  } as const;
-
-  return map[value as keyof typeof map] ?? value;
-}
-
-function labelForSignature(value: string) {
-  const map = {
-    not_sent: "Não enviado",
-    pending: "Pendente",
-    signed: "Assinado",
-    expired: "Expirado",
-    revoked: "Revogado"
-  } as const;
-
-  return map[value as keyof typeof map] ?? value;
-}
-
-function labelForConsent(value: string) {
-  const map = {
-    valid: "Valido",
-    pending: "Pendente",
-    revoked: "Revogado",
-    not_applicable: "Não aplicável"
-  } as const;
-
-  return map[value as keyof typeof map] ?? value;
-}
-
-function labelForCriticality(value: string) {
-  const map = {
-    normal: "Normal",
-    attention: "Atenção",
-    critical: "Critico"
-  } as const;
-
-  return map[value as keyof typeof map] ?? value;
-}
-
 const signatureOptions = [
   { label: "Todas", value: "all" },
   { label: "Não enviado", value: "not_sent" },
@@ -696,9 +651,3 @@ const consentOptions = [
   { label: "Não aplicável", value: "not_applicable" }
 ];
 
-const criticalityOptions = [
-  { label: "Todas", value: "all" },
-  { label: "Critico", value: "critical" },
-  { label: "Atenção", value: "attention" },
-  { label: "Normal", value: "normal" }
-];
