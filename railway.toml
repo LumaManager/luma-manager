@@ -1,6 +1,6 @@
 [build]
 builder = "nixpacks"
-buildCommand = "npm run build --workspace @terapia/api && npm prune --omit=dev --legacy-peer-deps"
+buildCommand = "npm install --legacy-peer-deps && npm run build --workspace @terapia/api"
 installCommand = "npm install --legacy-peer-deps"
 
 [deploy]
