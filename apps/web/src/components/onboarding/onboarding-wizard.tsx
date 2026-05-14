@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import type {
   OnboardingCompleteStepRequest,
   OnboardingStepKey,
@@ -17,10 +17,11 @@ export function OnboardingWizard({ initialData }: OnboardingWizardProps) {
   const router = useRouter();
   const [data, setData] = useState(initialData);
   const [error, setError] = useState<string | null>(null);
-  const [isPending, startTransition] = useTransition();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const currentStep = data.currentStep;
   const currentStepMeta = data.steps.find((step) => step.key === currentStep);
+  const isReadyForOperations = data.accountStatus === "ready_for_operations";
 
   function updateDraft<K extends keyof TherapistOnboardingBootstrap["draft"]>(
     section: K,
@@ -35,56 +36,66 @@ export function OnboardingWizard({ initialData }: OnboardingWizardProps) {
     }));
   }
 
-  function submitCurrentStep() {
+  async function submitCurrentStep() {
     setError(null);
 
-    startTransition(async () => {
-      try {
-        if (currentStep === "welcome") {
-          const response = await fetch("/api/account/onboarding/start", {
-            method: "POST"
-          });
+    if (isReadyForOperations) {
+      router.replace("/app/dashboard");
+      return;
+    }
 
-          if (!response.ok) {
-            throw new Error("Não foi possível iniciar o onboarding.");
-          }
+    setIsSubmitting(true);
 
-          const payload = (await response.json()) as { onboarding: TherapistOnboardingBootstrap };
-          setData(payload.onboarding);
-          router.refresh();
-          return;
-        }
-
-        const body = buildStepPayload(currentStep, data);
-        const response = await fetch("/api/account/onboarding/complete-step", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify(body)
+    try {
+      if (currentStep === "welcome") {
+        const response = await fetch("/api/account/onboarding/start", {
+          method: "POST"
         });
 
         if (!response.ok) {
-          throw new Error("Não foi possível salvar a etapa.");
+          throw new Error("Não foi possível iniciar o onboarding.");
         }
 
-        const payload = (await response.json()) as {
-          onboarding: TherapistOnboardingBootstrap;
-          accountStatus: TherapistOnboardingBootstrap["accountStatus"];
-        };
-
+        const payload = (await response.json()) as { onboarding: TherapistOnboardingBootstrap };
         setData(payload.onboarding);
         router.refresh();
-
-        if (payload.accountStatus === "ready_for_operations") {
-          router.push("/app/dashboard");
-        }
-      } catch (submitError) {
-        setError(
-          submitError instanceof Error ? submitError.message : "Erro inesperado ao salvar a etapa."
-        );
+        return;
       }
-    });
+
+      const body = buildStepPayload(currentStep, data);
+      const response = await fetch("/api/account/onboarding/complete-step", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(body)
+      });
+
+      if (!response.ok) {
+        const payload = (await response.json().catch(() => null)) as { message?: string } | null;
+        throw new Error(payload?.message ?? "Não foi possível salvar a etapa.");
+      }
+
+      const payload = (await response.json()) as {
+        onboarding: TherapistOnboardingBootstrap;
+        accountStatus: TherapistOnboardingBootstrap["accountStatus"];
+      };
+
+      setData(payload.onboarding);
+
+      if (payload.accountStatus === "ready_for_operations") {
+        router.replace("/app/dashboard");
+        return;
+      }
+
+      router.refresh();
+    } catch (submitError) {
+      setError(
+        submitError instanceof Error ? submitError.message : "Erro inesperado ao salvar a etapa."
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   const completedCount = data.steps.filter((s) => s.status === "completed").length;
@@ -146,10 +157,24 @@ export function OnboardingWizard({ initialData }: OnboardingWizardProps) {
         {/* Step form */}
         <Card>
           <CardHeader>
-            <h2 className="text-lg font-semibold">{currentStepMeta?.title}</h2>
+            <h2 className="text-lg font-semibold">
+              {isReadyForOperations ? "Conta pronta para operar" : currentStepMeta?.title}
+            </h2>
           </CardHeader>
           <CardContent className="space-y-6">
-            {renderStepFields(data, updateDraft)}
+            {isReadyForOperations ? (
+              <div className="rounded-3xl border border-[rgba(15,76,92,0.14)] bg-[rgba(15,76,92,0.04)] p-5">
+                <p className="font-semibold text-[var(--color-text)]">
+                  A ativação já foi concluída.
+                </p>
+                <p className="mt-2 text-sm leading-6 text-[var(--color-text-muted)]">
+                  O próximo passo é abrir o dashboard para operar agenda, pacientes, financeiro e
+                  documentos.
+                </p>
+              </div>
+            ) : (
+              renderStepFields(data, updateDraft)
+            )}
 
             {error ? (
               <p className="rounded-2xl bg-[rgba(178,74,58,0.12)] px-4 py-3 text-sm text-[var(--color-danger)]">
@@ -158,10 +183,12 @@ export function OnboardingWizard({ initialData }: OnboardingWizardProps) {
             ) : null}
 
             <div className="flex justify-end">
-              <Button disabled={isPending} onClick={submitCurrentStep} type="button">
-                {isPending
+              <Button disabled={isSubmitting} onClick={submitCurrentStep} type="button">
+                {isSubmitting
                   ? "Salvando..."
-                  : currentStep === "welcome"
+                  : isReadyForOperations
+                    ? "Ir para o dashboard"
+                    : currentStep === "welcome"
                     ? "Começar"
                     : currentStep === "consents"
                       ? "Concluir ativação"
