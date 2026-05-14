@@ -16,11 +16,10 @@ import {
   Search,
   Send,
   ShieldAlert,
-  SlidersHorizontal,
   X
 } from "lucide-react";
 
-import { OperationalHero, ToolbarPanel } from "@/components/shared/operational-surface";
+import { OperationalHero } from "@/components/shared/operational-surface";
 
 type DocumentsPageProps = {
   initialData: DocumentsListResponse;
@@ -32,7 +31,7 @@ export function DocumentsPageView({ initialData }: DocumentsPageProps) {
   const searchParams = useSearchParams();
   const [items, setItems] = useState(initialData.items);
   const [isGenerateOpen, setIsGenerateOpen] = useState(false);
-  const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [, startTransition] = useTransition();
   const [feedback, setFeedback] = useState<string | null>(null);
   const [query, setQuery] = useState(initialData.filters.search);
@@ -59,31 +58,20 @@ export function DocumentsPageView({ initialData }: DocumentsPageProps) {
     [generationForm.documentType, initialData.templateOptions]
   );
 
-  const activeChips = useMemo(() => {
-    const chips: string[] = [];
-    if (patientId.length > 0) {
-      const patient = initialData.patientOptions.find((option) => option.value === patientId);
-      if (patient) chips.push(`Paciente: ${patient.label}`);
-    }
-    if (documentType !== "all") chips.push(`Tipo: ${labelForType(documentType)}`);
-    if (signatureStatus !== "all") chips.push(`Assinatura: ${labelForSignature(signatureStatus)}`);
-    if (consentStatus !== "all") chips.push(`Consentimento: ${labelForConsent(consentStatus)}`);
-    if (criticality !== "all") chips.push(`Prioridade: ${labelForCriticality(criticality)}`);
-    if (onlyCritical) chips.push("Apenas críticos");
-    if (thisWeekOnly) chips.push("Apenas esta semana");
-    if (onlyRevoked) chips.push("Apenas revogados");
-    return chips;
-  }, [
-    consentStatus,
-    criticality,
-    documentType,
-    initialData.patientOptions,
-    onlyCritical,
-    onlyRevoked,
-    patientId,
-    signatureStatus,
-    thisWeekOnly
-  ]);
+  const activeFilterCount = useMemo(
+    () =>
+      [
+        patientId !== "",
+        documentType !== "all",
+        signatureStatus !== "all",
+        consentStatus !== "all",
+        criticality !== "all",
+        onlyCritical,
+        thisWeekOnly,
+        onlyRevoked
+      ].filter(Boolean).length,
+    [consentStatus, criticality, documentType, onlyCritical, onlyRevoked, patientId, signatureStatus, thisWeekOnly]
+  );
 
   useEffect(() => {
     if (!selectedTemplate) return;
@@ -198,7 +186,7 @@ export function DocumentsPageView({ initialData }: DocumentsPageProps) {
               )}
             </>
           }
-          description="Acompanhe assinaturas, consentimentos e pendências documentais sem transformar a área em repositório genérico de arquivos."
+          description=""
           stats={[
             {
               detail: "Itens com impacto direto em sessão, call ou capability clínica.",
@@ -219,103 +207,85 @@ export function DocumentsPageView({ initialData }: DocumentsPageProps) {
               value: String(initialData.summary.revokedCount)
             }
           ]}
-          supportingText={`${initialData.summary.affectedPatientsLabel}. O foco aqui é destacar o que bloqueia atendimento, transcript ou operação.`}
+          supportingText={initialData.summary.affectedPatientsLabel}
           title="Documentos"
         />
 
-        <ToolbarPanel
-          actions={
-            <>
-              <Button onClick={applyFilters} type="button" variant="secondary">
-                Aplicar
-              </Button>
-              <Button onClick={() => setIsAdvancedOpen(true)} type="button" variant="ghost">
-                <SlidersHorizontal className="h-4 w-4" />
-                Extras
-              </Button>
-            </>
-          }
-          description="Filtre por paciente, tipo, assinatura e consentimento sem esconder o recorte crítico da fila."
-          footer={
-            <>
-              <div className="flex flex-wrap gap-3">
-                {activeChips.map((chip) => (
-                  <Badge key={chip} tone="neutral">
-                    {chip}
-                  </Badge>
-                ))}
-                {activeChips.length > 0 ? (
+        <div className="space-y-3">
+          <div className="flex gap-3">
+            <span className="flex h-11 flex-1 items-center gap-3 rounded-2xl border border-[var(--color-border-strong)] bg-white px-4">
+              <Search className="h-4 w-4 text-[var(--color-text-muted)]" />
+              <input
+                className="w-full bg-transparent text-sm outline-none placeholder:text-[var(--color-text-muted)]"
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder="Buscar por paciente, código ou tipo documental"
+                value={query}
+              />
+            </span>
+            <Button onClick={() => setIsFilterOpen((v) => !v)} type="button" variant="secondary">
+              Filtros {activeFilterCount > 0 ? `(${activeFilterCount})` : ""}
+            </Button>
+            <Button onClick={applyFilters} type="button">
+              Buscar
+            </Button>
+          </div>
+          {isFilterOpen && (
+            <div className="rounded-2xl border border-[var(--color-border)] bg-white p-4">
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <SelectField
+                  label="Paciente"
+                  onChange={setPatientId}
+                  options={[{ label: "Todos", value: "" }, ...initialData.patientOptions]}
+                  value={patientId}
+                />
+                <SelectField
+                  label="Tipo"
+                  onChange={(value) => setDocumentType(value as typeof documentType)}
+                  options={[
+                    { label: "Todos", value: "all" },
+                    ...initialData.templateOptions.map((option) => ({
+                      label: option.label,
+                      value: option.documentType
+                    }))
+                  ]}
+                  value={documentType}
+                />
+                <SelectField
+                  label="Assinatura"
+                  onChange={(value) => setSignatureStatus(value as typeof signatureStatus)}
+                  options={signatureOptions}
+                  value={signatureStatus}
+                />
+                <SelectField
+                  label="Consentimento"
+                  onChange={(value) => setConsentStatus(value as typeof consentStatus)}
+                  options={consentOptions}
+                  value={consentStatus}
+                />
+              </div>
+              <div className="mt-3 flex flex-wrap items-center gap-3">
+                <ChipToggle checked={onlyCritical} label="Apenas críticos" onToggle={setOnlyCritical} />
+                <ChipToggle checked={thisWeekOnly} label="Apenas esta semana" onToggle={setThisWeekOnly} />
+                <ChipToggle checked={onlyRevoked} label="Apenas revogados" onToggle={setOnlyRevoked} />
+                {activeFilterCount > 0 ? (
                   <button
                     className="inline-flex h-8 items-center gap-1.5 rounded-full border border-[var(--color-border)] px-3 text-[11px] font-semibold leading-none whitespace-nowrap text-[var(--color-text-muted)] transition hover:bg-[var(--color-surface-raised)]"
                     onClick={clearFilters}
                     type="button"
                   >
-                    <X className="h-3.5 w-3.5" />
                     Limpar filtros
                   </button>
                 ) : null}
               </div>
+            </div>
+          )}
+        </div>
 
-              {feedback ? (
-                <div className="rounded-2xl border border-[rgba(15,76,92,0.12)] bg-[rgba(15,76,92,0.04)] px-4 py-3 text-sm text-[var(--color-primary)]">
-                  {feedback}
-                </div>
-              ) : null}
-            </>
-          }
-          title="Filtrar documentos"
-        >
-          <div className="grid gap-4 xl:grid-cols-[minmax(0,1.35fr)_repeat(4,minmax(0,1fr))]">
-            <label className="flex h-12 min-w-0 items-center gap-3 rounded-2xl border border-[var(--color-border-strong)] bg-white px-4">
-              <Search className="h-4 w-4 text-[var(--color-text-muted)]" />
-              <input
-                className="w-full bg-transparent outline-none"
-                onChange={(event) => setQuery(event.target.value)}
-                placeholder="Buscar por paciente, código ou tipo documental"
-                value={query}
-              />
-            </label>
-            <SelectField
-              label="Paciente"
-              onChange={setPatientId}
-              options={[{ label: "Todos", value: "" }, ...initialData.patientOptions]}
-              value={patientId}
-            />
-            <SelectField
-              label="Tipo"
-              onChange={(value) => setDocumentType(value as typeof documentType)}
-              options={[
-                { label: "Todos", value: "all" },
-                ...initialData.templateOptions.map((option) => ({
-                  label: option.label,
-                  value: option.documentType
-                }))
-              ]}
-              value={documentType}
-            />
-            <SelectField
-              label="Assinatura"
-              onChange={(value) => setSignatureStatus(value as typeof signatureStatus)}
-              options={signatureOptions}
-              value={signatureStatus}
-            />
-            <SelectField
-              label="Consentimento"
-              onChange={(value) => setConsentStatus(value as typeof consentStatus)}
-              options={consentOptions}
-              value={consentStatus}
-            />
+        {feedback ? (
+          <div className="rounded-2xl border border-[rgba(15,76,92,0.12)] bg-[rgba(15,76,92,0.04)] px-4 py-3 text-sm text-[var(--color-primary)]">
+            {feedback}
           </div>
-          <div className="flex gap-3 xl:hidden">
-            <Button onClick={applyFilters} type="button" variant="secondary">
-              Aplicar
-            </Button>
-            <Button onClick={() => setIsAdvancedOpen(true)} type="button" variant="ghost">
-              <SlidersHorizontal className="h-4 w-4" />
-              Extras
-            </Button>
-          </div>
-        </ToolbarPanel>
+        ) : null}
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between gap-4">
@@ -332,17 +302,17 @@ export function DocumentsPageView({ initialData }: DocumentsPageProps) {
               <div className="p-6">
                 <div className="rounded-[28px] border border-dashed border-[var(--color-border)] bg-[rgba(15,76,92,0.03)] p-6">
                   <p className="text-lg font-semibold">
-                    {activeChips.length > 0
+                    {activeFilterCount > 0
                       ? "Nenhum documento corresponde aos filtros atuais."
                       : "Ainda não há documentos gerados para este workspace."}
                   </p>
                   <p className="mt-2 text-sm leading-6 text-[var(--color-text-muted)]">
-                    {activeChips.length > 0
+                    {activeFilterCount > 0
                       ? "Ajuste a combinação de filtros ou limpe a busca para voltar a ver a fila completa."
                       : "Comece gerando o primeiro documento padrão da plataforma para deixar a operação pronta para assinatura e rastreabilidade."}
                   </p>
                   <div className="mt-4 flex flex-wrap gap-3">
-                    {activeChips.length > 0 ? (
+                    {activeFilterCount > 0 ? (
                       <Button onClick={clearFilters} type="button" variant="secondary">
                         Limpar filtros
                       </Button>
@@ -356,17 +326,18 @@ export function DocumentsPageView({ initialData }: DocumentsPageProps) {
               </div>
             ) : (
               <>
-                <div className="grid grid-cols-[minmax(0,1.4fr)_minmax(0,1.5fr)_0.9fr_1fr_1.1fr] gap-4 border-b border-[var(--color-border)] px-6 py-4 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--color-text-muted)]">
+                <div className="grid grid-cols-[minmax(0,1.3fr)_minmax(0,1.4fr)_0.9fr_1fr_0.85fr_auto] gap-4 border-b border-[var(--color-border)] px-6 py-4 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--color-text-muted)]">
                   <span>Paciente</span>
                   <span>Documento</span>
                   <span>Assinatura</span>
                   <span>Consentimento</span>
                   <span>Atualização</span>
+                  <span>Ações</span>
                 </div>
                 {items.map((item) => (
                   <div
                     className={cn(
-                      "grid cursor-pointer grid-cols-[minmax(0,1.4fr)_minmax(0,1.5fr)_0.9fr_1fr_1.1fr] gap-4 border-b border-[var(--color-border)] px-6 py-5 transition hover:bg-[rgba(15,76,92,0.03)]",
+                      "grid cursor-pointer grid-cols-[minmax(0,1.3fr)_minmax(0,1.4fr)_0.9fr_1fr_0.85fr_auto] gap-4 border-b border-[var(--color-border)] px-6 py-5 transition hover:bg-[rgba(15,76,92,0.03)]",
                       item.criticality === "critical" && "bg-[rgba(178,74,58,0.04)]"
                     )}
                     key={item.id}
@@ -423,38 +394,37 @@ export function DocumentsPageView({ initialData }: DocumentsPageProps) {
                       )}
                     </div>
 
-                    <div className="space-y-3">
-                      <div>
-                        <p className="text-sm font-semibold">{item.lastEventAtLabel}</p>
-                        <p className="mt-1 text-xs text-[var(--color-text-muted)]">{item.lastEventLabel}</p>
-                      </div>
-                      <div className="flex flex-wrap gap-2">
-                        <Button
-                          onClick={(event) => {
-                            event.preventDefault();
-                            event.stopPropagation();
-                            void handleResend(item.id);
-                          }}
-                          type="button"
-                          variant="ghost"
-                          disabled={!item.canResend || isMutating}
-                        >
-                          <Send className="h-3.5 w-3.5" />
-                          Reenviar
-                        </Button>
-                        <Button
-                          onClick={(event) => {
-                            event.preventDefault();
-                            event.stopPropagation();
-                            router.push(item.patientHref);
-                          }}
-                          type="button"
-                          variant="ghost"
-                        >
-                          <Mail className="h-3.5 w-3.5" />
-                          Paciente
-                        </Button>
-                      </div>
+                    <div>
+                      <p className="text-sm font-semibold">{item.lastEventAtLabel}</p>
+                      <p className="mt-1 text-xs text-[var(--color-text-muted)]">{item.lastEventLabel}</p>
+                    </div>
+
+                    <div className="flex flex-col gap-2">
+                      <Button
+                        onClick={(event) => {
+                          event.preventDefault();
+                          event.stopPropagation();
+                          void handleResend(item.id);
+                        }}
+                        type="button"
+                        variant="ghost"
+                        disabled={!item.canResend || isMutating}
+                      >
+                        <Send className="h-3.5 w-3.5" />
+                        Reenviar
+                      </Button>
+                      <Button
+                        onClick={(event) => {
+                          event.preventDefault();
+                          event.stopPropagation();
+                          router.push(item.patientHref);
+                        }}
+                        type="button"
+                        variant="ghost"
+                      >
+                        <Mail className="h-3.5 w-3.5" />
+                        Paciente
+                      </Button>
                     </div>
                   </div>
                 ))}
@@ -463,47 +433,6 @@ export function DocumentsPageView({ initialData }: DocumentsPageProps) {
           </CardContent>
         </Card>
       </div>
-
-      <SidePanel
-        description="Ative recortes de fila para destacar documentos da semana, críticos ou já revogados."
-        isOpen={isAdvancedOpen}
-        onClose={() => setIsAdvancedOpen(false)}
-        title="Filtros extras"
-      >
-        <div className="space-y-3">
-          <ChipToggle checked={onlyCritical} label="Apenas críticos" onToggle={setOnlyCritical} />
-          <ChipToggle checked={thisWeekOnly} label="Apenas esta semana" onToggle={setThisWeekOnly} />
-          <ChipToggle checked={onlyRevoked} label="Apenas revogados" onToggle={setOnlyRevoked} />
-          <SelectField
-            label="Prioridade"
-            onChange={(value) => setCriticality(value as typeof criticality)}
-            options={criticalityOptions}
-            value={criticality}
-          />
-        </div>
-        <div className="mt-6 flex gap-3">
-          <Button
-            onClick={() => {
-              setIsAdvancedOpen(false);
-              applyFilters();
-            }}
-            type="button"
-            variant="secondary"
-          >
-            Aplicar filtros
-          </Button>
-          <Button
-            onClick={() => {
-              clearFilters();
-              setIsAdvancedOpen(false);
-            }}
-            type="button"
-            variant="ghost"
-          >
-            Limpar
-          </Button>
-        </div>
-      </SidePanel>
 
       <SidePanel
         description="Gere documentos padrão da plataforma por paciente e contexto operacional."

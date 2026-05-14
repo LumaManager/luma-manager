@@ -11,9 +11,6 @@ export function DashboardHeader() {
           <h1 className="text-3xl font-semibold tracking-[-0.02em] text-[var(--color-text)] xl:text-4xl">
             Dashboard
           </h1>
-          <p className="mt-3 max-w-2xl text-base leading-7 text-[var(--color-text-muted)]">
-            Veja o que exige atenção hoje: atendimento próximo, backlog clínico, pendências e atalhos diretos para cada fluxo.
-          </p>
         </div>
 
         <div className="flex flex-wrap gap-3">

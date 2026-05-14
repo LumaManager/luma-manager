@@ -2,7 +2,7 @@
 import { randomUUID } from "node:crypto";
 
 import { Inject, Injectable } from "@nestjs/common";
-import { and, count, desc, eq, ilike, or, sql } from "drizzle-orm";
+import { and, count, eq, ilike, or, sql } from "drizzle-orm";
 
 import type { DrizzleClient } from "@/db/client";
 import { DATABASE_CLIENT } from "@/common/tokens";
@@ -92,7 +92,7 @@ export class PatientsRepository {
       .select()
       .from(patients)
       .where(where)
-      .orderBy(desc(patients.createdAt))
+      .orderBy(patients.fullName)
       .limit(filters.pageSize)
       .offset(offset);
 

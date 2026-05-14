@@ -204,7 +204,7 @@ export function AgendaPageView({
               <Badge tone={readOnly ? "warning" : "success"}>{nextActionLabel}</Badge>
             </>
           }
-          description="Gerencie disponibilidade, sessões e conflitos do consultório sem transformar a tela em lista solta. A semana continua como visão principal."
+          description=""
           stats={[
             {
               detail: "Esta semana.",

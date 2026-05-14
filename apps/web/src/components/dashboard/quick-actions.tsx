@@ -20,9 +20,6 @@ export function QuickActions({ actions }: QuickActionsProps) {
     <section className="space-y-4">
       <div>
         <h2 className="text-lg font-semibold">Ações rápidas</h2>
-        <p className="text-sm text-[var(--color-text-muted)]">
-          Um clique para as rotas mais importantes desta etapa do produto.
-        </p>
       </div>
 
       <div className="grid gap-4 xl:grid-cols-5">
@@ -51,14 +48,6 @@ export function QuickActions({ actions }: QuickActionsProps) {
                   </div>
                   <div>
                     <p className="text-base font-semibold">{action.label}</p>
-                    <p
-                      className={cn(
-                        "mt-2 text-sm leading-6",
-                        isPrimary ? "text-white/78" : "text-[var(--color-text-muted)]"
-                      )}
-                    >
-                      {action.description}
-                    </p>
                   </div>
                 </CardHeader>
                 <CardContent>

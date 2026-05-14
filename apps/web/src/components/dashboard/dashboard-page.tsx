@@ -98,7 +98,6 @@ export function DashboardPage({ data }: DashboardPageProps) {
             ))}
           </SummaryCard>
 
-          <SummaryCard state={data.cards.accountState} />
         </div>
       </section>
 
