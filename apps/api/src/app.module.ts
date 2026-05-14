@@ -1,11 +1,12 @@
 import { Module } from "@nestjs/common";
 import { ThrottlerModule } from "@nestjs/throttler";
 
+import { ConfigModule } from "@/common/config/config.module";
 import { EnvService } from "@/common/config/env.service";
 import { EncryptionService } from "@/common/services/encryption.service";
 import { AuditModule } from "@/modules/audit/audit.module";
+import { DatabaseModule } from "@/db/database.module";
 import { DATABASE_CLIENT } from "@/common/tokens";
-import { createDatabaseClient } from "@/db/client";
 import type { DrizzleClient } from "@/db/client";
 import { MfaRepository } from "@/modules/auth/mfa.repository";
 import { MfaService } from "@/modules/auth/mfa.service";
@@ -58,6 +59,8 @@ import { OnboardingService } from "@/modules/onboarding/onboarding.service";
 
 @Module({
   imports: [
+    ConfigModule,
+    DatabaseModule,
     ThrottlerModule.forRoot([
       {
         name:  "short",
@@ -89,17 +92,11 @@ import { OnboardingService } from "@/modules/onboarding/onboarding.service";
     OnboardingController
   ],
   providers: [
-    EnvService,
     EncryptionService,
     WorkspaceStateService,
     SupabaseService,
     AppSessionService,
     AuthService,
-    {
-      provide: DATABASE_CLIENT,
-      inject: [EnvService],
-      useFactory: (env: EnvService) => createDatabaseClient(env)
-    },
     {
       provide: "MFA_ENCRYPTION_KEY_BUFFER",
       inject: [EnvService],
