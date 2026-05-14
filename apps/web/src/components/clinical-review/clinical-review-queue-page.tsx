@@ -7,7 +7,7 @@ import type { ClinicalReviewQueueResponse } from "@terapia/contracts";
 import { Badge, Button, Card, CardContent, CardHeader, cn } from "@terapia/ui";
 import { ArrowRight, Search, Sparkles, TriangleAlert } from "lucide-react";
 
-import { OperationalHero, ToolbarPanel } from "@/components/shared/operational-surface";
+import { OperationalHero } from "@/components/shared/operational-surface";
 
 type ClinicalReviewQueuePageProps = {
   initialData: ClinicalReviewQueueResponse;
@@ -30,16 +30,18 @@ export function ClinicalReviewQueuePageView({
     initialData.filters.transcriptDisabledOnly
   );
 
-  const chips = useMemo(() => {
-    const values: string[] = [];
-    if (reviewState !== "all") values.push(`Estado: ${reviewState}`);
-    if (transcriptStatus !== "all") values.push(`Transcript: ${transcriptStatus}`);
-    if (draftStatus !== "all") values.push(`Rascunho: ${draftStatus}`);
-    if (slaState !== "all") values.push(`SLA: ${slaState}`);
-    if (failuresOnly) values.push("Só falhas");
-    if (thisWeekOnly) values.push("Desta semana");
-    if (transcriptDisabledOnly) values.push("Transcript desativado");
-    return values;
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+
+  const activeFilterCount = useMemo(() => {
+    let count = 0;
+    if (reviewState !== "all") count++;
+    if (transcriptStatus !== "all") count++;
+    if (draftStatus !== "all") count++;
+    if (slaState !== "all") count++;
+    if (failuresOnly) count++;
+    if (thisWeekOnly) count++;
+    if (transcriptDisabledOnly) count++;
+    return count;
   }, [draftStatus, failuresOnly, reviewState, slaState, thisWeekOnly, transcriptDisabledOnly, transcriptStatus]);
   const readyCount = initialData.items.filter((item) => item.reviewState === "ready_for_review").length;
   const blockedCount = initialData.items.filter((item) => item.reviewState === "blocked").length;
@@ -125,103 +127,103 @@ export function ClinicalReviewQueuePageView({
         title="Revisão Clínica"
       />
 
-      <ToolbarPanel
-        actions={
-          <>
-            <Button onClick={applyFilters} type="button" variant="secondary">
-              Aplicar
-            </Button>
-            <Button onClick={clearFilters} type="button" variant="ghost">
-              Limpar filtros
-            </Button>
-          </>
-        }
-        description="Recorte a fila por estado de revisão, transcript, rascunho e SLA sem perder visibilidade dos casos que exigem retry."
-        footer={
-          <div className="flex flex-wrap gap-3">
-            <Chip checked={failuresOnly} label="Apenas falhas" onToggle={setFailuresOnly} />
-            <Chip checked={thisWeekOnly} label="Apenas esta semana" onToggle={setThisWeekOnly} />
-            <Chip
-              checked={transcriptDisabledOnly}
-              label="Transcript desativado"
-              onToggle={setTranscriptDisabledOnly}
-            />
-            {chips.map((chip) => (
-              <Badge key={chip} tone="neutral">
-                {chip}
-              </Badge>
-            ))}
-          </div>
-        }
-        title="Filtrar e priorizar"
-      >
-        <div className="grid gap-4 xl:grid-cols-[minmax(0,1.45fr)_repeat(4,minmax(0,1fr))]">
-          <label className="flex h-12 min-w-0 items-center gap-3 rounded-2xl border border-[var(--color-border-strong)] bg-white px-4">
-            <Search className="h-4 w-4 text-[var(--color-text-muted)]" />
+      <div className="space-y-3">
+        <div className="flex gap-3">
+          <span className="flex h-11 flex-1 items-center gap-3 rounded-2xl border border-[var(--color-border-strong)] bg-white px-4">
+            <Search className="h-4 w-4 shrink-0 text-[var(--color-text-muted)]" />
             <input
-              className="w-full bg-transparent outline-none"
+              className="w-full bg-transparent text-sm outline-none"
               onChange={(event) => setSearch(event.target.value)}
+              onKeyDown={(e) => { if (e.key === "Enter") applyFilters(); }}
               placeholder="Buscar por paciente ou data da sessão"
               value={search}
             />
-          </label>
-          <SelectField
-            label="Estado"
-            onChange={(value) => setReviewState(value as typeof reviewState)}
-            options={[
-              ["all", "Todos"],
-              ["ready_for_review", "Pronto para revisar"],
-              ["in_review", "Em revisão"],
-              ["blocked", "Bloqueado"],
-              ["processing", "Processando"]
-            ]}
-            value={reviewState}
-          />
-          <SelectField
-            label="Transcript"
-            onChange={(value) => setTranscriptStatus(value as typeof transcriptStatus)}
-            options={[
-              ["all", "Todos"],
-              ["ready", "Pronto"],
-              ["processing", "Processando"],
-              ["failed", "Falha"],
-              ["disabled", "Desativado"]
-            ]}
-            value={transcriptStatus}
-          />
-          <SelectField
-            label="Rascunho"
-            onChange={(value) => setDraftStatus(value as typeof draftStatus)}
-            options={[
-              ["all", "Todos"],
-              ["ready", "Pronto"],
-              ["generating", "Gerando"],
-              ["failed", "Falha"],
-              ["disabled", "Desativado"]
-            ]}
-            value={draftStatus}
-          />
-          <SelectField
-            label="SLA"
-            onChange={(value) => setSlaState(value as typeof slaState)}
-            options={[
-              ["all", "Todos"],
-              ["within_sla", "Dentro do prazo"],
-              ["attention", "Atenção"],
-              ["overdue", "Atrasado"]
-            ]}
-            value={slaState}
-          />
-        </div>
-        <div className="flex gap-3 xl:hidden">
-          <Button onClick={applyFilters} type="button" variant="secondary">
-            Aplicar
+          </span>
+          <Button
+            className={activeFilterCount > 0 ? "border-[var(--color-primary)] text-[var(--color-primary)]" : ""}
+            onClick={() => setIsFilterOpen((v) => !v)}
+            type="button"
+            variant="secondary"
+          >
+            Filtros {activeFilterCount > 0 ? `(${activeFilterCount})` : ""}
           </Button>
-          <Button onClick={clearFilters} type="button" variant="ghost">
-            Limpar filtros
+          <Button onClick={applyFilters} type="button">
+            Buscar
           </Button>
         </div>
-      </ToolbarPanel>
+
+        {isFilterOpen && (
+          <div className="rounded-2xl border border-[var(--color-border)] bg-white p-4">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              <SelectField
+                label="Estado"
+                onChange={(value) => setReviewState(value as typeof reviewState)}
+                options={[
+                  ["all", "Todos"],
+                  ["ready_for_review", "Pronto para revisar"],
+                  ["in_review", "Em revisão"],
+                  ["blocked", "Bloqueado"],
+                  ["processing", "Processando"]
+                ]}
+                value={reviewState}
+              />
+              <SelectField
+                label="Transcript"
+                onChange={(value) => setTranscriptStatus(value as typeof transcriptStatus)}
+                options={[
+                  ["all", "Todos"],
+                  ["ready", "Pronto"],
+                  ["processing", "Processando"],
+                  ["failed", "Falha"],
+                  ["disabled", "Desativado"]
+                ]}
+                value={transcriptStatus}
+              />
+              <SelectField
+                label="Rascunho"
+                onChange={(value) => setDraftStatus(value as typeof draftStatus)}
+                options={[
+                  ["all", "Todos"],
+                  ["ready", "Pronto"],
+                  ["generating", "Gerando"],
+                  ["failed", "Falha"],
+                  ["disabled", "Desativado"]
+                ]}
+                value={draftStatus}
+              />
+              <SelectField
+                label="SLA"
+                onChange={(value) => setSlaState(value as typeof slaState)}
+                options={[
+                  ["all", "Todos"],
+                  ["within_sla", "Dentro do prazo"],
+                  ["attention", "Atenção"],
+                  ["overdue", "Atrasado"]
+                ]}
+                value={slaState}
+              />
+            </div>
+            <div className="mt-3 flex flex-wrap items-center gap-3">
+              <Chip checked={failuresOnly} label="Apenas falhas" onToggle={setFailuresOnly} />
+              <Chip checked={thisWeekOnly} label="Apenas esta semana" onToggle={setThisWeekOnly} />
+              <Chip
+                checked={transcriptDisabledOnly}
+                label="Transcript desativado"
+                onToggle={setTranscriptDisabledOnly}
+              />
+              {activeFilterCount > 0 && (
+                <button
+                  className="text-xs text-[var(--color-text-muted)] underline underline-offset-2"
+                  onClick={clearFilters}
+                  type="button"
+                >
+                  Limpar filtros
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between gap-4">
