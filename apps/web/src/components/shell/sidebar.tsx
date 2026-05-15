@@ -46,62 +46,35 @@ export function Sidebar({ bootstrap, isCollapsed, onToggle }: SidebarProps) {
     ? primaryNavigation
     : primaryNavigation.filter((item) => item.key !== "onboarding");
 
-  return (
-    <aside
-      className={cn(
-        "sticky top-0 hidden h-screen overflow-y-auto border-r border-[var(--color-border)] bg-[rgba(255,253,248,0.84)] py-4 backdrop-blur lg:flex lg:flex-col",
-        isCollapsed ? "px-2 items-center" : "px-4"
-      )}
-    >
-      {isCollapsed ? (
+  if (isCollapsed) {
+    return (
+      <aside className="sticky top-0 hidden h-screen overflow-y-auto border-r border-[var(--color-border)] bg-[rgba(255,253,248,0.84)] px-2 py-4 backdrop-blur lg:flex lg:flex-col lg:items-center">
+        {/* Toggle button */}
         <button
-          className="flex h-9 w-9 items-center justify-center rounded-xl text-[var(--color-text-muted)] transition hover:bg-[rgba(15,76,92,0.07)]"
+          className="flex h-8 w-8 items-center justify-center rounded-xl border border-[var(--color-border)] bg-white text-[var(--color-text-muted)] shadow-sm transition hover:text-[var(--color-text)]"
           onClick={onToggle}
           title="Expandir menu"
           type="button"
         >
           <ChevronRight className="h-4 w-4" />
         </button>
-      ) : (
-        <div className="relative rounded-[26px] border border-[var(--color-border)] bg-white p-3.5 shadow-[var(--shadow-panel)]">
-          <div className="text-[15px] font-semibold text-[var(--color-text)]">
-            {bootstrap.therapistProfile.fullName}
-          </div>
-          <p className="mt-1.5 text-xs font-medium text-[var(--color-text-muted)]">
-            {bootstrap.therapistProfile.crp}
-          </p>
-          <button
-            className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-xl text-[var(--color-text-muted)] transition hover:bg-[rgba(15,76,92,0.07)]"
-            onClick={onToggle}
-            title="Recolher menu"
-            type="button"
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </button>
-        </div>
-      )}
 
-      <nav
-        className={cn(
-          "flex-1 space-y-1.5",
-          isCollapsed ? "mt-4 flex flex-col items-center w-full" : "mt-6"
-        )}
-      >
-        {navigationItems.map((item) => {
-          const Icon = navigationIcons[item.key];
-          const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
-          const isBlocked = activationMode && !activationUnlockedKeys.has(item.key);
-          const badgeValue =
-            isBlocked || item.key === "onboarding" ? 0 : getBadgeForItem(bootstrap, item.key);
+        {/* Nav — flex-none so icons group at top */}
+        <nav className="mt-4 flex flex-none flex-col items-center space-y-1 w-full">
+          {navigationItems.map((item) => {
+            const Icon = navigationIcons[item.key];
+            const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
+            const isBlocked = activationMode && !activationUnlockedKeys.has(item.key);
+            const badgeValue =
+              isBlocked || item.key === "onboarding" ? 0 : getBadgeForItem(bootstrap, item.key);
 
-          if (isCollapsed) {
             return (
               <Link
                 key={item.key}
                 className={cn(
-                  "relative flex h-10 w-10 items-center justify-center rounded-2xl border transition",
+                  "relative flex h-8 w-8 items-center justify-center rounded-2xl border transition",
                   isActive && !isBlocked
-                    ? "border border-[rgba(9,60,73,0.28)] bg-[var(--color-primary)] text-white shadow-[0_14px_32px_rgba(15,76,92,0.26)]"
+                    ? "border-[rgba(9,60,73,0.28)] bg-[var(--color-primary)] text-white shadow-[0_8px_20px_rgba(15,76,92,0.22)]"
                     : isActive && isBlocked
                       ? "border-[rgba(198,122,69,0.24)] bg-[rgba(198,122,69,0.12)] text-[var(--color-text)]"
                       : isBlocked
@@ -112,9 +85,9 @@ export function Sidebar({ bootstrap, isCollapsed, onToggle }: SidebarProps) {
                 title={item.label}
               >
                 {isBlocked ? (
-                  <Lock className="h-4 w-4" />
+                  <Lock className="h-3.5 w-3.5" />
                 ) : (
-                  <Icon className="h-4 w-4" />
+                  <Icon className="h-3.5 w-3.5" />
                 )}
                 {badgeValue > 0 ? (
                   <span
@@ -130,7 +103,50 @@ export function Sidebar({ bootstrap, isCollapsed, onToggle }: SidebarProps) {
                 ) : null}
               </Link>
             );
-          }
+          })}
+        </nav>
+
+        {/* Spacer pushes avatar to bottom */}
+        <div className="flex-1" />
+
+        <Avatar
+          className="h-9 w-9 rounded-[16px]"
+          name={bootstrap.therapistProfile.fullName}
+        />
+      </aside>
+    );
+  }
+
+  return (
+    <aside className="sticky top-0 hidden h-screen overflow-y-auto border-r border-[var(--color-border)] bg-[rgba(255,253,248,0.84)] px-4 py-4 backdrop-blur lg:flex lg:flex-col">
+      {/* Profile card — no toggle inside */}
+      <div className="rounded-[26px] border border-[var(--color-border)] bg-white p-3.5 shadow-[var(--shadow-panel)]">
+        <div className="text-[15px] font-semibold text-[var(--color-text)]">
+          {bootstrap.therapistProfile.fullName}
+        </div>
+        <p className="mt-1.5 text-xs font-medium text-[var(--color-text-muted)]">
+          {bootstrap.therapistProfile.crp}
+        </p>
+      </div>
+
+      {/* Toggle row — dedicated row below profile card */}
+      <button
+        className="mt-2 flex w-full items-center justify-end gap-1 px-1 py-1 text-[11px] font-medium text-[var(--color-text-muted)] transition hover:text-[var(--color-text)]"
+        onClick={onToggle}
+        type="button"
+      >
+        <ChevronLeft className="h-3.5 w-3.5" />
+        Recolher
+      </button>
+
+      {/* Nav */}
+      <nav className="mt-1 flex-1 space-y-1.5">
+        {navigationItems.map((item) => {
+          const Icon = navigationIcons[item.key];
+          const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
+          const isBlocked = activationMode && !activationUnlockedKeys.has(item.key);
+          const badgeValue =
+            isBlocked || item.key === "onboarding" ? 0 : getBadgeForItem(bootstrap, item.key);
 
           return (
             <Link
@@ -147,18 +163,8 @@ export function Sidebar({ bootstrap, isCollapsed, onToggle }: SidebarProps) {
               )}
               href={item.href}
             >
-              <span
-                className={cn(
-                  "flex items-center gap-3",
-                  isActive && !isBlocked ? "text-white" : "text-inherit"
-                )}
-              >
-                <Icon
-                  className={cn(
-                    "h-4 w-4",
-                    isActive && !isBlocked ? "text-white" : "text-inherit"
-                  )}
-                />
+              <span className={cn("flex items-center gap-3", isActive && !isBlocked ? "text-white" : "text-inherit")}>
+                <Icon className={cn("h-4 w-4", isActive && !isBlocked ? "text-white" : "text-inherit")} />
                 {item.label}
               </span>
               {isBlocked ? (
@@ -185,29 +191,21 @@ export function Sidebar({ bootstrap, isCollapsed, onToggle }: SidebarProps) {
         })}
       </nav>
 
-      {isCollapsed ? (
-        <div className="mt-5">
-          <Avatar
-            className="h-10 w-10 rounded-[18px]"
-            name={bootstrap.therapistProfile.fullName}
-          />
-        </div>
-      ) : (
-        <div className="mt-5 rounded-[26px] border border-[var(--color-border)] bg-white p-3.5 shadow-[var(--shadow-panel)]">
-          <div className="flex items-center gap-3">
-            <Avatar className="h-10 w-10 rounded-[18px]" name={bootstrap.therapistProfile.fullName} />
-            <div>
-              <p className="text-sm font-semibold">{bootstrap.therapistProfile.fullName}</p>
-              <p className="text-xs text-[var(--color-text-muted)]">{bootstrap.therapistProfile.roleLabel}</p>
-            </div>
+      {/* User card */}
+      <div className="mt-5 rounded-[26px] border border-[var(--color-border)] bg-white p-3.5 shadow-[var(--shadow-panel)]">
+        <div className="flex items-center gap-3">
+          <Avatar className="h-10 w-10 rounded-[18px]" name={bootstrap.therapistProfile.fullName} />
+          <div>
+            <p className="text-sm font-semibold">{bootstrap.therapistProfile.fullName}</p>
+            <p className="text-xs text-[var(--color-text-muted)]">{bootstrap.therapistProfile.roleLabel}</p>
           </div>
-          {activationMode && (
-            <div className="mt-3 text-xs leading-5 text-[var(--color-text-muted)]">
-              Áreas operacionais liberam após a ativação da conta.
-            </div>
-          )}
         </div>
-      )}
+        {activationMode && (
+          <div className="mt-3 text-xs leading-5 text-[var(--color-text-muted)]">
+            Áreas operacionais liberam após a ativação da conta.
+          </div>
+        )}
+      </div>
     </aside>
   );
 }
