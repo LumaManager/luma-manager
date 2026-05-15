@@ -2249,3 +2249,79 @@ export type EbookLeadResponse = z.infer<typeof ebookLeadResponseSchema>;
 export type InternalEbookLeadEntry = z.infer<typeof internalEbookLeadEntrySchema>;
 export type InternalEbookLeadsResponse = z.infer<typeof internalEbookLeadsResponseSchema>;
 export type TherapistProfile = z.infer<typeof therapistProfileSchema>;
+
+// ---------------------------------------------------------------------------
+// SCHEDULING TOKENS
+// ---------------------------------------------------------------------------
+
+export const schedulingTokenStatusSchema = z.enum(["pending", "used", "expired"]);
+export type SchedulingTokenStatus = z.infer<typeof schedulingTokenStatusSchema>;
+
+export const schedulingSlotSchema = z.object({
+  date: z.string(),
+  dayLabel: z.string(),
+  startTime: z.string(),
+  endTime: z.string()
+});
+export type SchedulingSlot = z.infer<typeof schedulingSlotSchema>;
+
+export const schedulingTokenItemSchema = z.object({
+  patientId: z.string(),
+  patientName: z.string(),
+  phone: z.string(),
+  token: z.string(),
+  bookingUrl: z.string(),
+  whatsappUrl: z.string(),
+  status: schedulingTokenStatusSchema
+});
+export type SchedulingTokenItem = z.infer<typeof schedulingTokenItemSchema>;
+
+export const generateWeekTokensRequestSchema = z.object({
+  weekStart: z.string()
+});
+export type GenerateWeekTokensRequest = z.infer<typeof generateWeekTokensRequestSchema>;
+
+export const generateWeekTokensResponseSchema = z.object({
+  weekStart: z.string(),
+  weekEnd: z.string(),
+  tokens: z.array(schedulingTokenItemSchema)
+});
+export type GenerateWeekTokensResponse = z.infer<typeof generateWeekTokensResponseSchema>;
+
+export const publicSchedulingPageSchema = z.object({
+  therapistName: z.string(),
+  patientFirstName: z.string(),
+  weekStart: z.string(),
+  weekEnd: z.string(),
+  weekLabel: z.string(),
+  slots: z.array(schedulingSlotSchema)
+});
+export type PublicSchedulingPage = z.infer<typeof publicSchedulingPageSchema>;
+
+export const publicSchedulingResponseSchema = z.discriminatedUnion("state", [
+  z.object({ state: z.literal("available"), data: publicSchedulingPageSchema }),
+  z.object({ state: z.literal("used") }),
+  z.object({ state: z.literal("expired") }),
+  z.object({ state: z.literal("not_found") })
+]);
+export type PublicSchedulingResponse = z.infer<typeof publicSchedulingResponseSchema>;
+
+export const bookSlotRequestSchema = z.object({
+  date: z.string(),
+  startTime: z.string()
+});
+export type BookSlotRequest = z.infer<typeof bookSlotRequestSchema>;
+
+export const bookSlotResponseSchema = z.discriminatedUnion("success", [
+  z.object({
+    success: z.literal(true),
+    confirmedAt: z.string(),
+    therapistName: z.string()
+  }),
+  z.object({
+    success: z.literal(false),
+    error: z.enum(["slot_taken", "token_invalid"]),
+    message: z.string()
+  })
+]);
+export type BookSlotResponse = z.infer<typeof bookSlotResponseSchema>;
