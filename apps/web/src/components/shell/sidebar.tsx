@@ -94,8 +94,8 @@ export function Sidebar({ bootstrap, isCollapsed, onToggle }: SidebarProps) {
                     className={cn(
                       "absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[9px] font-semibold leading-none",
                       isActive
-                        ? "bg-white text-[var(--color-primary)]"
-                        : "bg-[rgba(15,76,92,0.12)] text-[var(--color-primary)]"
+                        ? "bg-white/20 text-white"
+                        : "bg-[rgba(0,0,0,0.08)] text-[var(--color-text-muted)]"
                     )}
                   >
                     {badgeValue}
@@ -180,7 +180,7 @@ export function Sidebar({ bootstrap, isCollapsed, onToggle }: SidebarProps) {
                     "inline-flex h-6 min-w-6 items-center justify-center rounded-full px-2 text-[11px] font-semibold leading-none whitespace-nowrap",
                     isActive
                       ? "bg-white/18 text-white"
-                      : "bg-[rgba(15,76,92,0.12)] text-[var(--color-primary)]"
+                      : "bg-[rgba(0,0,0,0.07)] text-[var(--color-text-muted)]"
                   )}
                 >
                   {badgeValue}

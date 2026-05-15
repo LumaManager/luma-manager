@@ -122,27 +122,7 @@ export function SettingsPageView({ activeSection, initialData }: SettingsPagePro
           </>
         }
         description=""
-        stats={[
-          {
-            detail: "Itens que pedem correção agora.",
-            label: "Remediações",
-            tone: data.remediationItems.length > 0 ? "warning" : "success",
-            value: String(data.remediationItems.length)
-          },
-          {
-            detail: "Bloqueiam operação ou segurança até ajuste.",
-            label: "Bloqueantes",
-            tone: blockingRemediationCount > 0 ? "critical" : "success",
-            value: String(blockingRemediationCount)
-          },
-          {
-            detail: data.lastSensitiveChangeLabel,
-            label: "Auditoria",
-            tone: "neutral",
-            value: hasPendingChanges ? "Pendente" : "Em dia"
-          }
-        ]}
-        title="Configurações"
+          title="Configurações"
       />
 
       {data.remediationItems.length > 0 ? (
@@ -342,25 +322,6 @@ function SecuritySection({
           <InfoBlock label="MFA" value={security.mfaStatusLabel} />
           <InfoBlock label="Códigos de recuperação" value={security.recoveryCodesLabel} />
           <InfoBlock label="Último evento crítico" value={security.lastCriticalEventLabel} />
-          <ToggleCard
-            label="Solicitar rotação de senha"
-            description="Marca a conta para revisar credenciais no próximo ciclo de segurança."
-            value={security.passwordRotationRequested}
-            onChange={(value) => setSecurity((current) => ({ ...current, passwordRotationRequested: value }))}
-          />
-          <ToggleCard
-            label="Revogar outras sessões"
-            description="Revoga dispositivos recentes e preserva apenas a sessão atual."
-            value={security.revokeOtherSessions}
-            onChange={(value) => setSecurity((current) => ({ ...current, revokeOtherSessions: value }))}
-          />
-          <ToggleCard
-            className="md:col-span-2"
-            label="Rotacionar códigos de recuperação"
-            description="Gera novo conjunto de códigos e invalida o anterior."
-            value={security.rotateRecoveryCodes}
-            onChange={(value) => setSecurity((current) => ({ ...current, rotateRecoveryCodes: value }))}
-          />
         </CardContent>
       </Card>
 
@@ -419,25 +380,25 @@ function PoliciesSection({
           }
         />
         <NumericField label="Janela de cancelamento (h)" value={policies.cancelWindowHours} onChange={(value) => setPolicies((current) => ({ ...current, cancelWindowHours: value }))} />
-        <ToggleCard
+        <ToggleSwitch
           label="Paciente pode agendar sozinho"
           description="Define o default do fluxo futuro de autoagendamento."
           value={policies.allowSelfScheduling}
           onChange={(value) => setPolicies((current) => ({ ...current, allowSelfScheduling: value }))}
         />
-        <ToggleCard
+        <ToggleSwitch
           label="Teleatendimento habilitado"
           description="Não altera retrospectivamente sessões já concluídas."
           value={policies.telehealthEnabled}
           onChange={(value) => setPolicies((current) => ({ ...current, telehealthEnabled: value }))}
         />
-        <ToggleCard
+        <ToggleSwitch
           label="Transcript habilitado por padrão"
           description="Só vale quando houver capability ativa e consentimento válido."
           value={policies.transcriptDefaultEnabled}
           onChange={(value) => setPolicies((current) => ({ ...current, transcriptDefaultEnabled: value }))}
         />
-        <ToggleCard
+        <ToggleSwitch
           label="Gerar cobrança após sessão"
           description="Default futuro do financeiro, sem reescrever cobranças antigas."
           value={policies.autoChargeAfterSession}
@@ -468,13 +429,13 @@ function NotificationsSection({
           <p className="text-lg font-semibold">Canais</p>
         </CardHeader>
         <CardContent className="grid gap-4 md:grid-cols-2">
-          <ToggleCard
+          <ToggleSwitch
             label="Canal in-app"
             description="Alertas dentro do shell do terapeuta."
             value={notifications.inAppEnabled}
             onChange={(value) => setNotifications((current) => ({ ...current, inAppEnabled: value }))}
           />
-          <ToggleCard
+          <ToggleSwitch
             label="Canal e-mail"
             description="Resumo operacional enviado ao endereco profissional."
             value={notifications.emailEnabled}
@@ -681,7 +642,7 @@ function SelectField({
   );
 }
 
-function ToggleCard({
+function ToggleSwitch({
   className,
   description,
   label,
@@ -696,21 +657,29 @@ function ToggleCard({
 }) {
   return (
     <button
+      aria-checked={value}
       className={cn(
-        "rounded-3xl border p-4 text-left transition",
-        value
-          ? "border-[var(--color-primary)] bg-[rgba(15,76,92,0.06)]"
-          : "border-[var(--color-border)] bg-white",
+        "flex w-full items-center justify-between gap-4 rounded-2xl border bg-white p-4 text-left transition",
+        value ? "border-[rgba(15,76,92,0.2)] bg-[rgba(15,76,92,0.03)]" : "border-[var(--color-border)]",
         className
       )}
       onClick={() => onChange(!value)}
+      role="switch"
       type="button"
     >
-      <div className="flex items-center justify-between gap-4">
-        <p className="font-semibold">{label}</p>
-        <Badge tone={value ? "success" : "neutral"}>{value ? "Ativo" : "Desligado"}</Badge>
+      <div className="min-w-0">
+        <p className="font-semibold text-[var(--color-text)]">{label}</p>
+        <p className="mt-1 text-sm leading-5 text-[var(--color-text-muted)]">{description}</p>
       </div>
-      <p className="mt-2 text-sm leading-6 text-[var(--color-text-muted)]">{description}</p>
+      <div className={cn(
+        "relative h-6 w-11 shrink-0 rounded-full transition-colors",
+        value ? "bg-[var(--color-primary)]" : "bg-[rgba(0,0,0,0.15)]"
+      )}>
+        <div className={cn(
+          "absolute top-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition-transform",
+          value ? "translate-x-5" : "translate-x-0.5"
+        )} />
+      </div>
     </button>
   );
 }

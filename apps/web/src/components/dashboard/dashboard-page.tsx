@@ -2,7 +2,6 @@ import type { TherapistDashboard } from "@terapia/contracts";
 
 import { DashboardHeader } from "./dashboard-header";
 import { ActionItemsList, AgendaList, RecentActivityList } from "./operational-list";
-import { QuickActions } from "./quick-actions";
 import { SummaryCard } from "./summary-card";
 
 type DashboardPageProps = {
@@ -12,9 +11,7 @@ type DashboardPageProps = {
 export function DashboardPage({ data }: DashboardPageProps) {
   return (
     <div className="space-y-8">
-      <DashboardHeader />
-
-      <QuickActions actions={data.quickActions} />
+      <DashboardHeader quickActions={data.quickActions} />
 
       <section className="space-y-4">
         <div className="grid gap-4 2xl:grid-cols-3">
