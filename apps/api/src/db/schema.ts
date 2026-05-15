@@ -459,12 +459,13 @@ export const schedulingTokens = pgTable(
     therapistId: text("therapist_id").notNull().references(() => therapists.id),
     patientId: text("patient_id").notNull().references(() => patients.id),
     token: text("token").notNull().unique(),
-    weekStart: text("week_start").notNull(),
-    weekEnd: text("week_end").notNull(),
-    status: text("status").notNull().default("pending"),
+    weekStart: text("week_start").notNull(), // "YYYY-MM-DD"
+    weekEnd: text("week_end").notNull(), // "YYYY-MM-DD"
+    status: text("status").notNull().default("pending"), // pending | used | expired
     appointmentId: text("appointment_id").references(() => appointments.id),
     expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
     usedAt: timestamp("used_at", { withTimezone: true }),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow()
   },
   (table) => ({
