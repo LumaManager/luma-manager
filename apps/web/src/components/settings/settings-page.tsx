@@ -179,16 +179,16 @@ export function SettingsPageView({ activeSection, initialData }: SettingsPagePro
         </Card>
       ) : null}
 
-      <div className="grid gap-4 xl:grid-cols-[280px_minmax(0,1fr)_320px]">
-        <div className="rounded-3xl border border-[var(--color-border)] bg-[rgba(15,76,92,0.03)] p-4">
-          <p className="mb-3 px-2 pt-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--color-text-muted)]">
+      <div className="grid gap-4 xl:grid-cols-[260px_minmax(0,1fr)]">
+        <div className="rounded-3xl border border-[var(--color-border)] bg-[rgba(15,76,92,0.03)] p-3">
+          <p className="mb-2 px-2 pt-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--color-text-muted)]">
             Seções
           </p>
-          <nav className="space-y-1">
+          <nav className="space-y-0.5">
             {data.sections.map((section) => (
               <Link
                 className={cn(
-                  "flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium transition",
+                  "flex items-center gap-2.5 rounded-2xl px-3 py-2.5 text-sm font-medium transition",
                   section.key === activeSection
                     ? "bg-[var(--color-primary)] text-white"
                     : "text-[var(--color-text)] hover:bg-[rgba(15,76,92,0.07)]"
@@ -240,33 +240,6 @@ export function SettingsPageView({ activeSection, initialData }: SettingsPagePro
           </Card>
         </div>
 
-        <div className="space-y-4">
-          <Card>
-            <CardHeader>
-              <p className="text-lg font-semibold">Auditoria</p>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {data.lastSensitiveChanges.map((item) => (
-                <div
-                  className="rounded-3xl border border-[var(--color-border)] bg-white p-4"
-                  key={item.id}
-                >
-                  <div className="flex items-center justify-between gap-3">
-                    <p className="font-semibold">{item.title}</p>
-                    <Badge tone={item.tone}>{item.actorLabel}</Badge>
-                  </div>
-                  <p className="mt-2 text-sm leading-6 text-[var(--color-text-muted)]">
-                    {item.description}
-                  </p>
-                  <p className="mt-2 text-xs uppercase tracking-[0.12em] text-[var(--color-text-muted)]">
-                    {item.occurredAtLabel}
-                  </p>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
-
-        </div>
       </div>
     </div>
   );

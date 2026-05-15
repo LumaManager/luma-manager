@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import type { AppShellBootstrap } from "@terapia/contracts";
 import { Monitor } from "lucide-react";
@@ -19,6 +20,19 @@ type AppShellProps = {
 
 export function AppShell({ bootstrap, children }: AppShellProps) {
   const pathname = usePathname();
+  const [isCollapsed, setIsCollapsed] = useState(false);
+
+  useEffect(() => {
+    if (localStorage.getItem("sidebar-collapsed") === "true") setIsCollapsed(true);
+  }, []);
+
+  function toggleSidebar() {
+    setIsCollapsed((prev) => {
+      localStorage.setItem("sidebar-collapsed", String(!prev));
+      return !prev;
+    });
+  }
+
   const activationMode = bootstrap.tenant.status !== "ready_for_operations";
   const blockedAreaLabel = getBreadcrumbs(pathname).at(-1) ?? "Área";
   const canAccessRoute =
@@ -54,8 +68,8 @@ export function AppShell({ bootstrap, children }: AppShellProps) {
         </Card>
       </div>
 
-      <div className="hidden min-h-screen lg:grid lg:grid-cols-[264px_minmax(0,1fr)]">
-        <Sidebar bootstrap={bootstrap} />
+      <div className={`hidden min-h-screen lg:grid ${isCollapsed ? "lg:grid-cols-[72px_minmax(0,1fr)]" : "lg:grid-cols-[264px_minmax(0,1fr)]"}`}>
+        <Sidebar bootstrap={bootstrap} isCollapsed={isCollapsed} onToggle={toggleSidebar} />
         <div className="min-w-0">
           <Topbar bootstrap={bootstrap} />
           <GlobalAlertBand bootstrap={bootstrap} />
