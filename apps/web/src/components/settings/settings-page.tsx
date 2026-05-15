@@ -58,8 +58,6 @@ export function SettingsPageView({ activeSection, initialData }: SettingsPagePro
         return JSON.stringify(notifications) !== JSON.stringify(data.notifications);
     }
   }, [activeSection, data, notifications, policies, practice, profile, security]);
-  const blockingRemediationCount = data.remediationItems.filter((item) => item.blocking).length;
-
   async function saveActiveSection() {
     setFeedback(null);
 
