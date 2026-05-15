@@ -66,7 +66,12 @@ export function PatientDetailPageView({ patient }: PatientDetailPageProps) {
             value: patient.sessionStartLabel
           },
           {
-            detail: "Sinal documental atual do vínculo.",
+            detail:
+              patient.documentsState === "critical"
+                ? "Documentos pendentes de assinatura ou envio."
+                : patient.documentsState === "pending"
+                  ? "Documentos aguardando confirmação."
+                  : "Documentação em dia.",
             label: "Documentos",
             tone:
               patient.documentsState === "critical"
@@ -76,13 +81,18 @@ export function PatientDetailPageView({ patient }: PatientDetailPageProps) {
                   : "success",
             value:
               patient.documentsState === "critical"
-                ? "Crítico"
+                ? "Incompleto"
                 : patient.documentsState === "pending"
                   ? "Pendente"
                   : "OK"
           },
           {
-            detail: "Sinal financeiro atual do vínculo.",
+            detail:
+              patient.financialState === "overdue"
+                ? "Cobranças vencidas sem pagamento."
+                : patient.financialState === "open"
+                  ? "Cobranças aguardando pagamento."
+                  : "Financeiro em dia.",
             label: "Financeiro",
             tone:
               patient.financialState === "overdue"
