@@ -72,7 +72,7 @@ export function Sidebar({ bootstrap, isCollapsed, onToggle }: SidebarProps) {
               <Link
                 key={item.key}
                 className={cn(
-                  "relative flex h-8 w-8 items-center justify-center rounded-2xl border transition",
+                  "relative flex h-10 w-10 items-center justify-center rounded-2xl border transition",
                   isActive && !isBlocked
                     ? "border-[rgba(9,60,73,0.28)] bg-[var(--color-primary)] text-white shadow-[0_8px_20px_rgba(15,76,92,0.22)]"
                     : isActive && isBlocked
@@ -85,9 +85,9 @@ export function Sidebar({ bootstrap, isCollapsed, onToggle }: SidebarProps) {
                 title={item.label}
               >
                 {isBlocked ? (
-                  <Lock className="h-3.5 w-3.5" />
+                  <Lock className="h-4 w-4" />
                 ) : (
-                  <Icon className="h-3.5 w-3.5" />
+                  <Icon className="h-4 w-4" />
                 )}
                 {badgeValue > 0 ? (
                   <span
@@ -95,7 +95,7 @@ export function Sidebar({ bootstrap, isCollapsed, onToggle }: SidebarProps) {
                       "absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[9px] font-semibold leading-none",
                       isActive
                         ? "bg-white text-[var(--color-primary)]"
-                        : "bg-[var(--color-primary)] text-white"
+                        : "bg-[rgba(15,76,92,0.12)] text-[var(--color-primary)]"
                     )}
                   >
                     {badgeValue}
