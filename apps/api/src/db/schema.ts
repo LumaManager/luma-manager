@@ -1,5 +1,5 @@
 // apps/api/src/db/schema.ts
-import { boolean, integer, pgTable, text, timestamp } from "drizzle-orm/pg-core";
+import { boolean, integer, pgTable, text, timestamp, uniqueIndex } from "drizzle-orm/pg-core";
 
 // ---------------------------------------------------------------------------
 // TENANTS
@@ -446,3 +446,32 @@ export const auditLogs = pgTable("audit_logs", {
   metadata:    text("metadata"),              // JSON serializado
   createdAt:   timestamp("created_at", { withTimezone: true }).notNull().defaultNow()
 });
+
+// ---------------------------------------------------------------------------
+// SCHEDULING TOKENS (no-auth patient booking links)
+// ---------------------------------------------------------------------------
+
+export const schedulingTokens = pgTable(
+  "scheduling_tokens",
+  {
+    id: text("id").primaryKey(),
+    tenantId: text("tenant_id").notNull().references(() => tenants.id),
+    therapistId: text("therapist_id").notNull().references(() => therapists.id),
+    patientId: text("patient_id").notNull().references(() => patients.id),
+    token: text("token").notNull().unique(),
+    weekStart: text("week_start").notNull(),
+    weekEnd: text("week_end").notNull(),
+    status: text("status").notNull().default("pending"),
+    appointmentId: text("appointment_id").references(() => appointments.id),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    usedAt: timestamp("used_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow()
+  },
+  (table) => ({
+    therapistPatientWeekIdx: uniqueIndex("scheduling_tokens_therapist_patient_week_idx").on(
+      table.therapistId,
+      table.patientId,
+      table.weekStart
+    )
+  })
+);
