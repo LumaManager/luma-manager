@@ -38,7 +38,6 @@ export function BookingPage({ token }: { token: string }) {
 
   async function handleBook(slot: SchedulingSlot) {
     if (state.type !== "confirming") return;
-    const currentData = state.data;
     try {
       const res = await fetch(`/api/public/scheduling/${token}/book`, {
         method: "POST",
