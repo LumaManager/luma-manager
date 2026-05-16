@@ -6,6 +6,7 @@ export const metadata: Metadata = {
   robots: "noindex"
 };
 
-export default function AgendarPage({ params }: { params: { token: string } }) {
-  return <BookingPage token={params.token} />;
+export default async function AgendarPage({ params }: { params: Promise<{ token: string }> }) {
+  const { token } = await params;
+  return <BookingPage token={token} />;
 }

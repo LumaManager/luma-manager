@@ -293,7 +293,7 @@ export class SchedulingService {
       date: input.date,
       startTime: input.startTime,
       durationMinutes: policies.sessionDurationMinutes,
-      modality: "presential"
+      modality: "in_person"
     });
 
     await this.repo.markTokenUsed(tokenRow.id, appointmentId);
