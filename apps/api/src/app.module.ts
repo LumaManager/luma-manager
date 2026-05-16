@@ -56,6 +56,9 @@ import { SettingsController } from "@/modules/settings/settings.controller";
 import { OnboardingController } from "@/modules/onboarding/onboarding.controller";
 import { OnboardingRepository } from "@/modules/onboarding/onboarding.repository";
 import { OnboardingService } from "@/modules/onboarding/onboarding.service";
+import { SchedulingController } from "@/modules/scheduling/scheduling.controller";
+import { SchedulingRepository } from "@/modules/scheduling/scheduling.repository";
+import { SchedulingService } from "@/modules/scheduling/scheduling.service";
 
 @Module({
   imports: [
@@ -89,7 +92,8 @@ import { OnboardingService } from "@/modules/onboarding/onboarding.service";
     PatientsController,
     PortalController,
     WaitlistController,
-    OnboardingController
+    OnboardingController,
+    SchedulingController
   ],
   providers: [
     EncryptionService,
@@ -136,7 +140,9 @@ import { OnboardingService } from "@/modules/onboarding/onboarding.service";
     WaitlistService,
     EmailService,
     OnboardingRepository,
-    OnboardingService
+    OnboardingService,
+    SchedulingRepository,
+    SchedulingService
   ]
 })
 export class AppModule {}
