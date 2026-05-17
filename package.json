@@ -17,7 +17,8 @@
     "format": "prettier --check .",
     "format:write": "prettier --write .",
     "lint": "npm run lint --workspaces --if-present",
-    "typecheck": "npm run typecheck --workspaces --if-present"
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "setup:hooks": "cp scripts/hooks/pre-commit .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit"
   },
   "devDependencies": {
     "@eslint/js": "^9.24.0",
