@@ -158,21 +158,6 @@ export default function PoliticaDePrivacidadePage() {
                 <td>Art. 11, II, a LGPD (tutela da saúde por profissional de saúde)</td>
               </tr>
               <tr>
-                <td>Áudio da sessão (quando ativado)</td>
-                <td>Geração de transcrição descartável para rascunho de prontuário</td>
-                <td>Art. 11, I LGPD (consentimento destacado) + art. 11, II, a</td>
-              </tr>
-              <tr>
-                <td>Transcrição temporária</td>
-                <td>Base para rascunho de prontuário — descartada após geração</td>
-                <td>Art. 11, I + art. 11, II, a LGPD</td>
-              </tr>
-              <tr>
-                <td>Rascunho gerado por IA</td>
-                <td>Apoio à escrita do prontuário, com revisão humana obrigatória</td>
-                <td>Art. 11, II, a LGPD + consentimento específico para IA</td>
-              </tr>
-              <tr>
                 <td>Dados de pagamento (portal do paciente)</td>
                 <td>Cobrança da sessão</td>
                 <td>Art. 7º, V + art. 7º, II LGPD</td>
@@ -213,15 +198,7 @@ export default function PoliticaDePrivacidadePage() {
             </tbody>
           </table>
 
-          <h2>5. Consentimento específico para dado sensível</h2>
-          <p>
-            Para gravação de áudio, transcrição e uso de IA, obtemos{" "}
-            <strong>consentimento destacado e específico</strong> (art. 11, I LGPD), separado do
-            aceite geral dos termos. O consentimento pode ser revogado a qualquer tempo (art. 8º,
-            §5º LGPD) com efeitos imediatos.
-          </p>
-
-          <h2>6. Tempo de guarda</h2>
+          <h2>5. Tempo de guarda</h2>
           <table>
             <thead>
               <tr>
@@ -233,18 +210,6 @@ export default function PoliticaDePrivacidadePage() {
               <tr>
                 <td>Prontuário clínico</td>
                 <td>5 anos após a última sessão (Resolução CFP nº 6/2019)</td>
-              </tr>
-              <tr>
-                <td>Áudio bruto da sessão</td>
-                <td>Descartado após geração da transcrição (horas)</td>
-              </tr>
-              <tr>
-                <td>Transcrição temporária</td>
-                <td>Descartada após geração do rascunho pela IA (horas)</td>
-              </tr>
-              <tr>
-                <td>Rascunho de IA não aprovado</td>
-                <td>30 dias ou até decisão do terapeuta, o que ocorrer primeiro</td>
               </tr>
               <tr>
                 <td>Dados de cobrança</td>
@@ -265,7 +230,7 @@ export default function PoliticaDePrivacidadePage() {
             </tbody>
           </table>
 
-          <h2>7. Com quem compartilhamos dados</h2>
+          <h2>6. Com quem compartilhamos dados</h2>
           <p>
             Compartilhamos dados apenas com sub-operadores necessários à operação do serviço, sob
             contrato com cláusulas de confidencialidade, segurança, proibição de uso para treino
@@ -302,34 +267,10 @@ export default function PoliticaDePrivacidadePage() {
                 <td>Notificações e confirmações (sem conteúdo clínico)</td>
               </tr>
               <tr>
-                <td>Analytics</td>
+                <td>Analytics do site</td>
                 <td>Google Analytics 4</td>
                 <td>EUA</td>
-                <td>Métricas agregadas de uso (sem conteúdo clínico)</td>
-              </tr>
-              <tr>
-                <td>Monitoramento de erro</td>
-                <td>Sentry</td>
-                <td>EUA</td>
-                <td>Diagnóstico de bugs, com filtro de PII habilitado</td>
-              </tr>
-              <tr>
-                <td>Videoconferência</td>
-                <td>Daily.co</td>
-                <td>EUA</td>
-                <td>Sessão de teleatendimento; áudio descartado após transcrição</td>
-              </tr>
-              <tr>
-                <td>Transcrição (quando ativado)</td>
-                <td>AssemblyAI</td>
-                <td>EUA</td>
-                <td>Transcrição temporária com diarização — zero retention contratual</td>
-              </tr>
-              <tr>
-                <td>IA generativa (quando ativado)</td>
-                <td>Anthropic (Claude)</td>
-                <td>EUA</td>
-                <td>Rascunho de prontuário — zero retention + opt-out de treino contratual</td>
+                <td>Métricas agregadas de acesso ao site público (sem conteúdo clínico)</td>
               </tr>
             </tbody>
           </table>
@@ -347,7 +288,7 @@ export default function PoliticaDePrivacidadePage() {
             estrito limite da solicitação (art. 7º, VI e art. 11, II, e LGPD).
           </p>
 
-          <h2>8. Transferência internacional</h2>
+          <h2>7. Transferência internacional</h2>
           <p>
             Alguns sub-operadores (transcrição, LLM, email) estão fora do Brasil. Adotamos as{" "}
             <strong>Cláusulas Padrão Contratuais da ANPD</strong> (Resolução CD/ANPD nº 19/2024) e
@@ -355,7 +296,7 @@ export default function PoliticaDePrivacidadePage() {
             conteúdo clínico além do estritamente necessário.
           </p>
 
-          <h2>9. Segurança da informação</h2>
+          <h2>8. Segurança da informação</h2>
           <p>Aplicamos medidas técnicas e organizacionais proporcionais ao risco:</p>
           <ul>
             <li>Criptografia em trânsito (TLS) e em repouso</li>
@@ -367,7 +308,7 @@ export default function PoliticaDePrivacidadePage() {
             <li>Plano de resposta a incidentes com prazo de comunicação à ANPD e ao titular</li>
           </ul>
 
-          <h2>10. Direitos do titular (art. 18 LGPD)</h2>
+          <h2>9. Direitos do titular (art. 18 LGPD)</h2>
           <p>Você pode a qualquer tempo solicitar:</p>
           <ul>
             <li>confirmação da existência de tratamento</li>
@@ -394,7 +335,7 @@ export default function PoliticaDePrivacidadePage() {
             atendimento, mas não decide sozinha sobre prontuário alheio.
           </p>
 
-          <h2>11. Menores de idade</h2>
+          <h2>10. Menores de idade</h2>
           <p>
             A Luma <strong>não está habilitada para atendimento a menores de 18 anos no momento</strong>.
             Terapeutas que atendem crianças e adolescentes não devem cadastrar esses pacientes na
@@ -402,29 +343,7 @@ export default function PoliticaDePrivacidadePage() {
             consentimento do responsável legal nos termos do art. 14 LGPD e do ECA.
           </p>
 
-          <h2>12. Inteligência artificial</h2>
-          <p>
-            Quando o recurso de rascunho automatizado estiver ativado, um modelo de IA processa
-            uma transcrição da sessão para sugerir tópicos e organização do texto. Neste caso:
-          </p>
-          <ul>
-            <li>o paciente precisa ter consentido especificamente para este uso</li>
-            <li>o áudio e a transcrição são descartados após a geração do rascunho</li>
-            <li>
-              o rascunho nunca vira prontuário sem <strong>revisão e aprovação humana</strong> do
-              psicólogo
-            </li>
-            <li>
-              o conteúdo clínico <strong>não é usado</strong> para treinar modelos da Luma ou do
-              fornecedor de IA (cláusula contratual de não-treino)
-            </li>
-            <li>
-              a IA <strong>não emite diagnóstico</strong> nem sugere CID — vedado pelo Código de
-              Ética e pela Resolução CFP nº 9/2024
-            </li>
-          </ul>
-
-          <h2>13. Encarregado (DPO)</h2>
+          <h2>11. Encarregado (DPO)</h2>
           <p>
             <strong>Nome:</strong> Gabriel de Oliveira Frozi
             <br />
@@ -436,14 +355,14 @@ export default function PoliticaDePrivacidadePage() {
             CD/ANPD nº 18/2024, que permite essa acumulação em agentes de pequeno porte.
           </p>
 
-          <h2>14. Alterações desta política</h2>
+          <h2>12. Alterações desta política</h2>
           <p>
             Podemos atualizar esta política para refletir mudanças legais, regulatórias ou
             operacionais. Sempre que houver alteração material, avisaremos com 30 dias de
             antecedência por email e destacaremos a mudança no site.
           </p>
 
-          <h2>15. Foro</h2>
+          <h2>13. Foro</h2>
           <p>
             Esta política é regida pela lei brasileira, com foro na comarca de Mogi das Cruzes/SP,
             ressalvada a escolha de foro do domicílio do titular consumidor quando aplicável.
