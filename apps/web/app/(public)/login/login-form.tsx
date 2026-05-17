@@ -57,7 +57,7 @@ export function LoginForm({ nextPath }: LoginFormProps) {
             body: JSON.stringify(payload)
           });
           if (!sessionResponse.ok) throw new Error("Não foi possível abrir a sessão. Tente novamente.");
-          router.push(getAuthenticatedHomePath(payload as unknown as import("@terapia/contracts").AuthSession, nextPath));
+          router.push(getAuthenticatedHomePath(payload as unknown as AuthSession, nextPath));
           router.refresh();
           return;
         }
