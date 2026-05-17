@@ -158,6 +158,10 @@ export const waitlistMonthlySessionsRangeSchema = z.enum([
 ]);
 
 export const waitlistBiggestPainSchema = z.enum([
+  "payment_no_show_policy",
+  "platforms_and_low_fee",
+  "patient_acquisition",
+  "documents_reports_laudos",
   "post_session_overload",
   "scattered_workflow",
   "documents_and_consents",
@@ -609,7 +613,42 @@ export const appointmentDetailSchema = z.object({
       occurredAtLabel: z.string(),
       description: z.string()
     })
-  )
+  ),
+  patientPhone: z.string(),
+  recordingConsentStatus: z.enum(["not_sent", "pending", "signed", "expired"]),
+  recordingConsentLink: z.string(),
+  transcriptStatus: z.enum(["none", "requested", "processing", "ready", "failed"]),
+  transcriptDraft: z.string().nullable(),
+  transcriptApprovedAt: z.string().nullable()
+});
+
+export const consentDocumentPublicSchema = z.object({
+  token: z.string(),
+  documentType: z.string(),
+  documentVersion: z.string(),
+  status: z.enum(["pending", "signed", "expired", "revoked"]),
+  patientName: z.string(),
+  therapistName: z.string(),
+  expiresAt: z.string()
+});
+
+export const consentSignRequestSchema = z.object({
+  signerName: z.string().min(1)
+});
+
+export const consentSignResponseSchema = z.object({
+  success: z.boolean(),
+  signedAt: z.string()
+});
+
+export const transcriptApproveRequestSchema = z.object({
+  draft: z.string().min(1)
+});
+
+export const recordingConsentSendResponseSchema = z.object({
+  consentId: z.string(),
+  token: z.string(),
+  expiresAt: z.string()
 });
 
 export const callExperienceStateSchema = z.enum([
@@ -724,7 +763,10 @@ export const appointmentCallSchema = z.object({
       title: z.string(),
       description: z.string()
     })
-  )
+  ),
+  hostToken: z.string(),
+  roomUrl: z.string(),
+  recordingConsented: z.boolean()
 });
 
 export const clinicalTranscriptStatusSchema = z.enum([
@@ -2325,3 +2367,8 @@ export const bookSlotResponseSchema = z.discriminatedUnion("success", [
   })
 ]);
 export type BookSlotResponse = z.infer<typeof bookSlotResponseSchema>;
+export type ConsentDocumentPublic = z.infer<typeof consentDocumentPublicSchema>;
+export type ConsentSignRequest = z.infer<typeof consentSignRequestSchema>;
+export type ConsentSignResponse = z.infer<typeof consentSignResponseSchema>;
+export type TranscriptApproveRequest = z.infer<typeof transcriptApproveRequestSchema>;
+export type RecordingConsentSendResponse = z.infer<typeof recordingConsentSendResponseSchema>;
