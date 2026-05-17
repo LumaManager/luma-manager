@@ -465,4 +465,22 @@ export class AppointmentsRepository {
       })
       .where(eq(appointments.id, appointmentId));
   }
+
+  async findByRoomProviderRef(roomProviderRef: string): Promise<AppointmentRow | null> {
+    const rows = await this.db
+      .select()
+      .from(appointments)
+      .where(eq(appointments.roomProviderRef, roomProviderRef))
+      .limit(1);
+    return rows[0] ?? null;
+  }
+
+  async findByTranscriptJobId(transcriptJobId: string): Promise<AppointmentRow | null> {
+    const rows = await this.db
+      .select()
+      .from(appointments)
+      .where(eq(appointments.transcriptJobId, transcriptJobId))
+      .limit(1);
+    return rows[0] ?? null;
+  }
 }

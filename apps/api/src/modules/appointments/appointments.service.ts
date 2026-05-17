@@ -450,7 +450,14 @@ export class AppointmentsService {
 
   async startRecording(session: AuthSession, appointmentId: string): Promise<{ success: boolean }> {
     if (isMockEmail(session.therapist.email)) return { success: true };
-    return { success: false };
+
+    const a = await this.repo.findById(session.therapist.id, appointmentId);
+    if (!a) throw new NotFoundException("Sessão não encontrada.");
+
+    const roomName = `luma-${appointmentId}`;
+    await this.dailyClient.startRecording(roomName);
+    await this.repo.setRecordingDailyId(appointmentId, "");
+    return { success: true };
   }
 
   // ---------------------------------------------------------------------------
