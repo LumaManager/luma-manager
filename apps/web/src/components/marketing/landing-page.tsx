@@ -10,7 +10,6 @@ import {
   CalendarDays,
   CheckCircle2,
   ChevronDown,
-  Clock,
   CreditCard,
   FileCheck,
   FileText,
@@ -20,6 +19,7 @@ import {
   MessageSquare,
   Monitor,
   RefreshCw,
+  Search,
   Shield,
   Sparkles,
   User,
@@ -77,6 +77,10 @@ const monthlySessionsOptions: { label: string; value: WaitlistMonthlySessionsRan
 ];
 
 const biggestPainOptions: { label: string; value: WaitlistBiggestPain }[] = [
+  { value: "payment_no_show_policy", label: "Pagamentos, faltas e cancelamentos" },
+  { value: "platforms_and_low_fee", label: "Plataformas, valor social ou repasses baixos" },
+  { value: "patient_acquisition", label: "Captação e início de carreira clínica" },
+  { value: "documents_reports_laudos", label: "Documentos, relatórios ou laudos" },
   { value: "post_session_overload", label: "Pós-sessão pesado no fim do dia" },
   { value: "scattered_workflow", label: "Rotina espalhada entre várias ferramentas" },
   { value: "documents_and_consents", label: "Documentos e consentimentos fora do timing" },
@@ -104,7 +108,7 @@ export function LandingPage({
   const [monthlySessionsRange, setMonthlySessionsRange] =
     useState<WaitlistMonthlySessionsRange>("21_to_60");
   const [biggestPain, setBiggestPain] =
-    useState<WaitlistBiggestPain>("scattered_workflow");
+    useState<WaitlistBiggestPain>("payment_no_show_policy");
   const [questionnaireError, setQuestionnaireError] = useState<string | null>(null);
   const [isSavingQuestionnaire, startQuestionnaireSave] = useTransition();
 
@@ -376,19 +380,19 @@ export function LandingPage({
                   </div>
 
                   <h1 className="mt-5 max-w-3xl text-[clamp(2rem,4.1vw,4.4rem)] font-semibold leading-[0.96] tracking-[-0.055em] sm:mt-8 sm:text-[clamp(2.4rem,4.1vw,4.4rem)]">
-                    Menos fricção para o consultório.
+                    Organize sua rotina clínica em um lugar só.
                   </h1>
 
                   <p className="mt-3 max-w-2xl text-[15px] leading-6 text-[rgba(255,255,255,0.8)] sm:mt-5 sm:text-[17px] sm:leading-8">
                     O {productName} é o produto da {brandName} para psicólogo(a) autônomo(a) no Brasil.
-                    Ele junta o que hoje fica em Google Agenda, WhatsApp, planilha, documento solto
-                    e cobrança espalhada, sem abrir mão de revisão humana obrigatória.
+                    Ele junta agenda, pacientes, pagamentos, documentos e continuidade clínica
+                    para reduzir o improviso entre WhatsApp, planilha, plataforma e arquivo solto.
                   </p>
 
                   <div className="mt-4 grid gap-2 sm:mt-6 sm:max-w-2xl">
-                    <HeroBullet text="Veja cedo o que pode travar atendimento, consentimento, continuidade ou pagamento." />
-                    <HeroBullet text="Feche o pós-sessão com contexto, rascunho assistido e decisão humana." />
-                    <HeroBullet text="Saia do remendo entre Google Agenda, WhatsApp, planilha, documento e cobrança." />
+                    <HeroBullet text="Acompanhe consultas, faltas, pagamentos e pendências no mesmo fluxo." />
+                    <HeroBullet text="Registre combinados, documentos e contexto sem depender de mensagens soltas." />
+                    <HeroBullet text="Organize pacientes vindos de indicação, plataforma, convênio ou valor social." />
                   </div>
 
                   <div className="mt-5 flex flex-wrap gap-3 sm:mt-7">
@@ -449,10 +453,10 @@ export function LandingPage({
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[rgba(255,255,255,0.56)]">
-                      Hoje no beta da {brandName}
+                      O que o {productName} coloca no mesmo radar
                     </p>
                     <p className="mt-2 text-2xl font-semibold tracking-[-0.03em]">
-                      O consultório em ordem antes, durante e depois da sessão.
+                      Agenda, pagamento, combinados e continuidade sem virar cinco controles paralelos.
                     </p>
                   </div>
                 </div>
@@ -461,12 +465,12 @@ export function LandingPage({
                   <HeroMetric
                     label="Sessões hoje"
                     value="6"
-                    detail="2 com pendência operacional"
+                    detail="1 falta para remarcar"
                   />
                   <HeroMetric
-                    label="Pós-sessão"
-                    value="2"
-                    detail="1 rascunho e 1 revisão final"
+                    label="Combinados"
+                    value="4"
+                    detail="2 com política financeira"
                   />
                   <HeroMetric
                     label="Recebimentos"
@@ -474,9 +478,9 @@ export function LandingPage({
                     detail="1 cobrança fora do prazo"
                   />
                   <MiniSignal
-                    eyebrow="Governança"
-                    title="Revisão humana obrigatória"
-                    description="A IA assiste o fechamento. O registro clínico final continua sob decisão do terapeuta."
+                    eyebrow="Canais"
+                    title="Origem do paciente no contexto"
+                    description="Indicação, plataforma, convênio e valor social deixam de ficar implícitos na memória."
                   />
                   <MiniSignal
                     eyebrow="Pensado para o Brasil"
@@ -502,19 +506,19 @@ export function LandingPage({
                   <PatientSummaryCard
                     patientName="Ana Ribeiro"
                     sessionTime="09:00"
-                    summary="Entre na próxima sessão com a mente fresca sobre o que ficou mais vivo na conversa anterior."
+                    summary="Entre na próxima sessão sem procurar dados em três lugares diferentes."
                     bullets={[
-                      "ansiedade mais alta ao falar da pressão no trabalho",
-                      "culpa recorrente quando tenta colocar limite na família",
-                      "combinado de observar rotina de sono até a próxima sessão"
+                      "pagamento confirmado no Pix",
+                      "termo vigente e documento sem pendência",
+                      "paciente veio por indicação particular"
                     ]}
-                    nextStep="Retomar como foi a semana no trabalho e se conseguiu sustentar algum limite sem se punir."
+                    nextStep="Retomar a sessão com contexto operacional, prontuário e próximos passos no mesmo lugar."
                   />
 
                   <HeroQueueCard
-                    eyebrow="Fila de fechamento"
-                    title="Pós-sessão com contexto pronto"
-                    description={`A ${brandName} separa o que está pronto para revisar do que ainda depende de ação.`}
+                    eyebrow="Fila operacional"
+                    title="Pendências claras antes de virarem urgência"
+                    description={`A ${brandName} separa o que está pronto do que ainda depende de confirmação, pagamento ou documento.`}
                     items={[
                       "Sessão 11:00 com cobrança pendente",
                       "Sessão 15:30 com documento para liberar"
@@ -522,12 +526,12 @@ export function LandingPage({
                   />
 
                   <HeroQueueCard
-                    eyebrow="Leitura longitudinal"
-                    title="Continuidade visível antes da próxima conversa"
-                    description="O caso volta com o que já foi aprovado, sem recomeçar da memória."
+                    eyebrow="Canais e valores"
+                    title="Valor social, plataforma e particular não se misturam"
+                    description="A origem do paciente ajuda a entender rotina, combinado e previsibilidade de recebimento."
                     items={[
-                      "Último resumo aprovado em 26 de março",
-                      "Próximo passo sugerido para retomada"
+                      "2 pacientes de plataforma com repasse pendente",
+                      "3 particulares com pagamento confirmado"
                     ]}
                   />
                 </div>
@@ -539,19 +543,19 @@ export function LandingPage({
                     description="A agenda deixa de ser um calendário solto e vira a mesa de ação do dia."
                   />
                   <HeroValue
-                    eyebrow="Sessão"
-                    title="O detalhe mostra o que pode travar continuidade"
-                    description="Paciente, consentimentos, cobrança e próximos passos aparecem no mesmo lugar."
-                  />
-                  <HeroValue
-                    eyebrow="Revisão"
-                    title="O pós-sessão deixa de depender de memória improvisada"
-                    description="O sistema organiza rascunho, contexto e pendências antes da aprovação final."
-                  />
-                  <HeroValue
                     eyebrow="Financeiro"
-                    title="Cobrança e documentos entram no fluxo clínico"
-                    description="O que costuma escapar ao longo da semana aparece antes de virar urgência."
+                    title="Pagamento, falta e cancelamento ligados à sessão"
+                    description="A cobrança deixa de ser um lembrete perdido entre planilha, Pix e WhatsApp."
+                  />
+                  <HeroValue
+                    eyebrow="Documentos"
+                    title="Relatórios, termos e consentimentos com status claro"
+                    description="O documento aparece no fluxo antes de virar urgência com paciente ou família."
+                  />
+                  <HeroValue
+                    eyebrow="Continuidade"
+                    title="Contexto clínico sem depender só da memória"
+                    description="O que foi aprovado volta para a próxima sessão com revisão humana obrigatória."
                   />
                 </div>
               </div>
@@ -591,8 +595,8 @@ export function LandingPage({
               O consultório se espalha quando cada parte da rotina vive em um canto.
             </h2>
             <p className="mt-4 text-lg leading-8 text-[var(--color-text-muted)]">
-              Google Agenda em um lado, WhatsApp em outro, planilha para cobrança, documento solto
-              no Drive e o pós-sessão sempre empurrado para o fim do dia.
+              Google Agenda em um lado, WhatsApp em outro, planilha para cobrança, documento solto,
+              paciente vindo de plataforma e combinado financeiro guardado só na conversa.
             </p>
           </div>
 
@@ -603,19 +607,19 @@ export function LandingPage({
               description="A sessão existe no Google Agenda, mas o contexto real do atendimento não acompanha o horário."
             />
             <ProblemCard
-              icon={<Clock className="h-5 w-5" />}
-              title="Pós-sessão pesado"
-              description="O fechamento clínico fica para depois e passa a depender de memória, cansaço e texto improvisado."
+              icon={<CreditCard className="h-5 w-5" />}
+              title="Pagamento sem política"
+              description="Falta, cancelamento, valor social e cobrança ficam combinados caso a caso até virarem desgaste."
+            />
+            <ProblemCard
+              icon={<MessageSquare className="h-5 w-5" />}
+              title="Canais sem leitura"
+              description="Indicação, plataforma, convênio e particular se misturam, dificultando entender o que sustenta a prática."
             />
             <ProblemCard
               icon={<FileText className="h-5 w-5" />}
               title="Documento fora do timing"
-              description="Consentimento, termo e pendência aparecem tarde, quando já viraram atrito no WhatsApp com paciente."
-            />
-            <ProblemCard
-              icon={<CreditCard className="h-5 w-5" />}
-              title="Cobrança sem contexto"
-              description="Pagamento vai para planilha, comprovante chega no WhatsApp e o financeiro vira mais uma pilha separada."
+              description="Relatório, termo e pendência aparecem tarde, quando já viraram atrito no WhatsApp com paciente ou família."
             />
           </div>
         </section>
@@ -646,9 +650,9 @@ export function LandingPage({
               description="Paciente, consentimentos, pagamento, prontidão e acesso à sala no mesmo contexto."
             />
             <PlatformCard
-              icon={<FileCheck className="h-5 w-5" />}
-              title="Revisão clínica"
-              description="Fila, transcript quando houver, rascunho assistido e aprovação humana antes do registro final."
+              icon={<User className="h-5 w-5" />}
+              title="Origem do paciente"
+              description="Indicação, plataforma, convênio, Google, Instagram ou valor social entram no histórico operacional."
             />
             <PlatformCard
               icon={<BookOpen className="h-5 w-5" />}
@@ -669,38 +673,87 @@ export function LandingPage({
         </section>
 
         <section className="mt-10 sm:mt-16">
+          <div className="max-w-3xl">
+            <Badge tone="warning" className="px-3">
+              O que a busca mostra
+            </Badge>
+            <h2 className="mt-4 text-4xl font-semibold tracking-[-0.04em]">
+              Quem procura um sistema para psicólogos não está buscando só uma agenda.
+            </h2>
+            <p className="mt-4 text-lg leading-8 text-[var(--color-text-muted)]">
+              As buscas por software para psicólogos, agenda, prontuário psicológico,
+              pagamento de consulta e contrato terapêutico apontam para a mesma necessidade:
+              concentrar a operação clínica em um lugar confiável.
+            </p>
+          </div>
+
+          <div className="mt-8 grid gap-4 lg:grid-cols-3">
+            <PlatformCard
+              icon={<Search className="h-5 w-5" />}
+              title="Sistema para psicólogos"
+              description="O Luma se posiciona como workspace de rotina clínica, não como app wellness nem software médico genérico."
+            />
+            <PlatformCard
+              icon={<CalendarDays className="h-5 w-5" />}
+              title="Agenda para psicólogos"
+              description="A agenda conecta sessão, paciente, confirmação, pagamento, pendência e próximo passo."
+            />
+            <PlatformCard
+              icon={<BookOpen className="h-5 w-5" />}
+              title="Prontuário psicológico"
+              description="O histórico fica organizado para continuidade e revisão humana, sem promessa de diagnóstico automático."
+            />
+            <PlatformCard
+              icon={<Wallet className="h-5 w-5" />}
+              title="Controle financeiro para psicólogos"
+              description="Recebimento, falta, cancelamento, valor social e cobrança deixam de ficar espalhados em conversa e planilha."
+            />
+            <PlatformCard
+              icon={<FileCheck className="h-5 w-5" />}
+              title="Contrato terapêutico e combinados"
+              description="Política de pagamento, remarcação e cancelamento aparece junto da sessão, não só em mensagem antiga."
+            />
+            <PlatformCard
+              icon={<User className="h-5 w-5" />}
+              title="Origem e canais de pacientes"
+              description="Indicação, plataforma, Google, Instagram, convênio e valor social entram no contexto operacional."
+            />
+          </div>
+        </section>
+
+        <section className="mt-10 sm:mt-16">
           <div className="grid gap-5 lg:grid-cols-3">
             <DeepDiveCard
               badge="Deep dive 01"
-              signal="Texto ou ditado com fechamento assistido"
-              title="O pós-sessão pesa menos quando o sistema já organiza o que precisa ser fechado."
-              description="Em vez de depender só de memória, texto improvisado e boa vontade no fim do dia, a revisão clínica já nasce com contexto, rascunho assistido, pendências e continuidade visível."
+              signal="Agenda, pagamento e combinado"
+              title="A sessão fica mais previsível quando o combinado financeiro aparece antes."
+              description="Em vez de procurar Pix, mensagem antiga e regra de falta no WhatsApp, o detalhe da sessão mostra o que ainda precisa ser confirmado."
               bullets={[
-                "funciona com texto ou ditado",
-                "revisão humana obrigatória",
-                "organiza resumo, continuidade e próximos passos"
+                "status de pagamento ligado à sessão",
+                "política de falta e cancelamento visível",
+                "menos cobrança perdida no WhatsApp"
               ]}
             />
             <DeepDiveCard
               badge="Deep dive 02"
-              signal="Contexto reaparece no momento certo"
-              title="A continuidade clínica deixa de viver espalhada entre sessões, arquivos e lembranças."
-              description="O que já foi aprovado volta como contexto útil para retomar o caso sem começar sempre do zero."
+              signal="Canais e origem"
+              title="Plataforma, valor social e particular não deveriam parecer a mesma operação."
+              description="Quando a origem do paciente entra no fluxo, fica mais fácil entender repasse, previsibilidade e esforço de captação."
               bullets={[
-                "linha longitudinal do cuidado",
-                "mais clareza para retomar a próxima sessão",
-                "menos risco de perder contexto importante"
+                "origem registrada no paciente",
+                "mais clareza sobre canais de entrada",
+                "rotina menos dependente de memória e planilha"
               ]}
             />
             <DeepDiveCard
               badge="Deep dive 03"
-              signal="Operação e cuidado no mesmo radar"
-              title="Consentimentos, documentos e cobrança entram no mesmo radar da prática."
-              description="O produto não trata documento e financeiro como apêndice. O que pode travar continuidade ou recebimento aparece no fluxo certo."
+              signal="Documento com estrutura"
+              title="Relatório, declaração e consentimento precisam aparecer antes de virar urgência."
+              description="O produto não trata documento e financeiro como apêndice. O que pode travar continuidade, recebimento ou segurança operacional aparece no fluxo certo."
               bullets={[
                 "status documental visível",
                 "cobrança ligada ao atendimento",
-                "menos surpresa operacional com o paciente"
+                "revisão humana obrigatória nos registros"
               ]}
             />
           </div>
@@ -755,19 +808,20 @@ export function LandingPage({
               </p>
               <p className="mt-3 max-w-3xl text-sm leading-7 text-[var(--color-text-muted)]">
                 O fit mais forte hoje é o psicólogo autônomo, com consultório enxuto, que atende
-                sozinho e sente atrito real entre agenda, pós-sessão, documento e cobrança.
+                sozinho e sente atrito real entre agenda, pagamento, documentos, canais de entrada
+                e continuidade entre sessões.
               </p>
             </CardHeader>
             <CardContent className="grid gap-4 pt-6 md:grid-cols-3">
               <FitPoint
                 icon={<RefreshCw className="h-5 w-5" />}
                 title="Quem cansou do remendo"
-                description="Hoje opera entre Google Agenda, WhatsApp, planilha, Drive, documento solto e revisão clínica fragmentada."
+                description="Hoje opera entre Google Agenda, WhatsApp, planilha, Drive, plataforma, documento solto e cobrança manual."
               />
               <FitPoint
                 icon={<User className="h-5 w-5" />}
                 title="Psicólogo(a) solo"
-                description="Atende com volume recorrente e já sente o desgaste para fechar sessão, documento e cobrança no mesmo dia."
+                description="Atende com volume recorrente e já sente o desgaste para confirmar sessão, cobrar, registrar e acompanhar pacientes."
               />
               <FitPoint
                 icon={<Building2 className="h-5 w-5" />}
@@ -789,6 +843,22 @@ export function LandingPage({
           </div>
           <div className="mt-8 grid gap-4">
             <FaqCard
+              question="O Luma é um sistema para psicólogos?"
+              answer="Sim. O foco é a rotina do psicólogo autônomo: agenda, pacientes, pagamentos, documentos, prontuário e continuidade clínica em um workspace só."
+            />
+            <FaqCard
+              question="É uma agenda para psicólogos?"
+              answer="A agenda é uma parte central, mas ela não fica isolada. Cada sessão pode carregar paciente, status de pagamento, pendências, documentos e contexto operacional."
+            />
+            <FaqCard
+              question="Tem prontuário psicológico?"
+              answer="A proposta é organizar histórico e registros clínicos com revisão humana. O produto não promete diagnóstico automático nem substitui a responsabilidade profissional."
+            />
+            <FaqCard
+              question="Serve para contrato terapêutico e combinados financeiros?"
+              answer="O Luma ajuda a manter combinados de pagamento, falta, remarcação e cancelamento visíveis no fluxo. O conteúdo jurídico e ético final deve ser definido pelo profissional."
+            />
+            <FaqCard
               question="Funciona mesmo sem áudio?"
               answer="Sim. A utilidade principal continua existindo com texto ou ditado. Áudio e transcript são capability condicional, não a única forma do produto fazer sentido."
             />
@@ -797,12 +867,20 @@ export function LandingPage({
               answer="Não. O produto organiza, propõe e acelera. O fechamento clínico final continua exigindo revisão e decisão humana."
             />
             <FaqCard
+              question="O Luma capta pacientes para mim?"
+              answer="Não. O Luma não é marketplace nem mentoria de captação. Ele ajuda a organizar pacientes que chegam por indicação, plataforma, Google, Instagram, convênio ou valor social."
+            />
+            <FaqCard
+              question="Ajuda com pagamento, falta e cancelamento?"
+              answer="Sim. A ideia é ligar consulta, combinado financeiro, status de pagamento e pendências no mesmo contexto, para reduzir cobrança perdida e regra combinada só no WhatsApp."
+            />
+            <FaqCard
               question="O paciente acessa prontuário ou conteúdo clínico?"
               answer="Não. O portal do paciente cobre o fluxo operacional essencial, como convite, documentos, pagamento e acesso à sessão, sem abrir o prontuário clínico."
             />
             <FaqCard
               question="Onde isso mais ajuda na prática?"
-              answer="Principalmente antes da sessão, no detalhe operacional do atendimento, no fechamento do pós-sessão e na leitura de tudo que pode travar continuidade ou pagamento."
+              answer="Principalmente na rotina que fica entre as sessões: agenda, confirmação, pagamento, documento, origem do paciente, pendências e continuidade."
             />
             <FaqCard
               question="Como ficam consentimentos e documentos?"
@@ -826,7 +904,7 @@ export function LandingPage({
               </h2>
               <p className="mt-4 text-base leading-7 text-[rgba(255,255,255,0.8)] sm:text-lg sm:leading-8">
                 O {productName} não é para quem quer mais uma ferramenta solta. É para quem quer
-                parar de remendar agenda, sessão, documento, revisão e cobrança em cinco lugares diferentes.
+                parar de remendar agenda, paciente, pagamento, documento e cobrança em cinco lugares diferentes.
               </p>
             </div>
             <div className="flex flex-wrap gap-3">

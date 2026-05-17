@@ -14,6 +14,10 @@ import { EmailService } from "@/modules/platform/email/email.service";
 import { SupabaseService } from "@/modules/platform/supabase/supabase.service";
 
 const PAIN_LABELS: Record<WaitlistBiggestPain, string> = {
+  payment_no_show_policy: "Pagamentos, faltas e cancelamentos sem política clara",
+  platforms_and_low_fee: "Dependência de plataformas, valor social ou repasses baixos",
+  patient_acquisition: "Captação e início de carreira clínica",
+  documents_reports_laudos: "Documentos, relatórios e laudos geram insegurança",
   post_session_overload: "Pós-sessão ainda é o maior gargalo",
   scattered_workflow: "Fluxo espalhado entre ferramentas soltas",
   documents_and_consents: "Documentos e consentimentos travam a operação",
