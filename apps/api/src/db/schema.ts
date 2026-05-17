@@ -242,6 +242,15 @@ export const appointments = pgTable("appointments", {
   roomProviderRef: text("room_provider_ref").notNull().default(""),
   // transcript
   transcriptJobId: text("transcript_job_id").notNull().default(""),
+  // recording
+  recordingConsentId: text("recording_consent_id"),
+  recordingDailyId: text("recording_daily_id").notNull().default(""),
+  recordingStatus: text("recording_status").notNull().default("none"),
+  // none | requested | processing | ready | failed
+  // transcript draft (AI output, approved by therapist)
+  transcriptDraft: text("transcript_draft"),
+  transcriptApprovedAt: timestamp("transcript_approved_at", { withTimezone: true }),
+  transcriptApprovedBy: text("transcript_approved_by"),
   // booking metadata
   bookedByPatient: boolean("booked_by_patient").notNull().default(false),
   cancelReason: text("cancel_reason").notNull().default(""),
@@ -493,3 +502,24 @@ export const schedulingTokens = pgTable(
     )
   })
 );
+
+// ---------------------------------------------------------------------------
+// CONSENT DOCUMENTS (recording/transcript consent — token-based, like scheduling)
+// ---------------------------------------------------------------------------
+
+export const consentDocuments = pgTable("consent_documents", {
+  id: text("id").primaryKey(),
+  patientId: text("patient_id").notNull().references(() => patients.id),
+  therapistId: text("therapist_id").notNull().references(() => therapists.id),
+  documentType: text("document_type").notNull().default("recording_consent"),
+  documentVersion: text("document_version").notNull(),
+  token: text("token").notNull().unique(),
+  tokenExpiresAt: timestamp("token_expires_at", { withTimezone: true }).notNull(),
+  status: text("status").notNull().default("pending"),
+  // pending | signed | expired | revoked
+  signedAt: timestamp("signed_at", { withTimezone: true }),
+  signerIp: text("signer_ip"),
+  signerName: text("signer_name"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow()
+});
