@@ -1,30 +1,43 @@
 // apps/api/src/modules/onboarding/onboarding.controller.ts
-import { Body, Controller, Get, Headers, HttpCode, Post } from "@nestjs/common";
+import { Body, Controller, Get, Headers, HttpCode, Ip, Post } from "@nestjs/common";
+
+import type { OnboardingCompleteStepRequest } from "@terapia/contracts";
+import { onboardingCompleteStepRequestSchema } from "@terapia/contracts";
 
 import { AuthService } from "@/modules/auth/auth.service";
 
 import { OnboardingService } from "./onboarding.service";
 
-@Controller("v1/onboarding")
+@Controller("v1/account/onboarding")
 export class OnboardingController {
   constructor(
     private readonly authService: AuthService,
     private readonly onboardingService: OnboardingService
   ) {}
 
-  @Get("status")
-  async getStatus(@Headers("authorization") authorization?: string) {
+  @Get()
+  async getBootstrap(@Headers("authorization") authorization?: string) {
     const session = await this.authService.getSessionFromAuthorizationHeader(authorization);
-    return this.onboardingService.getStatus(session.therapist.id);
+    return this.onboardingService.getBootstrap(session.therapist.id);
   }
 
-  @Post("practice-info")
+  @Post("start")
   @HttpCode(200)
-  async savePracticeInfo(
+  async start(@Headers("authorization") authorization?: string) {
+    const session = await this.authService.getSessionFromAuthorizationHeader(authorization);
+    const onboarding = await this.onboardingService.getBootstrap(session.therapist.id);
+    return { onboarding };
+  }
+
+  @Post("complete-step")
+  @HttpCode(200)
+  async completeStep(
     @Headers("authorization") authorization: string | undefined,
-    @Body() body: { practiceName: string; city: string; state: string }
+    @Body() body: OnboardingCompleteStepRequest,
+    @Ip() ip: string
   ) {
     const session = await this.authService.getSessionFromAuthorizationHeader(authorization);
-    return this.onboardingService.savePracticeInfo(session.therapist.id, body);
+    const validated = onboardingCompleteStepRequestSchema.parse(body);
+    return this.onboardingService.completeStep(session.therapist.id, validated, ip);
   }
 }

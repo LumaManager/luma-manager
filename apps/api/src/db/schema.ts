@@ -451,6 +451,23 @@ export const auditLogs = pgTable("audit_logs", {
 // SCHEDULING TOKENS (no-auth patient booking links)
 // ---------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------
+// THERAPIST LEGAL ACCEPTANCES (LGPD audit trail)
+// ---------------------------------------------------------------------------
+
+export const therapistLegalAcceptances = pgTable("therapist_legal_acceptances", {
+  id: text("id").primaryKey(),
+  therapistId: text("therapist_id").notNull().references(() => therapists.id),
+  documentType: text("document_type").notNull(),
+  documentVersion: text("document_version").notNull().default("1.0"),
+  acceptedAt: timestamp("accepted_at", { withTimezone: true }).notNull().defaultNow(),
+  ipAddress: text("ip_address").notNull().default("")
+});
+
+// ---------------------------------------------------------------------------
+// SCHEDULING TOKENS
+// ---------------------------------------------------------------------------
+
 export const schedulingTokens = pgTable(
   "scheduling_tokens",
   {
