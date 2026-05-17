@@ -448,6 +448,11 @@ export class AppointmentsService {
     return { success: true };
   }
 
+  async startRecording(session: AuthSession, appointmentId: string): Promise<{ success: boolean }> {
+    if (isMockEmail(session.therapist.email)) return { success: true };
+    return { success: false };
+  }
+
   // ---------------------------------------------------------------------------
   // Availability
   // ---------------------------------------------------------------------------

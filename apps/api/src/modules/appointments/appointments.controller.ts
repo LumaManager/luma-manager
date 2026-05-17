@@ -138,4 +138,31 @@ export class AppointmentsController {
     const session = await this.authService.getSessionFromAuthorizationHeader(authorization);
     return this.appointmentsService.getAppointmentDetail(session, appointmentId);
   }
+
+  @Post(":appointmentId/consent/send")
+  async sendRecordingConsent(
+    @Headers("authorization") authorization: string | undefined,
+    @Param("appointmentId") appointmentId: string
+  ) {
+    const session = await this.authService.getSessionFromAuthorizationHeader(authorization);
+    return this.appointmentsService.sendRecordingConsent(session, appointmentId);
+  }
+
+  @Post(":appointmentId/recording/start")
+  async startRecording(
+    @Headers("authorization") authorization: string | undefined,
+    @Param("appointmentId") appointmentId: string
+  ) {
+    const session = await this.authService.getSessionFromAuthorizationHeader(authorization);
+    return this.appointmentsService.startRecording(session, appointmentId);
+  }
+
+  @Post(":appointmentId/transcript/approve")
+  async approveTranscript(
+    @Headers("authorization") authorization: string | undefined,
+    @Param("appointmentId") appointmentId: string
+  ) {
+    const session = await this.authService.getSessionFromAuthorizationHeader(authorization);
+    return this.appointmentsService.approveTranscript(session, appointmentId);
+  }
 }
