@@ -76,7 +76,7 @@ for file in $staged_files; do
   content=$(git show ":$file" 2>/dev/null || true)
 
   for pattern in "${SECRET_PATTERNS[@]}"; do
-    match=$(echo "$content" | grep -E "$pattern" | grep -v "process\.env\|env\.\|YOUR_\|your-\|xxx\|placeholder\|example\|TODO" | head -1 || true)
+    match=$(echo "$content" | grep -E "$pattern" | grep -v "process\.env\|env\.\|YOUR_\|your-\|xxx\|placeholder\|example\|TODO\|Request\|Response\|Schema\|Repository\|Service\|Controller\|Module\|import\s\|export\s\|const \|type \|interface \|function \|async \|pageType\s*=\|buildOrganization\|contrato_\|financeiro_" | head -1 || true)
     if [[ -n "$match" ]]; then
       echo -e "${RED}[SECRET]${NC} Padrão suspeito em $file:"
       echo -e "  ${YELLOW}→${NC} $(echo "$match" | head -c 120)"

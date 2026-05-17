@@ -10,6 +10,7 @@ import type {
   AppointmentDetail,
   AppointmentRescheduleRequest,
   AuthSession,
+  RecordingConsentSendResponse,
   ScheduleBlockCreateRequest,
   ScheduleBlockCreateResponse,
   ScheduleBlockUpdateRequest
@@ -23,9 +24,14 @@ import {
   scheduleBlockUpdateRequestSchema
 } from "@terapia/contracts";
 
+import { randomUUID } from "node:crypto";
+
+import { readEnv } from "@/common/config/env";
+import { ConsentRepository } from "@/modules/consent/consent.repository";
 import { buildMockAgenda, buildMockAppointmentDetail, buildMockCall, isMockEmail } from "@/modules/mock";
 import type { AppointmentWithPatient, AvailabilityRuleWithWindows } from "./appointments.repository";
 import { AppointmentsRepository } from "./appointments.repository";
+import { DailyClient } from "./daily.client";
 
 const DAY_LABELS = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"] as const;
 const MONTH_LABELS = ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"] as const;
@@ -33,7 +39,9 @@ const MONTH_LABELS = ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "s
 @Injectable()
 export class AppointmentsService {
   constructor(
-    @Inject(AppointmentsRepository) private readonly repo: AppointmentsRepository
+    @Inject(AppointmentsRepository) private readonly repo: AppointmentsRepository,
+    @Inject(DailyClient) private readonly dailyClient: DailyClient,
+    @Inject(ConsentRepository) private readonly consentRepo: ConsentRepository
   ) {}
 
   // ---------------------------------------------------------------------------
@@ -144,6 +152,11 @@ export class AppointmentsService {
     const dateLabel = this.formatDateLabel(a.date);
     const timeRange = `${a.startTime}–${endTime}`;
 
+    const consentDoc = await this.consentRepo.findByPatientAndTherapist(a.patientId, a.therapistId);
+    const env = readEnv();
+    const recordingConsentStatus = (consentDoc?.status ?? "not_sent") as "not_sent" | "pending" | "signed" | "expired";
+    const recordingConsentLink = consentDoc ? `${env.APP_PUBLIC_URL}/consentimento/${consentDoc.token}` : "";
+
     return {
       id: a.id,
       patientId: a.patientId,
@@ -199,7 +212,13 @@ export class AppointmentsService {
           occurredAtLabel: this.formatDateLabel(a.cancelledAt.toISOString().slice(0, 10)),
           description: a.cancelReason || "Sem motivo registrado."
         }] : [])
-      ]
+      ],
+      patientPhone: a.patientPhone,
+      recordingConsentStatus,
+      recordingConsentLink,
+      transcriptStatus: (a.recordingStatus ?? "none") as "none" | "requested" | "processing" | "ready" | "failed",
+      transcriptDraft: a.transcriptDraft ?? null,
+      transcriptApprovedAt: a.transcriptApprovedAt?.toISOString() ?? null
     };
   }
 
@@ -265,36 +284,77 @@ export class AppointmentsService {
 
   async getAppointmentCall(session: AuthSession, appointmentId: string): Promise<AppointmentCall> {
     if (isMockEmail(session.therapist.email)) return buildMockCall(appointmentId);
+
+    const a = await this.repo.findById(session.therapist.id, appointmentId);
+    if (!a) throw new NotFoundException("Sessão não encontrada.");
+
+    const consentDoc = await this.consentRepo.findByPatientAndTherapist(a.patientId, a.therapistId);
+    const recordingConsented = consentDoc?.status === "signed";
+
+    let hostToken = "";
+    const roomUrl = a.roomUrl ?? "";
+
+    if ((a.roomState === "ready" || a.roomState === "open") && roomUrl) {
+      const roomName = `luma-${appointmentId}`;
+      try {
+        const tokenResult = await this.dailyClient.createMeetingToken(roomName, true);
+        hostToken = tokenResult.token;
+      } catch {
+        hostToken = "";
+      }
+    }
+
+    const canJoin = hostToken !== "";
+    const endTime = this.addMinutes(a.startTime, a.durationMinutes);
+
     return {
       appointment: {
-        id: appointmentId,
-        patientName: "",
-        dateLabel: "",
-        timeRangeLabel: "",
-        durationLabel: "",
-        detailHref: `/app/appointments/${appointmentId}`
+        id: a.id,
+        patientName: a.patientName,
+        dateLabel: this.formatDateLabel(a.date),
+        timeRangeLabel: `${a.startTime}–${endTime}`,
+        durationLabel: `${a.durationMinutes} min`,
+        detailHref: `/app/appointments/${a.id}`
       },
-      experienceState: "unavailable",
-      experienceLabel: "Sala não disponível",
+      experienceState: canJoin ? "prejoin" : "unavailable",
+      experienceLabel: canJoin ? "Pronto para entrar" : "Sala não disponível",
       roomSummary: {
-        state: "not_provisioned",
-        label: "Não provisionada",
-        providerLabel: "—",
-        joinUrlLabel: "—"
+        state: a.roomState as "not_provisioned" | "ready" | "open" | "closed" | "failed",
+        label: this.roomStatusLabel(a.roomState),
+        providerLabel: "Daily.co",
+        joinUrlLabel: roomUrl ? "Sala criada" : "—"
       },
       joinWindow: {
-        therapistOpensAtLabel: "",
-        patientOpensAtLabel: "",
-        scheduledStartLabel: "",
-        scheduledEndLabel: "",
-        canJoinNow: false,
-        blockedReason: "Teleatendimento fora do escopo MVP."
+        therapistOpensAtLabel: `${a.date} ${a.startTime}`,
+        patientOpensAtLabel: `${a.date} ${a.startTime}`,
+        scheduledStartLabel: `${a.date} ${a.startTime}`,
+        scheduledEndLabel: `${a.date} ${endTime}`,
+        canJoinNow: canJoin,
+        blockedReason: canJoin ? "" : "Sala não provisionada ou não disponível."
       },
-      readiness: { outcome: "blocked", items: [] },
+      readiness: {
+        outcome: canJoin ? "ready" : "blocked",
+        items: [
+          {
+            label: "Sala de vídeo",
+            state: canJoin ? "ok" : "blocked",
+            description: canJoin ? "Sala pronta para uso." : "Execute 'Provisionar sala' antes de entrar."
+          },
+          {
+            label: "Consentimento de gravação",
+            state: recordingConsented ? "ok" : "attention",
+            description: recordingConsented
+              ? "Paciente autorizou gravação da sessão."
+              : "Paciente não autorizou gravação — sessão não será gravada."
+          }
+        ]
+      },
       transcript: {
-        state: "disabled_by_policy",
-        label: "Transcript desativado",
-        description: "Funcionalidade fora do escopo MVP."
+        state: recordingConsented ? "active" : "disabled_by_consent",
+        label: recordingConsented ? "Transcrição ativa" : "Transcrição desativada",
+        description: recordingConsented
+          ? "Sessão será gravada e transcrita automaticamente ao encerrar."
+          : "Envie o link de consentimento ao paciente para ativar gravação e transcrição."
       },
       devices: {
         cameraPermission: "prompt",
@@ -305,27 +365,87 @@ export class AppointmentsService {
         microphoneLevel: 0
       },
       callPermissions: {
-        canProvisionRoom: false,
-        canCheckIn: false,
-        canEndSession: false
+        canProvisionRoom: a.roomState === "not_provisioned",
+        canCheckIn: canJoin,
+        canEndSession: a.status === "in_progress"
       },
       connection: {
-        state: "failed",
-        label: "Sem conexão",
-        description: "Sala não disponível neste plano."
+        state: canJoin ? "ready" : "failed",
+        label: canJoin ? "Pronto" : "Indisponível",
+        description: canJoin ? "Sala disponível." : "Sala não disponível."
       },
       participants: {
         therapistJoined: false,
         patientPresence: "absent",
-        patientLabel: "Paciente"
+        patientLabel: a.patientName
       },
-      sidePanel: [],
-      notices: []
+      sidePanel: [
+        { label: "Paciente", value: a.patientName },
+        { label: "Sessão", value: `${this.formatDateLabel(a.date)} · ${a.startTime}` }
+      ],
+      notices: [],
+      hostToken,
+      roomUrl,
+      recordingConsented
     };
   }
 
-  async provisionRoom(_session: AuthSession, _appointmentId: string): Promise<{ success: boolean }> {
-    return { success: false };
+  async provisionRoom(session: AuthSession, appointmentId: string): Promise<{ success: boolean }> {
+    if (isMockEmail(session.therapist.email)) return { success: true };
+
+    const a = await this.repo.findById(session.therapist.id, appointmentId);
+    if (!a) throw new NotFoundException("Sessão não encontrada.");
+    if (a.roomState !== "not_provisioned") return { success: true };
+
+    const roomName = `luma-${appointmentId}`;
+    const room = await this.dailyClient.createRoom(roomName);
+    await this.repo.setRoom(appointmentId, room.url, room.name);
+    return { success: true };
+  }
+
+  async sendRecordingConsent(
+    session: AuthSession,
+    appointmentId: string
+  ): Promise<RecordingConsentSendResponse> {
+    if (isMockEmail(session.therapist.email)) {
+      return { consentId: "mock-consent-id", token: "mocktoken", expiresAt: new Date().toISOString() };
+    }
+
+    const a = await this.repo.findById(session.therapist.id, appointmentId);
+    if (!a) throw new NotFoundException("Sessão não encontrada.");
+
+    const env = readEnv();
+    const token = randomUUID().replace(/-/g, "");
+    const tokenExpiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+
+    const consentDoc = await this.consentRepo.create({
+      patientId: a.patientId,
+      therapistId: session.therapist.id,
+      documentVersion: env.RECORDING_CONSENT_DOCUMENT_VERSION,
+      token,
+      tokenExpiresAt
+    });
+
+    await this.repo.setRecordingConsent(appointmentId, consentDoc.id);
+
+    return {
+      consentId: consentDoc.id,
+      token: consentDoc.token,
+      expiresAt: tokenExpiresAt.toISOString()
+    };
+  }
+
+  async approveTranscript(
+    session: AuthSession,
+    appointmentId: string
+  ): Promise<{ success: boolean }> {
+    if (isMockEmail(session.therapist.email)) return { success: true };
+
+    const a = await this.repo.findById(session.therapist.id, appointmentId);
+    if (!a) throw new NotFoundException("Sessão não encontrada.");
+
+    await this.repo.approveTranscript(appointmentId, session.therapist.id);
+    return { success: true };
   }
 
   // ---------------------------------------------------------------------------

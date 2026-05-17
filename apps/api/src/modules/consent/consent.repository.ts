@@ -41,7 +41,7 @@ export class ConsentRepository {
       })
       .returning();
 
-    return rows[0];
+    return rows[0]!;
   }
 
   async findByToken(token: string): Promise<ConsentDocumentRow | null> {

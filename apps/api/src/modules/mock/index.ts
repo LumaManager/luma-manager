@@ -448,7 +448,13 @@ export function buildMockAppointmentDetail(appointmentId: string): AppointmentDe
     timeline: [
       { id: "created", title: "Sessão criada", occurredAtLabel: "15 abr 2026", description: "Agendamento registrado pelo terapeuta." },
       { id: "confirmed", title: "Sessão confirmada", occurredAtLabel: "28 abr 2026", description: "Paciente confirmou presença." }
-    ]
+    ],
+    patientPhone: "(11) 98765-4321",
+    recordingConsentStatus: "signed" as const,
+    recordingConsentLink: "https://lumamanager.com.br/consentimento/mocktoken",
+    transcriptStatus: "none" as const,
+    transcriptDraft: null,
+    transcriptApprovedAt: null
   };
 }
 
@@ -628,6 +634,7 @@ export function buildMockFinanceList(query: Partial<Record<string, string>>): Fi
     patientOptions: PATIENTS.map((p) => ({ value: p.id, label: p.fullName })),
     appointmentOptions: MOCK_APPTS.map((a) => ({
       value: a.id,
+      patientId: a.patient,
       label: `${a.name} · ${a.start}–${a.end}`
     }))
   };
@@ -787,7 +794,7 @@ export function buildMockDocumentsList(query: Partial<Record<string, string>>): 
 
   const criticalCount = list.filter((d) => d.criticality === "critical").length;
   const pendingSignatureCount = list.filter((d) => d.signatureStatus === "pending").length;
-  const revokedCount = list.filter((d) => d.signatureStatus === "revoked" || d.consentStatus === "revoked").length;
+  const revokedCount = list.filter((d) => (d.signatureStatus as string) === "revoked" || (d.consentStatus as string) === "revoked").length;
 
   return {
     summary: {
@@ -817,7 +824,7 @@ export function buildMockDocumentsList(query: Partial<Record<string, string>>): 
       criticalReason: d.criticalReason,
       signedByLabel: d.signedByLabel,
       blockedFlowLabels: d.signatureStatus === "signed" ? [] : d.documentType === "telehealth" ? ["Teleatendimento"] : [],
-      canResend: d.signatureStatus === "pending" || d.signatureStatus === "expired",
+      canResend: d.signatureStatus === "pending" || (d.signatureStatus as string) === "expired",
       canGenerateNewVersion: true,
       openHref: `/app/documents/${d.id}`
     })),
@@ -899,14 +906,15 @@ export function buildMockDocumentDetail(documentId: string): DocumentDetail | nu
       ...(d.signatureStatus === "signed" ? [{ id: "ev_signed", title: "Documento assinado", description: "Aceite do paciente registrado.", occurredAtLabel: "10 Jan 2026 · 14:30", actorLabel: "Paciente" }] : [])
     ],
     primaryActions: {
-      canResend: d.signatureStatus === "pending" || d.signatureStatus === "expired",
-      canRevoke: d.signatureStatus !== "revoked" && d.signatureStatus !== "signed",
+      canResend: d.signatureStatus === "pending" || (d.signatureStatus as string) === "expired",
+      canRevoke: (d.signatureStatus as string) !== "revoked" && d.signatureStatus !== "signed",
       canGenerateNewVersion: true
     },
     nextGenerationDefaults: {
       patientId: d.patientId,
-      documentType: d.documentType,
-      templateVersion: d.templateVersion
+      documentType: d.documentType as any,
+      templateVersion: d.templateVersion,
+      deliveryChannel: "email" as const
     }
   };
 }
@@ -932,10 +940,10 @@ export function buildMockCall(appointmentId: string): AppointmentCall {
       durationLabel: "50 min",
       detailHref: `/app/appointments/${appointmentId}`
     },
-    experienceState: "pre_join",
+    experienceState: "prejoin",
     experienceLabel: "Pronto para entrar",
     roomSummary: {
-      state: "provisioned",
+      state: "ready",
       label: "Sala provisionada",
       providerLabel: "Luma Meet",
       joinUrlLabel: "meet.lumamanager.com.br/demo-sala"
@@ -990,6 +998,9 @@ export function buildMockCall(appointmentId: string): AppointmentCall {
       { label: "Direção atual", value: "Trabalho de exposição gradual e fortalecimento de vínculos." },
       { label: "Pagamento", value: "R$ 350,00 · pendente de confirmação." }
     ],
-    notices: []
+    notices: [],
+    hostToken: "mock-host-token",
+    roomUrl: "https://luma.daily.co/mock-room",
+    recordingConsented: true
   };
 }
