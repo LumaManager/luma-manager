@@ -64,7 +64,9 @@ function formatConfirmedAt(date: string, startTime: string): string {
 }
 
 function normalizePhone(phone: string): string {
+  const hasPlus = phone.trimStart().startsWith("+");
   const digits = phone.replace(/\D/g, "");
+  if (hasPlus) return digits; // country code already present
   return digits.startsWith("55") ? digits : `55${digits}`;
 }
 
