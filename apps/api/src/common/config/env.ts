@@ -38,7 +38,11 @@ const envSchema = z.object({
     .transform((value) => value === "true"),
   RESEND_API_KEY: z.string().optional(),
   APP_PUBLIC_URL: z.string().url().default("https://lumamanager.com.br"),
-  LUMA_ENV: z.string().default("production") // deploy trigger
+  LUMA_ENV: z.string().default("production"), // deploy trigger
+  DAILY_API_KEY: z.string().optional(),
+  DAILY_WEBHOOK_SECRET: z.string().optional(),
+  ASSEMBLY_AI_API_KEY: z.string().optional(),
+  RECORDING_CONSENT_DOCUMENT_VERSION: z.string().default("1.0")
 });
 
 export type Environment = z.infer<typeof envSchema>;
