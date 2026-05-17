@@ -6,6 +6,7 @@ import { resolve } from "node:path";
 import { NestFactory } from "@nestjs/core";
 import { FastifyAdapter, type NestFastifyApplication } from "@nestjs/platform-fastify";
 import fastifyHelmet from "@fastify/helmet";
+import fastifyRawBody from "fastify-raw-body";
 
 import { AppModule } from "./app.module";
 import { readEnv } from "./common/config/env";
@@ -84,6 +85,9 @@ async function bootstrap() {
       logger: true
     })
   );
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  await (app as any).register(fastifyRawBody, { field: "rawBody", global: true, runFirst: true });
 
   app.setGlobalPrefix("v1");
   app.enableCors({
