@@ -59,6 +59,12 @@ import { OnboardingService } from "@/modules/onboarding/onboarding.service";
 import { SchedulingController } from "@/modules/scheduling/scheduling.controller";
 import { SchedulingRepository } from "@/modules/scheduling/scheduling.repository";
 import { SchedulingService } from "@/modules/scheduling/scheduling.service";
+import { DailyClient } from "@/modules/appointments/daily.client";
+import { ConsentController } from "@/modules/consent/consent.controller";
+import { ConsentRepository } from "@/modules/consent/consent.repository";
+import { ConsentService } from "@/modules/consent/consent.service";
+import { RecordingService } from "@/modules/recording/recording.service";
+import { WebhooksController } from "@/modules/webhooks/webhooks.controller";
 
 @Module({
   imports: [
@@ -93,7 +99,9 @@ import { SchedulingService } from "@/modules/scheduling/scheduling.service";
     PortalController,
     WaitlistController,
     OnboardingController,
-    SchedulingController
+    SchedulingController,
+    ConsentController,
+    WebhooksController
   ],
   providers: [
     EncryptionService,
@@ -123,6 +131,10 @@ import { SchedulingService } from "@/modules/scheduling/scheduling.service";
     MfaService,
     AppointmentsRepository,
     AppointmentsService,
+    DailyClient,
+    ConsentRepository,
+    ConsentService,
+    RecordingService,
     DashboardService,
     ClinicalReviewService,
     ClinicalRecordsRepository,
