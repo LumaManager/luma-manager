@@ -57,7 +57,7 @@ done
 
 # ── 2. Varrer conteúdo staged por padrões de segredo ──────────────────────────
 # Ignorar arquivos de exemplo, binários, e o próprio hook
-IGNORED_PATHS=('.example' 'CLAUDE.md' 'scripts/hooks/' '.gitignore' 'test-scheduling-flow.mjs' 'README')
+IGNORED_PATHS=('.example' 'CLAUDE.md' 'scripts/hooks/' '.gitignore' 'test-scheduling-flow.mjs' 'README' 'docs/superpowers/')
 
 for file in $staged_files; do
   # Pular binários
