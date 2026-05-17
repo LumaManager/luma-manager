@@ -120,7 +120,14 @@ export class AppointmentsRepository {
         patientEmail: patients.email,
         patientPhone: patients.phone,
         patientBirthDate: patients.birthDate,
-        patientPaymentOrigin: patients.paymentOrigin
+        patientPaymentOrigin: patients.paymentOrigin,
+        // recording & consent fields
+        recordingConsentId: appointments.recordingConsentId,
+        recordingDailyId: appointments.recordingDailyId,
+        recordingStatus: appointments.recordingStatus,
+        transcriptDraft: appointments.transcriptDraft,
+        transcriptApprovedAt: appointments.transcriptApprovedAt,
+        transcriptApprovedBy: appointments.transcriptApprovedBy
       })
       .from(appointments)
       .innerJoin(patients, eq(appointments.patientId, patients.id))
@@ -171,7 +178,14 @@ export class AppointmentsRepository {
         patientEmail: patients.email,
         patientPhone: patients.phone,
         patientBirthDate: patients.birthDate,
-        patientPaymentOrigin: patients.paymentOrigin
+        patientPaymentOrigin: patients.paymentOrigin,
+        // recording & consent fields
+        recordingConsentId: appointments.recordingConsentId,
+        recordingDailyId: appointments.recordingDailyId,
+        recordingStatus: appointments.recordingStatus,
+        transcriptDraft: appointments.transcriptDraft,
+        transcriptApprovedAt: appointments.transcriptApprovedAt,
+        transcriptApprovedBy: appointments.transcriptApprovedBy
       })
       .from(appointments)
       .innerJoin(patients, eq(appointments.patientId, patients.id))
@@ -399,5 +413,56 @@ export class AppointmentsRepository {
         );
       }
     }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Room & recording updates
+  // ---------------------------------------------------------------------------
+
+  async setRoom(
+    appointmentId: string,
+    roomUrl: string,
+    roomProviderRef: string
+  ): Promise<void> {
+    await this.db
+      .update(appointments)
+      .set({ roomUrl, roomProviderRef, roomState: "ready", updatedAt: new Date() })
+      .where(eq(appointments.id, appointmentId));
+  }
+
+  async setRecordingConsent(appointmentId: string, consentId: string): Promise<void> {
+    await this.db
+      .update(appointments)
+      .set({ recordingConsentId: consentId, updatedAt: new Date() })
+      .where(eq(appointments.id, appointmentId));
+  }
+
+  async setRecordingDailyId(appointmentId: string, recordingDailyId: string): Promise<void> {
+    await this.db
+      .update(appointments)
+      .set({ recordingDailyId, recordingStatus: "processing", updatedAt: new Date() })
+      .where(eq(appointments.id, appointmentId));
+  }
+
+  async setTranscriptDraft(
+    appointmentId: string,
+    transcriptJobId: string,
+    draft: string
+  ): Promise<void> {
+    await this.db
+      .update(appointments)
+      .set({ transcriptJobId, transcriptDraft: draft, recordingStatus: "ready", updatedAt: new Date() })
+      .where(eq(appointments.id, appointmentId));
+  }
+
+  async approveTranscript(appointmentId: string, therapistId: string): Promise<void> {
+    await this.db
+      .update(appointments)
+      .set({
+        transcriptApprovedAt: new Date(),
+        transcriptApprovedBy: therapistId,
+        updatedAt: new Date()
+      })
+      .where(eq(appointments.id, appointmentId));
   }
 }
