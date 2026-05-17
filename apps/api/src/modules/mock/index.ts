@@ -15,8 +15,7 @@ import type {
 // ---------------------------------------------------------------------------
 
 export const MOCK_EMAILS = new Set([
-  "ana@institutovivace.com.br",
-  "ana.ready@institutovivace.com.br"
+  "ana@institutovivace.com.br"
 ]);
 
 export function isMockEmail(email: string): boolean {

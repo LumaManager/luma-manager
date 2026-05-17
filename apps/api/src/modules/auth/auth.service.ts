@@ -126,22 +126,19 @@ export class AuthService implements OnModuleInit {
       throw new UnauthorizedException("E-mail ou senha incorretos.");
     }
 
-    // --- REQUIRE_MFA=false: cria challenge normalmente, qualquer código é aceito ---
+    // --- REQUIRE_MFA=false: retorna sessão diretamente, sem challenge ---
     if (!this.env.values.REQUIRE_MFA) {
-      const challengeId = randomUUID();
-      this.pendingChallenges.set(challengeId, {
-        therapistId: therapist.id,
-        email: therapist.email,
-        expiresAt: Date.now() + 5 * 60 * 1000
+      const session = await this.buildSession(therapist.id);
+      const accessToken = await this.appSessionService.sign(session);
+
+      this.auditService.log({
+        therapistId: session.therapist.id,
+        tenantId:    session.tenant.id,
+        action:      "login",
+        resource:    "auth"
       });
-      return {
-        challengeId,
-        requiresMfa: false,
-        mfaMethod: "totp",
-        expiresInSeconds: 300,
-        hint: "MFA desativado. Digite qualquer código de 6 dígitos para continuar.",
-        accessToken: ""
-      } as AuthLoginResponse & { accessToken?: string };
+
+      return { ...session, accessToken } as unknown as AuthLoginResponse & { accessToken?: string };
     }
 
     // --- REQUIRE_MFA=true (padrão): fluxo normal com desafio TOTP ---

@@ -48,7 +48,20 @@ export function LoginForm({ nextPath }: LoginFormProps) {
           throw new Error(payload?.message ?? "Não foi possível iniciar o login.");
         }
 
-        const payload = (await response.json()) as AuthLoginResponse;
+        const payload = (await response.json()) as AuthLoginResponse & { accessToken?: string };
+
+        if (payload.accessToken) {
+          const sessionResponse = await fetch("/api/session", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+          });
+          if (!sessionResponse.ok) throw new Error("Não foi possível abrir a sessão. Tente novamente.");
+          router.push(getAuthenticatedHomePath(payload as unknown as import("@terapia/contracts").AuthSession, nextPath));
+          router.refresh();
+          return;
+        }
+
         setChallenge(payload);
         setPhase("mfa");
       } catch (requestError) {
