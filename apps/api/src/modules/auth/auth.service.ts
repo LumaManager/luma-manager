@@ -240,7 +240,7 @@ export class AuthService implements OnModuleInit {
       throw new UnauthorizedException("Conta não encontrada.");
     }
 
-    const expiresAt = new Date(Date.now() + 8 * 60 * 60 * 1000).toISOString();
+    const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
     const isInternal = this.isInternalEmail(therapist.email);
 
     return {
