@@ -34,6 +34,8 @@ export function AppointmentCallPageView({ initialCall }: AppointmentCallPageProp
   const [isBusy, setIsBusy] = useState<null | "room" | "check-in" | "end">(null);
   const [error, setError] = useState<string | null>(null);
   const [connectionState, setConnectionState] = useState(call.connection);
+  const [iframeVisible, setIframeVisible] = useState(false);
+  const [startingRecording, setStartingRecording] = useState(false);
 
   useEffect(() => {
     if (!enteredAt || !call.participants.therapistJoined) {
@@ -111,6 +113,39 @@ export function AppointmentCallPageView({ initialCall }: AppointmentCallPageProp
     }, 1800);
   }
 
+  async function handleEnter() {
+    if (isBusy !== null) return;
+    setIsBusy("check-in");
+    setError(null);
+    try {
+      await fetch(`/api/appointments/${call.appointment.id}/check-in`, { method: "POST" });
+      const res = await fetch(`/api/appointments/${call.appointment.id}/call`);
+      if (res.ok) {
+        const nextCall = (await res.json()) as AppointmentCall;
+        setCall(nextCall);
+        setConnectionState(nextCall.connection);
+        setEnteredAt(Date.now());
+      }
+      setIframeVisible(true);
+    } catch {
+      setError("Não foi possível entrar na sala.");
+    } finally {
+      setIsBusy(null);
+    }
+  }
+
+  async function handleStartRecording() {
+    if (startingRecording) return;
+    setStartingRecording(true);
+    try {
+      await fetch(`/api/appointments/${call.appointment.id}/recording/start`, { method: "POST" });
+    } catch {
+      setError("Não foi possível iniciar a gravação.");
+    } finally {
+      setStartingRecording(false);
+    }
+  }
+
   return (
     <div className="space-y-6">
       <section className="rounded-[32px] border border-[var(--color-border)] bg-[rgba(255,253,248,0.82)] p-7 shadow-[var(--shadow-panel)]">
@@ -121,6 +156,9 @@ export function AppointmentCallPageView({ initialCall }: AppointmentCallPageProp
               <Badge tone={readinessTone}>{call.experienceLabel}</Badge>
               <Badge tone={call.transcript.state === "active" ? "success" : "warning"}>
                 {call.transcript.label}
+              </Badge>
+              <Badge tone={call.recordingConsented ? "success" : "warning"}>
+                {call.recordingConsented ? "Gravação autorizada" : "Sem consentimento de gravação"}
               </Badge>
             </div>
             <h1 className="mt-4 text-3xl font-semibold tracking-[-0.02em]">
@@ -163,17 +201,29 @@ export function AppointmentCallPageView({ initialCall }: AppointmentCallPageProp
                 <p className="text-sm text-white/72">{call.participants.patientLabel}</p>
               </div>
 
-              <div className="mt-6 grid gap-4 xl:grid-cols-[1.45fr_0.55fr]">
-                <VideoPanel
-                  isRemote
-                  state={call.participants.patientPresence}
-                  title={call.appointment.patientName}
-                />
-                <VideoPanel
-                  isCameraOn={isCameraOn}
-                  title="Você"
-                />
-              </div>
+              {iframeVisible && call.hostToken && call.roomUrl ? (
+                <div className="mt-6">
+                  <iframe
+                    allow="camera; microphone; fullscreen; speaker; display-capture"
+                    className="w-full rounded-2xl"
+                    src={`${call.roomUrl}?t=${call.hostToken}`}
+                    style={{ height: "480px", border: "none" }}
+                    title="Videochamada Daily.co"
+                  />
+                </div>
+              ) : (
+                <div className="mt-6 grid gap-4 xl:grid-cols-[1.45fr_0.55fr]">
+                  <VideoPanel
+                    isRemote
+                    state={call.participants.patientPresence}
+                    title={call.appointment.patientName}
+                  />
+                  <VideoPanel
+                    isCameraOn={isCameraOn}
+                    title="Você"
+                  />
+                </div>
+              )}
             </section>
 
             <section className="flex flex-wrap items-center gap-3 rounded-[32px] border border-[var(--color-border)] bg-white p-5 shadow-[var(--shadow-panel)]">
@@ -203,6 +253,14 @@ export function AppointmentCallPageView({ initialCall }: AppointmentCallPageProp
                   await navigator.clipboard.writeText(call.roomSummary.joinUrlLabel).catch(() => undefined);
                 }}
               />
+              {call.recordingConsented && (
+                <ControlButton
+                  active={!startingRecording}
+                  icon={<Video className="h-4 w-4" />}
+                  label={startingRecording ? "Iniciando…" : "Iniciar gravação"}
+                  onClick={() => void handleStartRecording()}
+                />
+              )}
             </section>
           </div>
 
@@ -294,7 +352,7 @@ export function AppointmentCallPageView({ initialCall }: AppointmentCallPageProp
                 <Button
                   className="w-full"
                   disabled={isBusy !== null || !call.callPermissions.canCheckIn}
-                  onClick={() => runAction("check-in")}
+                  onClick={() => void handleEnter()}
                   type="button"
                 >
                   Entrar agora
