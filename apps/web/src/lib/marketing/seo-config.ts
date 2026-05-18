@@ -1,8 +1,13 @@
 import type { Metadata } from "next";
 import type { MetadataRoute } from "next";
 
-export const siteUrl =
-  process.env.NEXT_PUBLIC_SITE_URL ?? "https://lumamanager.com.br";
+const configuredSiteUrl =
+  process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.lumamanager.com.br";
+
+export const siteUrl = configuredSiteUrl.replace(
+  "https://lumamanager.com.br",
+  "https://www.lumamanager.com.br"
+);
 
 export const indexableRoutes = [
   {
