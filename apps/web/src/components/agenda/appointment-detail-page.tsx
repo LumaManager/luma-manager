@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useState, useTransition, type ReactNode } from "react";
+import { useState, useTransition, type ReactNode } from "react";
 import type {
   AppointmentCancelRequest,
   AppointmentDetail,
@@ -779,4 +779,3 @@ const consentLabelMap = {
   pending: "Pendente",
   critical: "Crítico"
 } as const;
-
