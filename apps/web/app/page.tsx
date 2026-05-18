@@ -2,10 +2,8 @@ import type { WaitlistSummary } from "@terapia/contracts";
 import { StructuredData } from "@/components/shared/structured-data";
 import { LandingPage } from "@/components/marketing/landing-page";
 import { apiFetch } from "@/lib/api/client";
-import {
-  buildOrganizationStructuredData,
-  buildSoftwareApplicationStructuredData
-} from "@/lib/marketing/structured-data";
+import { buildOrganizationStructuredData as buildOrg } from "@/lib/marketing/structured-data";
+import { buildSoftwareApplicationStructuredData as buildApp } from "@/lib/marketing/structured-data";
 
 const fallbackSummary: WaitlistSummary = {
   totalEntries: 0,
@@ -31,10 +29,10 @@ export default async function HomePage({
     () => fallbackSummary
   );
   const structuredData = [
-    buildOrganizationStructuredData(),
-    buildSoftwareApplicationStructuredData({
+    buildOrg(),
+    buildApp({
       description:
-        "Software para psicologos autonomos no Brasil com agenda, prontuario, documentos, cobranca e fluxo de pos-sessao no mesmo lugar.",
+        "Sistema para psicologos autonomos no Brasil com agenda, prontuario psicologico, pagamentos, documentos e continuidade clinica no mesmo lugar.",
       path: "/"
     })
   ];

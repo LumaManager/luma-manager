@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, useTransition, type ReactNode } from "react";
+import { useCallback, useState, useTransition, type ReactNode } from "react";
 import type {
   AppointmentCancelRequest,
   AppointmentDetail,
@@ -188,6 +188,8 @@ export function AppointmentDetailPageView({ appointment }: AppointmentDetailPage
 
           <div className="space-y-4">
             <VirtualRoomCard appointment={appointment} />
+            <RecordingConsentCard appointment={appointment} />
+            <TranscriptCard appointment={appointment} />
             <TimelineCard items={appointment.timeline} />
           </div>
         </div>
@@ -498,6 +500,144 @@ function VirtualRoomCard({ appointment }: { appointment: AppointmentDetail }) {
         <Button asChild className="w-full">
           <Link href={appointment.primaryAction.href}>{appointment.primaryAction.label}</Link>
         </Button>
+      </CardContent>
+    </Card>
+  );
+}
+
+function RecordingConsentCard({ appointment }: { appointment: AppointmentDetail }) {
+  const [sending, setSending] = useState(false);
+  const [, startTransition] = useTransition();
+  const router = useRouter();
+
+  if (appointment.modality === "in_person") return null;
+
+  async function handleSendConsent() {
+    if (sending) return;
+    setSending(true);
+    try {
+      await fetch(`/api/appointments/${appointment.id}/consent/send`, { method: "POST" });
+      startTransition(() => router.refresh());
+    } finally {
+      setSending(false);
+    }
+  }
+
+  const status = appointment.recordingConsentStatus;
+  const link = appointment.recordingConsentLink;
+
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex items-center gap-2">
+          <ShieldCheck className="h-4 w-4" />
+          <p className="text-base font-semibold">Consentimento de gravação</p>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        {status === "not_sent" && (
+          <>
+            <p className="text-sm text-[var(--color-text-muted)]">
+              Paciente ainda não autorizou gravação. Envie o link para colher o consentimento.
+            </p>
+            <Button className="w-full" disabled={sending} onClick={() => void handleSendConsent()}>
+              {sending ? "Enviando…" : "Enviar link de consentimento"}
+            </Button>
+          </>
+        )}
+        {status === "pending" && (
+          <>
+            <div className="rounded-2xl border border-[var(--color-border)] bg-amber-50 px-4 py-3">
+              <p className="text-sm font-medium text-amber-800">Aguardando assinatura do paciente</p>
+            </div>
+            {link ? (
+              <button
+                className="w-full text-left text-xs text-[var(--color-text-muted)] break-all hover:underline"
+                onClick={() => void navigator.clipboard.writeText(link)}
+                title="Clique para copiar o link"
+              >
+                {link}
+              </button>
+            ) : null}
+            <Button className="w-full" disabled={sending} onClick={() => void handleSendConsent()} variant="secondary">
+              {sending ? "Reenviando…" : "Reenviar link"}
+            </Button>
+          </>
+        )}
+        {status === "signed" && (
+          <div className="rounded-2xl border border-green-200 bg-green-50 px-4 py-3">
+            <p className="text-sm font-medium text-green-800">✓ Paciente autorizou gravação e transcrição</p>
+          </div>
+        )}
+        {status === "expired" && (
+          <>
+            <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3">
+              <p className="text-sm font-medium text-red-800">Link expirado — envie um novo</p>
+            </div>
+            <Button className="w-full" disabled={sending} onClick={() => void handleSendConsent()}>
+              {sending ? "Enviando…" : "Enviar novo link"}
+            </Button>
+          </>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+function TranscriptCard({ appointment }: { appointment: AppointmentDetail }) {
+  const [approving, setApproving] = useState(false);
+  const [, startTransition] = useTransition();
+  const router = useRouter();
+
+  const { transcriptStatus, transcriptDraft, transcriptApprovedAt } = appointment;
+
+  if (transcriptStatus === "none" || transcriptStatus === "requested") return null;
+
+  async function handleApprove() {
+    if (approving) return;
+    setApproving(true);
+    try {
+      await fetch(`/api/appointments/${appointment.id}/transcript/approve`, { method: "POST" });
+      startTransition(() => router.refresh());
+    } finally {
+      setApproving(false);
+    }
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <p className="text-base font-semibold">Rascunho de transcrição</p>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {transcriptStatus === "processing" && (
+          <p className="text-sm text-[var(--color-text-muted)]">Transcrição em andamento…</p>
+        )}
+        {transcriptStatus === "failed" && (
+          <p className="text-sm text-red-600">Falha na transcrição. Tente novamente ou transcreva manualmente.</p>
+        )}
+        {transcriptStatus === "ready" && transcriptDraft && !transcriptApprovedAt && (
+          <>
+            <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-contrast)] p-4 max-h-64 overflow-y-auto">
+              <pre className="text-sm text-[var(--color-text-muted)] whitespace-pre-wrap font-sans leading-6">
+                {transcriptDraft}
+              </pre>
+            </div>
+            <Button className="w-full" disabled={approving} onClick={() => void handleApprove()}>
+              {approving ? "Aprovando…" : "Aprovar e salvar no prontuário"}
+            </Button>
+            <p className="text-xs text-[var(--color-text-muted)] text-center">
+              Revise antes de aprovar. A aprovação registra o rascunho como documento clínico.
+            </p>
+          </>
+        )}
+        {transcriptApprovedAt && (
+          <div className="rounded-2xl border border-green-200 bg-green-50 px-4 py-3">
+            <p className="text-sm font-medium text-green-800">
+              ✓ Transcrição aprovada em {new Date(transcriptApprovedAt).toLocaleDateString("pt-BR")}
+            </p>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
